@@ -5,8 +5,9 @@ import { HeroThree } from "./HeroThree";
 const ACCENT = "rgb(151,252,228)";
 const ADIM = "rgba(151,252,228,0.55)";
 const ABORDER = "rgba(151,252,228,0.18)";
+const ADIM2 = "rgba(151,252,228,0.22)";
 
-// ─── CoinGecko coin IDs → display pairs ────────────────────
+// ─── CoinGecko coin IDs → display pairs ──────────────────────────
 const COIN_MAP = [
   { id: "ethereum", pair: "ETH/USDC" },
   { id: "bitcoin", pair: "BTC/USDT" },
@@ -14,7 +15,7 @@ const COIN_MAP = [
   { id: "arbitrum", pair: "ARB/USDC" },
 ];
 
-// ─── Sarcastic wisdom from the blockchain oracle ────────────
+// ─── Sarcastic wisdom from the blockchain oracle ──────────────────
 const SARCASM = [
   "pro tip: buy high, sell low",
   "just one more dip",
@@ -29,11 +30,17 @@ const SARCASM = [
   "wen lambo? soon™",
   "we are still early",
   "buy the dip",
-  "just hodl",
   "price is just noise",
   "long term play",
   "generational wealth",
 ];
+
+// ─── Fake recent tx hashes for the activity strip ─────────────────
+const genHash = () =>
+  "0x" +
+  Array.from({ length: 8 }, () =>
+    Math.floor(Math.random() * 16).toString(16),
+  ).join("");
 
 interface Ticker {
   pair: string;
@@ -60,7 +67,6 @@ const fmtVol = (v: number) => {
   if (v >= 1e6) return `${(v / 1e6).toFixed(0)}M`;
   return `${(v / 1e3).toFixed(0)}K`;
 };
-
 const fmtPrice = (p: number) =>
   p >= 1000
     ? p.toLocaleString("en", { maximumFractionDigits: 0 })
@@ -70,7 +76,7 @@ const Sep = () => (
   <div style={{ height: "1px", background: "rgba(151,252,228,0.07)" }} />
 );
 
-// ─── Sarcasm ticker that fades + types ──────────────────────
+// ─── Sarcasm ticker ────────────────────────────────────────────────
 const SarcasmTicker = () => {
   const [idx, setIdx] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -92,17 +98,131 @@ const SarcasmTicker = () => {
         fontFamily: "Space Mono, monospace",
         fontSize: "0.58rem",
         letterSpacing: "0.08em",
-        color: "rgba(151,252,228,0.45)",
+        color: "rgba(151,252,228,0.42)",
         fontStyle: "italic",
         opacity: visible ? 1 : 0,
         transition: "opacity 0.45s ease",
         minHeight: "1.2em",
-        padding: "0.55rem 1rem",
+        padding: "0.5rem 1rem",
         borderTop: "1px solid rgba(151,252,228,0.07)",
-        background: "rgba(151,252,228,0.015)",
+        background: "rgba(151,252,228,0.012)",
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
       }}
     >
+      <span style={{ color: ADIM, fontStyle: "normal" }}>oracle://</span>
       {SARCASM[idx]}
+    </div>
+  );
+};
+
+// ─── Scrolling activity hash strip ────────────────────────────────
+const ActivityStrip = () => {
+  const [hashes, setHashes] = useState(() =>
+    Array.from({ length: 6 }, () => ({
+      hash: genHash(),
+      type: Math.random() > 0.5 ? "SWAP" : "BRIDGE",
+    })),
+  );
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setHashes((prev) => [
+        { hash: genHash(), type: Math.random() > 0.5 ? "SWAP" : "BRIDGE" },
+        ...prev.slice(0, 5),
+      ]);
+    }, 1800);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div
+      style={{
+        overflow: "hidden",
+        padding: "0.35rem 1rem",
+        borderTop: "1px solid rgba(151,252,228,0.06)",
+        background: "rgba(151,252,228,0.008)",
+        display: "flex",
+        gap: "1.2rem",
+        alignItems: "center",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "Space Mono, monospace",
+          fontSize: "0.46rem",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "rgba(151,252,228,0.25)",
+          flexShrink: 0,
+        }}
+      >
+        MEMPOOL
+      </span>
+      <div
+        style={{ display: "flex", gap: "1rem", overflow: "hidden", flex: 1 }}
+      >
+        {hashes.map(({ hash, type }, i) => (
+          <span
+            key={i}
+            style={{
+              fontFamily: "Space Mono, monospace",
+              fontSize: "0.46rem",
+              letterSpacing: "0.06em",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+              color: i === 0 ? ADIM : "rgba(151,252,228,0.18)",
+              transition: "color 0.4s ease",
+            }}
+          >
+            <span
+              style={{
+                color:
+                  type === "SWAP"
+                    ? "rgba(151,252,228,0.5)"
+                    : "rgba(255,200,100,0.4)",
+                marginRight: "0.3em",
+              }}
+            >
+              {type}
+            </span>
+            {hash}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── Mini network health bar ───────────────────────────────────────
+const NetworkHealth = ({
+  tps,
+  blockNum,
+}: {
+  tps: number;
+  blockNum: number;
+}) => {
+  const bars = 16;
+  const health = Math.min(1, (tps - 3800) / 1200);
+
+  return (
+    <div style={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
+      {Array.from({ length: bars }, (_, i) => {
+        const active = i / bars < health;
+        return (
+          <div
+            key={i}
+            style={{
+              width: "2px",
+              height: `${6 + (i % 3) * 2}px`,
+              background: active ? ACCENT : "rgba(151,252,228,0.12)",
+              borderRadius: "1px",
+              transition: "background 0.4s ease",
+            }}
+          />
+        );
+      })}
     </div>
   );
 };
@@ -128,10 +248,12 @@ export const Hero = () => {
   const [tps, setTps] = useState(4218);
   const [fetchErr, setFetchErr] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("—");
+  const [latency, setLatency] = useState(18);
+  const [gasPrice, setGasPrice] = useState(24);
 
   const gridRef = useRef<HTMLCanvasElement>(null);
 
-  // ── Reveals ───────────────────────────────────────────────
+  // ── Reveals ────────────────────────────────────────────────────
   useEffect(() => {
     const ts = [
       setTimeout(() => setActive(true), 280),
@@ -143,7 +265,7 @@ export const Hero = () => {
     return () => ts.forEach(clearTimeout);
   }, []);
 
-  // ── CoinGecko live fetch ──────────────────────────────────
+  // ── CoinGecko live fetch ────────────────────────────────────────
   const fetchPrices = useCallback(async () => {
     try {
       const ids = COIN_MAP.map((c) => c.id).join(",");
@@ -156,24 +278,21 @@ export const Hero = () => {
         COIN_MAP.map((c, i) => {
           const raw = data[c.id];
           if (!raw) return prev[i];
-          const newPrice = raw.usd as number;
           return {
             pair: c.pair,
-            price: newPrice,
+            price: raw.usd as number,
             change: +(raw.usd_24h_change as number).toFixed(2),
             vol: fmtVol(raw.usd_24h_vol as number),
-            prevPrice: prev[i].price || newPrice,
+            prevPrice: prev[i].price || raw.usd,
           };
         }),
       );
-
       setUpIdx((prev) =>
         COIN_MAP.map((c, i) => {
           const raw = data[c.id];
           return raw ? (raw.usd_24h_change as number) >= 0 : prev[i];
         }),
       );
-
       setSparks((prev) =>
         COIN_MAP.map((c, i) => {
           const raw = data[c.id];
@@ -181,17 +300,15 @@ export const Hero = () => {
           return [...prev[i].slice(1), raw.usd as number];
         }),
       );
-
       setFetchErr(false);
       const now = new Date();
       setLastUpdated(
         `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`,
       );
-
-      // Flash a random row
       const fi = Math.floor(Math.random() * COIN_MAP.length);
       setFlashIdx(fi);
       setTimeout(() => setFlashIdx(-1), 500);
+      setLatency(12 + Math.floor(Math.random() * 28));
     } catch {
       setFetchErr(true);
     }
@@ -199,12 +316,11 @@ export const Hero = () => {
 
   useEffect(() => {
     fetchPrices();
-    // CoinGecko free tier: ~30 req/min — poll every 30s to be safe
     const id = setInterval(fetchPrices, 30_000);
     return () => clearInterval(id);
   }, [fetchPrices]);
 
-  // ── Block counter + TPS (cosmetic, not live) ──────────────
+  // ── Block counter + TPS + Gas ───────────────────────────────────
   useEffect(() => {
     const id = setInterval(() => {
       setBlockNum((n) => n + Math.floor(Math.random() * 3));
@@ -214,11 +330,14 @@ export const Hero = () => {
           Math.min(4800, n + Math.floor((Math.random() - 0.5) * 120)),
         ),
       );
+      setGasPrice((n) =>
+        Math.max(14, Math.min(64, n + Math.floor((Math.random() - 0.5) * 6))),
+      );
     }, 2000);
     return () => clearInterval(id);
   }, []);
 
-  // ── Background grid canvas ────────────────────────────────
+  // ── Background grid canvas ──────────────────────────────────────
   useEffect(() => {
     const canvas = gridRef.current;
     if (!canvas) return;
@@ -285,7 +404,7 @@ export const Hero = () => {
         }}
       />
 
-      {/* Corner meta */}
+      {/* Corner meta labels */}
       {[
         {
           pos: { top: "5.5rem", left: "2rem" },
@@ -319,7 +438,7 @@ export const Hero = () => {
         </div>
       ))}
 
-      {/* ── Two-column ─────────────────────────────────────────── */}
+      {/* ── Two-column grid ──────────────────────────────────── */}
       <div
         className="hero-grid"
         style={{
@@ -336,7 +455,7 @@ export const Hero = () => {
           minHeight: "100vh",
         }}
       >
-        {/* ── LEFT ─────────────────────────────────────────────── */}
+        {/* ── LEFT — unchanged ────────────────────────────────── */}
         <div>
           <div
             style={{
@@ -472,7 +591,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* ── RIGHT — DEX terminal ─────────────────────────────── */}
+        {/* ── RIGHT — DEX terminal (improved) ─────────────────── */}
         <div
           style={{
             opacity: threeVis ? 1 : 0,
@@ -480,366 +599,571 @@ export const Hero = () => {
             transition: "all 1s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
+          {/* Outer glow wrapper */}
           <div
             style={{
-              border: `1px solid ${ABORDER}`,
-              background: "rgba(8,8,8,0.6)",
-              backdropFilter: "blur(4px)",
               position: "relative",
-              overflow: "hidden",
+              boxShadow: `0 0 48px rgba(151,252,228,0.04), 0 0 1px rgba(151,252,228,0.12) inset`,
             }}
           >
-            {/* Corner brackets */}
-            {[
-              {
-                top: -1,
-                left: -1,
-                borderTop: `1px solid ${ACCENT}`,
-                borderLeft: `1px solid ${ACCENT}`,
-              },
-              {
-                top: -1,
-                right: -1,
-                borderTop: `1px solid ${ACCENT}`,
-                borderRight: `1px solid ${ACCENT}`,
-              },
-              {
-                bottom: -1,
-                left: -1,
-                borderBottom: `1px solid ${ACCENT}`,
-                borderLeft: `1px solid ${ACCENT}`,
-              },
-              {
-                bottom: -1,
-                right: -1,
-                borderBottom: `1px solid ${ACCENT}`,
-                borderRight: `1px solid ${ACCENT}`,
-              },
-            ].map((s, i) => (
-              <div
-                key={i}
-                style={{
-                  position: "absolute",
-                  width: 14,
-                  height: 14,
-                  zIndex: 5,
-                  ...s,
-                }}
-              />
-            ))}
-
-            {/* Header */}
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "0.6rem 1rem",
-                borderBottom: `1px solid ${ABORDER}`,
-                background: "rgba(151,252,228,0.03)",
+                border: `1px solid ${ABORDER}`,
+                background: "rgba(8,8,8,0.65)",
+                backdropFilter: "blur(6px)",
+                position: "relative",
+                overflow: "hidden",
               }}
             >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}
-              >
-                <span
+              {/* Animated corner brackets */}
+              {[
+                {
+                  top: -1,
+                  left: -1,
+                  borderTop: `1px solid ${ACCENT}`,
+                  borderLeft: `1px solid ${ACCENT}`,
+                },
+                {
+                  top: -1,
+                  right: -1,
+                  borderTop: `1px solid ${ACCENT}`,
+                  borderRight: `1px solid ${ACCENT}`,
+                },
+                {
+                  bottom: -1,
+                  left: -1,
+                  borderBottom: `1px solid ${ACCENT}`,
+                  borderLeft: `1px solid ${ACCENT}`,
+                },
+                {
+                  bottom: -1,
+                  right: -1,
+                  borderBottom: `1px solid ${ACCENT}`,
+                  borderRight: `1px solid ${ACCENT}`,
+                },
+              ].map((s, i) => (
+                <div
+                  key={i}
                   style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: fetchErr ? "#ff6464" : ACCENT,
-                    display: "inline-block",
-                    animation: "blink 2s ease-in-out infinite",
+                    position: "absolute",
+                    width: 18,
+                    height: 18,
+                    zIndex: 5,
+                    ...s,
                   }}
                 />
-                <span
+              ))}
+
+              {/* ── Header row 1 ── status + title + meta */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0.58rem 1rem",
+                  borderBottom: `1px solid ${ABORDER}`,
+                  background: "rgba(151,252,228,0.025)",
+                }}
+              >
+                <div
                   style={{
-                    fontFamily: "Space Mono, monospace",
-                    fontSize: "0.6rem",
-                    letterSpacing: "0.15em",
-                    color: ADIM,
-                    textTransform: "uppercase",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.6rem",
                   }}
                 >
-                  Exchange Core
-                </span>
-                {fetchErr && (
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: fetchErr ? "#ff6464" : ACCENT,
+                      display: "inline-block",
+                      boxShadow: fetchErr
+                        ? "0 0 6px #ff6464"
+                        : `0 0 6px ${ACCENT}`,
+                      animation: "blink 2s ease-in-out infinite",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: "Space Mono, monospace",
+                      fontSize: "0.6rem",
+                      letterSpacing: "0.15em",
+                      color: ADIM,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Exchange Core
+                  </span>
+                  {fetchErr && (
+                    <span
+                      style={{
+                        fontFamily: "Space Mono, monospace",
+                        fontSize: "0.5rem",
+                        color: "rgba(255,100,100,0.7)",
+                        letterSpacing: "0.08em",
+                      }}
+                    >
+                      [fallback]
+                    </span>
+                  )}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "1.1rem",
+                    alignItems: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "Space Mono, monospace",
+                      fontSize: "0.5rem",
+                      letterSpacing: "0.08em",
+                      color: "rgba(226,226,226,0.2)",
+                    }}
+                  >
+                    upd {lastUpdated}
+                  </span>
                   <span
                     style={{
                       fontFamily: "Space Mono, monospace",
                       fontSize: "0.52rem",
-                      color: "rgba(255,100,100,0.7)",
                       letterSpacing: "0.08em",
+                      color: "rgba(226,226,226,0.25)",
                     }}
                   >
-                    [fallback]
+                    BLK #{blockNum.toLocaleString()}
                   </span>
-                )}
-              </div>
-              <div
-                style={{ display: "flex", gap: "1.2rem", alignItems: "center" }}
-              >
-                <span
-                  style={{
-                    fontFamily: "Space Mono, monospace",
-                    fontSize: "0.52rem",
-                    letterSpacing: "0.08em",
-                    color: "rgba(226,226,226,0.2)",
-                  }}
-                >
-                  upd {lastUpdated}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "Space Mono, monospace",
-                    fontSize: "0.55rem",
-                    letterSpacing: "0.1em",
-                    color: "rgba(226,226,226,0.25)",
-                  }}
-                >
-                  BLK #{blockNum.toLocaleString()}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "Space Mono, monospace",
-                    fontSize: "0.55rem",
-                    letterSpacing: "0.1em",
-                    color: ADIM,
-                  }}
-                >
-                  TPS {tps.toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            {/* 3D scene */}
-            <div style={{ height: "420px", position: "relative" }}>
-              <HeroThree />
-              {[
-                { label: "L1 Mainnet", style: { top: "12%", left: "8%" } },
-                { label: "L2 Network", style: { top: "58%", left: "5%" } },
-                { label: "DeFi Layer", style: { top: "18%", right: "6%" } },
-              ].map(({ label, style }) => (
-                <div
-                  key={label}
-                  style={{
-                    position: "absolute",
-                    ...style,
-                    fontFamily: "Space Mono, monospace",
-                    fontSize: "0.52rem",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    color: "rgba(151,252,228,0.28)",
-                    pointerEvents: "none",
-                  }}
-                >
-                  {label}
                 </div>
-              ))}
+              </div>
+
+              {/* ── Header row 2 ── network stats bar */}
               <div
                 style={{
-                  position: "absolute",
-                  bottom: "0.7rem",
-                  right: "0.75rem",
-                  fontFamily: "Space Mono, monospace",
-                  fontSize: "0.5rem",
-                  letterSpacing: "0.08em",
-                  color: "rgba(151,252,228,0.25)",
-                  textAlign: "right",
-                  lineHeight: 1.9,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0.38rem 1rem",
+                  borderBottom: `1px solid rgba(151,252,228,0.05)`,
+                  background: "rgba(0,0,0,0.3)",
+                  gap: "1rem",
                 }}
               >
-                <div>NODES 24</div>
-                <div>DEPTH BARS 60</div>
-              </div>
-            </div>
-
-            <Sep />
-
-            {/* Ticker table */}
-            <div style={{ background: "rgba(8,8,8,0.82)" }}>
-              {/* Column headers */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 90px 64px 60px",
-                  padding: "0.4rem 1rem",
-                  background: "rgba(151,252,228,0.02)",
-                }}
-              >
-                {["Pair", "Price (USD)", "24h", "Vol"].map((h) => (
-                  <span
-                    key={h}
-                    style={{
-                      fontFamily: "Space Mono, monospace",
-                      fontSize: "0.5rem",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "rgba(226,226,226,0.2)",
-                    }}
-                  >
-                    {h}
-                  </span>
-                ))}
-              </div>
-              <Sep />
-
-              {tickers.map((t, i) => {
-                const isFlash = flashIdx === i;
-                const up = t.change >= 0;
-                const priceUp =
-                  t.prevPrice !== undefined ? t.price >= t.prevPrice : up;
-
-                return (
-                  <div key={t.pair}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "1.4rem",
+                    alignItems: "center",
+                  }}
+                >
+                  {[
+                    { label: "TPS", value: tps.toLocaleString(), accent: true },
+                    { label: "GAS", value: `${gasPrice} gwei`, accent: false },
+                    { label: "PING", value: `${latency}ms`, accent: false },
+                    {
+                      label: "STATUS",
+                      value: fetchErr ? "ERR" : "LIVE",
+                      accent: !fetchErr,
+                    },
+                  ].map(({ label, value, accent }) => (
                     <div
+                      key={label}
                       style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 90px 64px 60px",
-                        alignItems: "center",
-                        padding: "0.5rem 1rem",
-                        background: isFlash
-                          ? "rgba(151,252,228,0.04)"
-                          : "transparent",
-                        transition: "background 0.35s ease",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.12rem",
                       }}
                     >
-                      {/* Pair + sparkline */}
-                      <div>
-                        <div
-                          style={{
-                            fontFamily: "Space Mono, monospace",
-                            fontSize: "0.68rem",
-                            fontWeight: 700,
-                            color: "#e2e2e2",
-                            letterSpacing: "0.02em",
-                            marginBottom: "2px",
-                          }}
-                        >
-                          {t.pair}
-                        </div>
-                        <svg width="64" height="16">
-                          {sparks[i].length > 1 && (
-                            <path
-                              d={makeSpark(sparks[i], 64, 16)}
-                              fill="none"
-                              stroke={
-                                up
-                                  ? "rgba(151,252,228,0.7)"
-                                  : "rgba(255,100,100,0.65)"
-                              }
-                              strokeWidth="1.2"
-                              strokeLinejoin="round"
-                            />
-                          )}
-                        </svg>
-                      </div>
-
-                      {/* Price — flashes accent when updated */}
                       <span
                         style={{
                           fontFamily: "Space Mono, monospace",
-                          fontSize: "0.66rem",
-                          color: isFlash
-                            ? priceUp
-                              ? ACCENT
-                              : "#ff8080"
-                            : "rgba(226,226,226,0.75)",
-                          transition: "color 0.35s ease",
-                          letterSpacing: "0.01em",
-                          fontWeight: isFlash ? 700 : 400,
+                          fontSize: "0.44rem",
+                          letterSpacing: "0.14em",
+                          color: "rgba(226,226,226,0.22)",
+                          textTransform: "uppercase",
                         }}
                       >
-                        {t.price > 0 ? `$${fmtPrice(t.price)}` : "…"}
+                        {label}
                       </span>
-
-                      {/* 24h change */}
                       <span
                         style={{
                           fontFamily: "Space Mono, monospace",
-                          fontSize: "0.6rem",
-                          color: up
-                            ? "rgba(151,252,228,0.85)"
-                            : "rgba(255,100,100,0.8)",
-                          letterSpacing: "0.01em",
+                          fontSize: "0.58rem",
+                          letterSpacing: "0.06em",
+                          fontWeight: 700,
+                          color: accent
+                            ? ACCENT
+                            : fetchErr && label === "STATUS"
+                              ? "#ff8080"
+                              : "rgba(226,226,226,0.65)",
                         }}
                       >
-                        {t.price > 0
-                          ? `${up ? "▲" : "▼"} ${Math.abs(t.change).toFixed(2)}%`
-                          : "—"}
-                      </span>
-
-                      {/* Volume */}
-                      <span
-                        style={{
-                          fontFamily: "Space Mono, monospace",
-                          fontSize: "0.56rem",
-                          color: "rgba(226,226,226,0.28)",
-                          letterSpacing: "0.04em",
-                        }}
-                      >
-                        {t.vol !== "—" ? `$${t.vol}` : "—"}
+                        {value}
                       </span>
                     </div>
-                    {i < tickers.length - 1 && <Sep />}
-                  </div>
-                );
-              })}
-            </div>
+                  ))}
+                </div>
+                <NetworkHealth tps={tps} blockNum={blockNum} />
+              </div>
 
-            {/* Sarcasm strip */}
-            <SarcasmTicker />
+              {/* ── 3D scene ── */}
+              <div
+                style={{
+                  height: "380px",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                <HeroThree />
 
-            {/* Footer */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0.5rem 1rem",
-                background: "rgba(151,252,228,0.02)",
-                borderTop: "1px solid rgba(151,252,228,0.07)",
-              }}
-            >
-              {[
-                ["Source", "CoinGecko"],
-                ["Interval", "30s"],
-                ["Status", fetchErr ? "ERROR" : "LIVE"],
-              ].map(([label, value]) => (
-                <div key={label}>
+                {/* Subtle scanline overlay on 3D */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    pointerEvents: "none",
+                    backgroundImage:
+                      "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px)",
+                    zIndex: 2,
+                  }}
+                />
+
+                {/* Corner HUD labels */}
+                {[
+                  {
+                    style: { top: "10%", left: "7%" },
+                    label: "L1 MAINNET",
+                    sub: "ETH · EVM",
+                    dot: true,
+                  },
+                  {
+                    style: { top: "55%", left: "5%" },
+                    label: "L2 NETWORK",
+                    sub: "ARB · OP",
+                    dot: false,
+                  },
+                  {
+                    style: { top: "14%", right: "5%" },
+                    label: "DEFI LAYER",
+                    sub: "AMM · CLOB",
+                    dot: false,
+                  },
+                ].map(({ style, label, sub, dot }) => (
                   <div
+                    key={label}
                     style={{
+                      position: "absolute",
+                      ...style,
                       fontFamily: "Space Mono, monospace",
-                      fontSize: "0.48rem",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "rgba(226,226,226,0.2)",
-                      marginBottom: "0.12rem",
+                      pointerEvents: "none",
+                      zIndex: 3,
                     }}
                   >
-                    {label}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                      }}
+                    >
+                      {dot && (
+                        <span
+                          style={{
+                            width: 4,
+                            height: 4,
+                            borderRadius: "50%",
+                            background: ACCENT,
+                            display: "inline-block",
+                            animation: "blink 2.4s ease-in-out infinite",
+                          }}
+                        />
+                      )}
+                      <span
+                        style={{
+                          fontSize: "0.5rem",
+                          letterSpacing: "0.12em",
+                          textTransform: "uppercase",
+                          color: "rgba(151,252,228,0.35)",
+                        }}
+                      >
+                        {label}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "0.42rem",
+                        letterSpacing: "0.1em",
+                        color: "rgba(151,252,228,0.18)",
+                        marginTop: "0.15rem",
+                        paddingLeft: dot ? "0.55rem" : "0",
+                      }}
+                    >
+                      {sub}
+                    </div>
                   </div>
-                  <div
-                    style={{
-                      fontFamily: "Space Mono, monospace",
-                      fontSize: "0.6rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.04em",
-                      color:
-                        value === "LIVE"
-                          ? ACCENT
-                          : value === "ERROR"
-                            ? "#ff8080"
-                            : "rgba(226,226,226,0.65)",
-                    }}
-                  >
-                    {value}
+                ))}
+
+                {/* Bottom-right HUD stats */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "0.7rem",
+                    right: "0.75rem",
+                    fontFamily: "Space Mono, monospace",
+                    fontSize: "0.46rem",
+                    letterSpacing: "0.09em",
+                    color: "rgba(151,252,228,0.22)",
+                    textAlign: "right",
+                    lineHeight: 2.1,
+                    zIndex: 3,
+                  }}
+                >
+                  <div>
+                    NODES <span style={{ color: ADIM2 }}>24</span>
+                  </div>
+                  <div>
+                    DEPTH BARS <span style={{ color: ADIM2 }}>60</span>
+                  </div>
+                  <div>
+                    VALIDATORS <span style={{ color: ADIM2 }}>512</span>
                   </div>
                 </div>
-              ))}
+
+                {/* Bottom-left — chain selector pills */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "0.7rem",
+                    left: "0.75rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.28rem",
+                    zIndex: 3,
+                  }}
+                >
+                  {[
+                    { name: "ETH", active: true },
+                    { name: "ARB", active: false },
+                    { name: "SOL", active: false },
+                  ].map(({ name, active: a }) => (
+                    <div
+                      key={name}
+                      style={{
+                        fontFamily: "Space Mono, monospace",
+                        fontSize: "0.44rem",
+                        letterSpacing: "0.12em",
+                        padding: "0.1rem 0.4rem",
+                        border: `1px solid ${a ? "rgba(151,252,228,0.4)" : "rgba(151,252,228,0.1)"}`,
+                        color: a ? ADIM : "rgba(151,252,228,0.2)",
+                        background: a
+                          ? "rgba(151,252,228,0.06)"
+                          : "transparent",
+                      }}
+                    >
+                      {name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── Mempool activity strip ── */}
+              <ActivityStrip />
+              <Sep />
+
+              {/* ── Ticker table ── */}
+              <div style={{ background: "rgba(8,8,8,0.82)" }}>
+                {/* Column headers */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 90px 64px 56px",
+                    padding: "0.38rem 1rem",
+                    background: "rgba(151,252,228,0.02)",
+                  }}
+                >
+                  {["Pair", "Price (USD)", "24h", "Vol"].map((h) => (
+                    <span
+                      key={h}
+                      style={{
+                        fontFamily: "Space Mono, monospace",
+                        fontSize: "0.48rem",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "rgba(226,226,226,0.2)",
+                      }}
+                    >
+                      {h}
+                    </span>
+                  ))}
+                </div>
+                <Sep />
+
+                {tickers.map((t, i) => {
+                  const isFlash = flashIdx === i;
+                  const up = t.change >= 0;
+                  const priceUp =
+                    t.prevPrice !== undefined ? t.price >= t.prevPrice : up;
+
+                  return (
+                    <div key={t.pair}>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 90px 64px 56px",
+                          alignItems: "center",
+                          padding: "0.48rem 1rem",
+                          background: isFlash
+                            ? "rgba(151,252,228,0.045)"
+                            : "transparent",
+                          transition: "background 0.35s ease",
+                          borderLeft: isFlash
+                            ? `2px solid ${ACCENT}`
+                            : "2px solid transparent",
+                        }}
+                      >
+                        {/* Pair + sparkline */}
+                        <div>
+                          <div
+                            style={{
+                              fontFamily: "Space Mono, monospace",
+                              fontSize: "0.66rem",
+                              fontWeight: 700,
+                              color: "#e2e2e2",
+                              letterSpacing: "0.02em",
+                              marginBottom: "2px",
+                            }}
+                          >
+                            {t.pair}
+                          </div>
+                          <svg width="64" height="16">
+                            {sparks[i].length > 1 && (
+                              <path
+                                d={makeSpark(sparks[i], 64, 16)}
+                                fill="none"
+                                stroke={
+                                  up
+                                    ? "rgba(151,252,228,0.7)"
+                                    : "rgba(255,100,100,0.65)"
+                                }
+                                strokeWidth="1.3"
+                                strokeLinejoin="round"
+                              />
+                            )}
+                          </svg>
+                        </div>
+
+                        {/* Price */}
+                        <span
+                          style={{
+                            fontFamily: "Space Mono, monospace",
+                            fontSize: "0.64rem",
+                            color: isFlash
+                              ? priceUp
+                                ? ACCENT
+                                : "#ff8080"
+                              : "rgba(226,226,226,0.75)",
+                            transition: "color 0.35s ease",
+                            letterSpacing: "0.01em",
+                            fontWeight: isFlash ? 700 : 400,
+                          }}
+                        >
+                          {t.price > 0 ? `$${fmtPrice(t.price)}` : "…"}
+                        </span>
+
+                        {/* 24h change */}
+                        <span
+                          style={{
+                            fontFamily: "Space Mono, monospace",
+                            fontSize: "0.58rem",
+                            color: up
+                              ? "rgba(151,252,228,0.85)"
+                              : "rgba(255,100,100,0.8)",
+                            letterSpacing: "0.01em",
+                          }}
+                        >
+                          {t.price > 0
+                            ? `${up ? "▲" : "▼"} ${Math.abs(t.change).toFixed(2)}%`
+                            : "—"}
+                        </span>
+
+                        {/* Volume */}
+                        <span
+                          style={{
+                            fontFamily: "Space Mono, monospace",
+                            fontSize: "0.54rem",
+                            color: "rgba(226,226,226,0.28)",
+                            letterSpacing: "0.04em",
+                          }}
+                        >
+                          {t.vol !== "—" ? `$${t.vol}` : "—"}
+                        </span>
+                      </div>
+                      {i < tickers.length - 1 && <Sep />}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Sarcasm strip */}
+              <SarcasmTicker />
+
+              {/* ── Footer ── */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "0.48rem 1rem",
+                  background: "rgba(151,252,228,0.018)",
+                  borderTop: "1px solid rgba(151,252,228,0.07)",
+                  flexWrap: "wrap",
+                  gap: "0.6rem",
+                }}
+              >
+                {[
+                  ["Source", "CoinGecko"],
+                  ["Interval", "30s"],
+                  ["Status", fetchErr ? "ERROR" : "LIVE"],
+                  ["Gas", `${gasPrice} gwei`],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <div
+                      style={{
+                        fontFamily: "Space Mono, monospace",
+                        fontSize: "0.44rem",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "rgba(226,226,226,0.2)",
+                        marginBottom: "0.1rem",
+                      }}
+                    >
+                      {label}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "Space Mono, monospace",
+                        fontSize: "0.58rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.04em",
+                        color:
+                          value === "LIVE"
+                            ? ACCENT
+                            : value === "ERROR"
+                              ? "#ff8080"
+                              : "rgba(226,226,226,0.62)",
+                      }}
+                    >
+                      {value}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
+          {/* Sub-caption */}
           <div
             style={{
               marginTop: "0.6rem",
@@ -850,13 +1174,13 @@ export const Hero = () => {
             <span
               style={{
                 fontFamily: "Space Mono, monospace",
-                fontSize: "0.5rem",
+                fontSize: "0.48rem",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "rgba(151,252,228,0.2)",
+                color: "rgba(151,252,228,0.18)",
               }}
             >
-              Data via CoinGecko · Not financial advice (obviously)
+              Data via CoinGecko · Not financial advice
             </span>
           </div>
         </div>
