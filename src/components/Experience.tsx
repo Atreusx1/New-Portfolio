@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { EXPERIENCE } from "../data/constants";
 import { ScrambleText } from "./ScrambleText";
+import { useTheme } from "../context/ThemeContext";
 
 export const Experience = () => {
+  const t = useTheme();
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
@@ -22,8 +24,9 @@ export const Experience = () => {
       ref={ref}
       id="experience"
       style={{
-        borderTop: "1px solid rgba(226,226,226,0.08)",
+        borderTop: `1px solid ${t.fg_(0.08)}`,
         padding: "8rem 2rem",
+        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -44,7 +47,7 @@ export const Experience = () => {
               fontFamily: "Space Mono, monospace",
               fontSize: "0.6rem",
               letterSpacing: "0.2em",
-              color: "rgba(226,226,226,0.25)",
+              color: t.fg_(0.25),
             }}
           >
             04
@@ -55,7 +58,8 @@ export const Experience = () => {
               fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
               fontWeight: 700,
               letterSpacing: "-0.02em",
-              color: "#e2e2e2",
+              color: t.fg,
+              transition: "color 0.35s ease",
             }}
           >
             {visible ? (
@@ -76,13 +80,12 @@ export const Experience = () => {
               top: 0,
               bottom: 0,
               width: "1px",
-              background: "rgba(226,226,226,0.08)",
+              background: t.fg_(0.08),
               transformOrigin: "top",
               transform: visible ? "scaleY(1)" : "scaleY(0)",
               transition: "transform 1s ease 0.3s",
             }}
           />
-
           {EXPERIENCE.map((exp, i) => (
             <ExperienceRow key={exp.id} exp={exp} index={i} visible={visible} />
           ))}
@@ -101,6 +104,7 @@ const ExperienceRow = ({
   index: number;
   visible: boolean;
 }) => {
+  const t = useTheme();
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -111,9 +115,8 @@ const ExperienceRow = ({
         display: "grid",
         gridTemplateColumns: "6rem 1fr",
         gap: "2rem",
-        marginBottom: 0,
         padding: "2rem 0",
-        borderBottom: "1px solid rgba(226,226,226,0.08)",
+        borderBottom: `1px solid ${t.fg_(0.08)}`,
         opacity: visible ? 1 : 0,
         transform: visible ? "none" : "translateY(16px)",
         transition: `all 0.6s ease ${0.2 + index * 0.1}s`,
@@ -125,7 +128,7 @@ const ExperienceRow = ({
           fontFamily: "Space Mono, monospace",
           fontSize: "0.6rem",
           letterSpacing: "0.08em",
-          color: "rgba(226,226,226,0.2)",
+          color: t.fg_(0.2),
           lineHeight: 1.6,
           textAlign: "right",
           paddingRight: "2rem",
@@ -141,7 +144,7 @@ const ExperienceRow = ({
       <div
         style={{
           paddingLeft: "1.5rem",
-          borderLeft: `1px solid ${hovered ? "rgba(151, 252, 228, 0.45)" : "transparent"}`,
+          borderLeft: `1px solid ${hovered ? t.ac_(0.45) : "transparent"}`,
           transition: "border-color 0.2s ease",
         }}
       >
@@ -151,7 +154,7 @@ const ExperienceRow = ({
               fontFamily: "Space Mono, monospace",
               fontSize: "0.95rem",
               fontWeight: 700,
-              color: hovered ? "rgb(151, 252, 228)" : "rgba(226,226,226,0.85)",
+              color: hovered ? t.accent : t.fg_(0.85),
               letterSpacing: "-0.01em",
               transition: "color 0.2s ease",
               marginBottom: "0.2rem",
@@ -163,7 +166,7 @@ const ExperienceRow = ({
             style={{
               fontFamily: "Space Mono, monospace",
               fontSize: "0.7rem",
-              color: "rgba(226,226,226,0.35)",
+              color: t.fg_(0.35),
               letterSpacing: "0.05em",
             }}
           >
@@ -174,7 +177,7 @@ const ExperienceRow = ({
           style={{
             fontFamily: "Space Mono, monospace",
             fontSize: "0.78rem",
-            color: "rgba(226,226,226,0.4)",
+            color: t.fg_(0.4),
             lineHeight: 1.8,
           }}
         >

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { SKILLS } from "../data/constants";
 import { ScrambleText } from "./ScrambleText";
+import { useTheme } from "../context/ThemeContext";
 
 export const Skills = () => {
+  const t = useTheme();
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
@@ -29,8 +31,9 @@ export const Skills = () => {
       ref={ref}
       id="skills"
       style={{
-        borderTop: "1px solid rgba(226,226,226,0.08)",
+        borderTop: `1px solid ${t.fg_(0.08)}`,
         padding: "8rem 2rem",
+        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -51,7 +54,7 @@ export const Skills = () => {
               fontFamily: "Space Mono, monospace",
               fontSize: "0.6rem",
               letterSpacing: "0.2em",
-              color: "rgba(226,226,226,0.25)",
+              color: t.fg_(0.25),
             }}
           >
             03
@@ -62,7 +65,8 @@ export const Skills = () => {
               fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
               fontWeight: 700,
               letterSpacing: "-0.02em",
-              color: "#e2e2e2",
+              color: t.fg,
+              transition: "color 0.35s ease",
             }}
           >
             {visible ? (
@@ -78,7 +82,8 @@ export const Skills = () => {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
-            border: "1px solid rgba(226,226,226,0.08)",
+            border: `1px solid ${t.fg_(0.08)}`,
+            transition: "border-color 0.35s ease",
           }}
           className="skills-grid"
         >
@@ -86,8 +91,7 @@ export const Skills = () => {
             <div
               key={cat.key}
               style={{
-                borderRight:
-                  ci < 3 ? "1px solid rgba(226,226,226,0.08)" : "none",
+                borderRight: ci < 3 ? `1px solid ${t.fg_(0.08)}` : "none",
                 padding: "2rem",
                 opacity: visible ? 1 : 0,
                 transform: visible ? "none" : "translateY(16px)",
@@ -99,7 +103,7 @@ export const Skills = () => {
                 style={{
                   marginBottom: "1.5rem",
                   paddingBottom: "1rem",
-                  borderBottom: "1px solid rgba(226,226,226,0.08)",
+                  borderBottom: `1px solid ${t.fg_(0.08)}`,
                 }}
               >
                 <div
@@ -107,8 +111,9 @@ export const Skills = () => {
                     fontFamily: "Space Mono, monospace",
                     fontSize: "0.55rem",
                     letterSpacing: "0.2em",
-                    color: "rgba(151, 252, 228, 0.45)",
+                    color: t.ac_(0.45),
                     marginBottom: "0.4rem",
+                    transition: "color 0.35s ease",
                   }}
                 >
                   {cat.index}
@@ -118,8 +123,9 @@ export const Skills = () => {
                     fontFamily: "Space Mono, monospace",
                     fontSize: "0.75rem",
                     fontWeight: 700,
-                    color: "#e2e2e2",
+                    color: t.fg,
                     letterSpacing: "0.05em",
+                    transition: "color 0.35s ease",
                   }}
                 >
                   {cat.label}
@@ -154,12 +160,12 @@ export const Skills = () => {
         @media (max-width: 900px) {
           .skills-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .skills-grid > div:nth-child(2) { border-right: none !important; }
-          .skills-grid > div:nth-child(3) { border-top: 1px solid rgba(226,226,226,0.08); }
-          .skills-grid > div:nth-child(4) { border-top: 1px solid rgba(226,226,226,0.08); }
+          .skills-grid > div:nth-child(3) { border-top: 1px solid var(--border); }
+          .skills-grid > div:nth-child(4) { border-top: 1px solid var(--border); }
         }
         @media (max-width: 560px) {
           .skills-grid { grid-template-columns: 1fr !important; }
-          .skills-grid > div { border-right: none !important; border-top: 1px solid rgba(226,226,226,0.08); }
+          .skills-grid > div { border-right: none !important; border-top: 1px solid var(--border); }
           .skills-grid > div:first-child { border-top: none; }
         }
       `}</style>
@@ -176,7 +182,9 @@ const SkillItem = ({
   visible: boolean;
   delay: number;
 }) => {
+  const t = useTheme();
   const [hovered, setHovered] = useState(false);
+
   return (
     <div
       onMouseEnter={() => setHovered(true)}
@@ -188,7 +196,7 @@ const SkillItem = ({
         padding: "0.3rem 0",
         fontFamily: "Space Mono, monospace",
         fontSize: "0.72rem",
-        color: hovered ? "rgb(151, 252, 228)" : "rgba(226,226,226,0.45)",
+        color: hovered ? t.accent : t.fg_(0.45),
         letterSpacing: "0.02em",
         opacity: visible ? 1 : 0,
         transform: visible ? "none" : "translateX(8px)",
@@ -200,7 +208,7 @@ const SkillItem = ({
           width: "3px",
           height: "3px",
           borderRadius: "50%",
-          background: hovered ? "rgb(151, 252, 228)" : "rgba(226,226,226,0.2)",
+          background: hovered ? t.accent : t.fg_(0.2),
           flexShrink: 0,
           transition: "background 0.15s ease",
         }}

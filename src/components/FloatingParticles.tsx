@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 export const FloatingParticles = () => {
+  const t = useTheme();
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const mousePos = useRef({ x: -100, y: -100 });
@@ -27,7 +29,6 @@ export const FloatingParticles = () => {
     window.addEventListener("mousemove", handleMove);
     rafRef.current = requestAnimationFrame(animate);
 
-    // Hide on mobile
     const checkMobile = () => {
       const isMobile = window.matchMedia("(hover: none)").matches;
       if (dot) dot.style.display = isMobile ? "none" : "block";
@@ -40,6 +41,14 @@ export const FloatingParticles = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);
+
+  // Update colors reactively when theme changes
+  useEffect(() => {
+    const dot = cursorDotRef.current;
+    const ring = cursorRingRef.current;
+    if (dot) dot.style.background = t.accent;
+    if (ring) ring.style.borderColor = t.ac_(0.3);
+  }, [t.accent, t.ac_]);
 
   const base: React.CSSProperties = {
     position: "fixed",
@@ -60,7 +69,8 @@ export const FloatingParticles = () => {
           width: 6,
           height: 6,
           borderRadius: "50%",
-          background: "rgb(151,252,228)",
+          background: t.accent,
+          transition: "background 0.35s ease",
         }}
       />
       {/* Ring */}
@@ -71,7 +81,8 @@ export const FloatingParticles = () => {
           width: 32,
           height: 32,
           borderRadius: "50%",
-          border: "1px solid rgba(151,252,228,0.3)",
+          border: `1px solid ${t.ac_(0.3)}`,
+          transition: "border-color 0.35s ease",
         }}
       />
     </>

@@ -2,8 +2,10 @@ import { useRef, useEffect, useState } from "react";
 import { Github, Linkedin, Mail, ArrowUpRight } from "lucide-react";
 import { RESUME } from "../data/constants";
 import { ScrambleText } from "./ScrambleText";
+import { useTheme } from "../context/ThemeContext";
 
 export const Contact = () => {
+  const t = useTheme();
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
@@ -39,8 +41,9 @@ export const Contact = () => {
       ref={ref}
       id="contact"
       style={{
-        borderTop: "1px solid rgba(226,226,226,0.08)",
+        borderTop: `1px solid ${t.fg_(0.08)}`,
         padding: "8rem 2rem",
+        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -61,7 +64,7 @@ export const Contact = () => {
               fontFamily: "Space Mono, monospace",
               fontSize: "0.6rem",
               letterSpacing: "0.2em",
-              color: "rgba(226,226,226,0.25)",
+              color: t.fg_(0.25),
             }}
           >
             05
@@ -72,7 +75,8 @@ export const Contact = () => {
               fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
               fontWeight: 700,
               letterSpacing: "-0.02em",
-              color: "#e2e2e2",
+              color: t.fg,
+              transition: "color 0.35s ease",
             }}
           >
             {visible ? (
@@ -105,8 +109,9 @@ export const Contact = () => {
                 fontFamily: "Space Mono, monospace",
                 fontSize: "0.85rem",
                 lineHeight: 1.9,
-                color: "rgba(226,226,226,0.5)",
+                color: t.fg_(0.5),
                 marginBottom: "3rem",
+                transition: "color 0.35s ease",
               }}
             >
               Open to new opportunities, collaborations, and conversations.
@@ -127,7 +132,7 @@ export const Contact = () => {
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "1rem 0",
-                    borderBottom: "1px solid rgba(226,226,226,0.08)",
+                    borderBottom: `1px solid ${t.fg_(0.08)}`,
                     textDecoration: "none",
                     opacity: visible ? 1 : 0,
                     transform: visible ? "none" : "translateY(8px)",
@@ -143,10 +148,7 @@ export const Contact = () => {
                       gap: "1rem",
                     }}
                   >
-                    <link.icon
-                      size={14}
-                      style={{ color: "rgba(226,226,226,0.3)" }}
-                    />
+                    <link.icon size={14} style={{ color: t.fg_(0.3) }} />
                     <div>
                       <div
                         style={{
@@ -154,7 +156,7 @@ export const Contact = () => {
                           fontSize: "0.65rem",
                           letterSpacing: "0.12em",
                           textTransform: "uppercase",
-                          color: "rgba(226,226,226,0.25)",
+                          color: t.fg_(0.25),
                           marginBottom: "0.1rem",
                         }}
                       >
@@ -164,17 +166,14 @@ export const Contact = () => {
                         style={{
                           fontFamily: "Space Mono, monospace",
                           fontSize: "0.78rem",
-                          color: "rgba(226,226,226,0.7)",
+                          color: t.fg_(0.7),
                         }}
                       >
                         {link.handle}
                       </div>
                     </div>
                   </div>
-                  <ArrowUpRight
-                    size={12}
-                    style={{ color: "rgba(226,226,226,0.2)" }}
-                  />
+                  <ArrowUpRight size={12} style={{ color: t.fg_(0.2) }} />
                 </a>
               ))}
             </div>
@@ -200,23 +199,23 @@ export const Contact = () => {
                 display: "flex",
                 flexDirection: "column",
                 gap: "1px",
-                background: "rgba(226,226,226,0.08)",
+                background: t.fg_(0.08),
               }}
             >
               <input
                 type="text"
                 placeholder="Name"
-                style={{ background: "#080808" }}
+                style={{ background: t.bg }}
               />
               <input
                 type="email"
                 placeholder="Email"
-                style={{ background: "#080808" }}
+                style={{ background: t.bg }}
               />
               <textarea
                 placeholder="Message"
                 rows={5}
-                style={{ background: "#080808" }}
+                style={{ background: t.bg }}
               />
               <button
                 type="button"
@@ -226,19 +225,17 @@ export const Contact = () => {
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   padding: "1rem",
-                  background: "rgb(151, 252, 228)",
-                  color: "#080808",
+                  background: t.accent,
+                  color: t.bg,
                   border: "none",
                   cursor: "crosshair",
-                  transition: "background 0.2s ease",
+                  transition: "background 0.2s ease, color 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
-                  (e.target as HTMLButtonElement).style.background =
-                    "rgba(151,252,228,0.8)";
+                  (e.target as HTMLButtonElement).style.opacity = "0.8";
                 }}
                 onMouseLeave={(e) => {
-                  (e.target as HTMLButtonElement).style.background =
-                    "rgb(151, 252, 228)";
+                  (e.target as HTMLButtonElement).style.opacity = "1";
                 }}
               >
                 Send Message →
@@ -250,7 +247,7 @@ export const Contact = () => {
 
       <style>{`
         .contact-link:hover { opacity: 1 !important; }
-        .contact-link:hover svg:last-child { color: rgb(151, 252, 228) !important; }
+        .contact-link:hover svg:last-child { color: var(--accent) !important; }
         @media (max-width: 768px) {
           .contact-grid { grid-template-columns: 1fr !important; gap: 3rem !important; }
         }

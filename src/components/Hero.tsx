@@ -1,11 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { ScrambleText } from "./ScrambleText";
 import { HeroThree } from "./HeroThree";
-
-const ACCENT = "rgb(151,252,228)";
-const ADIM = "rgba(151,252,228,0.55)";
-const ABORDER = "rgba(151,252,228,0.18)";
-const ADIM2 = "rgba(151,252,228,0.22)";
+import { useTheme } from "../context/ThemeContext";
 
 // ─── CoinGecko coin IDs → display pairs ──────────────────────────
 const COIN_MAP = [
@@ -35,7 +31,6 @@ const SARCASM = [
   "generational wealth",
 ];
 
-// ─── Fake recent tx hashes for the activity strip ─────────────────
 const genHash = () =>
   "0x" +
   Array.from({ length: 8 }, () =>
@@ -72,12 +67,13 @@ const fmtPrice = (p: number) =>
     ? p.toLocaleString("en", { maximumFractionDigits: 0 })
     : p.toFixed(p < 10 ? 4 : 2);
 
-const Sep = () => (
-  <div style={{ height: "1px", background: "rgba(151,252,228,0.07)" }} />
+// ── Themed sub-components (receive accent prop) ───────────────────
+
+const Sep = ({ accentRaw }: { accentRaw: string }) => (
+  <div style={{ height: "1px", background: `rgba(${accentRaw},0.07)` }} />
 );
 
-// ─── Sarcasm ticker ────────────────────────────────────────────────
-const SarcasmTicker = () => {
+const SarcasmTicker = ({ accentRaw }: { accentRaw: string }) => {
   const [idx, setIdx] = useState(0);
   const [visible, setVisible] = useState(true);
 
@@ -98,27 +94,28 @@ const SarcasmTicker = () => {
         fontFamily: "Space Mono, monospace",
         fontSize: "0.58rem",
         letterSpacing: "0.08em",
-        color: "rgba(151,252,228,0.42)",
+        color: `rgba(${accentRaw},0.42)`,
         fontStyle: "italic",
         opacity: visible ? 1 : 0,
         transition: "opacity 0.45s ease",
         minHeight: "1.2em",
         padding: "0.5rem 1rem",
-        borderTop: "1px solid rgba(151,252,228,0.07)",
-        background: "rgba(151,252,228,0.012)",
+        borderTop: `1px solid rgba(${accentRaw},0.07)`,
+        background: `rgba(${accentRaw},0.012)`,
         display: "flex",
         alignItems: "center",
         gap: "0.5rem",
       }}
     >
-      <span style={{ color: ADIM, fontStyle: "normal" }}>oracle://</span>
+      <span style={{ color: `rgba(${accentRaw},0.55)`, fontStyle: "normal" }}>
+        oracle://
+      </span>
       {SARCASM[idx]}
     </div>
   );
 };
 
-// ─── Scrolling activity hash strip ────────────────────────────────
-const ActivityStrip = () => {
+const ActivityStrip = ({ accentRaw }: { accentRaw: string }) => {
   const [hashes, setHashes] = useState(() =>
     Array.from({ length: 6 }, () => ({
       hash: genHash(),
@@ -141,8 +138,8 @@ const ActivityStrip = () => {
       style={{
         overflow: "hidden",
         padding: "0.35rem 1rem",
-        borderTop: "1px solid rgba(151,252,228,0.06)",
-        background: "rgba(151,252,228,0.008)",
+        borderTop: `1px solid rgba(${accentRaw},0.06)`,
+        background: `rgba(${accentRaw},0.008)`,
         display: "flex",
         gap: "1.2rem",
         alignItems: "center",
@@ -154,7 +151,7 @@ const ActivityStrip = () => {
           fontSize: "0.46rem",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
-          color: "rgba(151,252,228,0.25)",
+          color: `rgba(${accentRaw},0.25)`,
           flexShrink: 0,
         }}
       >
@@ -172,7 +169,8 @@ const ActivityStrip = () => {
               letterSpacing: "0.06em",
               whiteSpace: "nowrap",
               flexShrink: 0,
-              color: i === 0 ? ADIM : "rgba(151,252,228,0.18)",
+              color:
+                i === 0 ? `rgba(${accentRaw},0.55)` : `rgba(${accentRaw},0.18)`,
               transition: "color 0.4s ease",
             }}
           >
@@ -180,7 +178,7 @@ const ActivityStrip = () => {
               style={{
                 color:
                   type === "SWAP"
-                    ? "rgba(151,252,228,0.5)"
+                    ? `rgba(${accentRaw},0.5)`
                     : "rgba(255,200,100,0.4)",
                 marginRight: "0.3em",
               }}
@@ -195,13 +193,13 @@ const ActivityStrip = () => {
   );
 };
 
-// ─── Mini network health bar ───────────────────────────────────────
 const NetworkHealth = ({
   tps,
-  blockNum,
+  accentRaw,
 }: {
   tps: number;
   blockNum: number;
+  accentRaw: string;
 }) => {
   const bars = 16;
   const health = Math.min(1, (tps - 3800) / 1200);
@@ -216,7 +214,9 @@ const NetworkHealth = ({
             style={{
               width: "2px",
               height: `${6 + (i % 3) * 2}px`,
-              background: active ? ACCENT : "rgba(151,252,228,0.12)",
+              background: active
+                ? `rgb(${accentRaw})`
+                : `rgba(${accentRaw},0.12)`,
               borderRadius: "1px",
               transition: "background 0.4s ease",
             }}
@@ -227,7 +227,10 @@ const NetworkHealth = ({
   );
 };
 
+// ─── Hero ─────────────────────────────────────────────────────────
 export const Hero = () => {
+  const t = useTheme();
+
   const [active, setActive] = useState(false);
   const [lineVis, setLineVis] = useState(false);
   const [subVis, setSubVis] = useState(false);
@@ -252,6 +255,13 @@ export const Hero = () => {
   const [gasPrice, setGasPrice] = useState(24);
 
   const gridRef = useRef<HTMLCanvasElement>(null);
+  // Refs so the canvas loop always reads the latest theme without restarting
+  const accentRawRef = useRef(t.accentRaw);
+  const isDarkRef = useRef(t.isDark);
+  useEffect(() => {
+    accentRawRef.current = t.accentRaw;
+    isDarkRef.current = t.isDark;
+  }, [t.accentRaw, t.isDark]);
 
   // ── Reveals ────────────────────────────────────────────────────
   useEffect(() => {
@@ -338,6 +348,7 @@ export const Hero = () => {
   }, []);
 
   // ── Background grid canvas ──────────────────────────────────────
+  // Runs once — reads accent color from ref so it adapts to theme changes
   useEffect(() => {
     const canvas = gridRef.current;
     if (!canvas) return;
@@ -362,6 +373,11 @@ export const Hero = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const cols = Math.ceil(canvas.width / S) + 1;
       const rows = Math.ceil(canvas.height / S) + 1;
+      const ac = accentRawRef.current;
+      const dark = isDarkRef.current;
+      // Light mode needs slightly higher base opacity so dots read on pale bg
+      const baseAlpha = dark ? 0.022 : 0.042;
+      const infAlpha = dark ? 0.13 : 0.2;
       for (let c = 0; c < cols; c++)
         for (let r = 0; r < rows; r++) {
           const x = c * S,
@@ -369,7 +385,7 @@ export const Hero = () => {
           const inf = Math.max(0, 1 - Math.hypot(mx - x, my - y) / 320);
           ctx.beginPath();
           ctx.arc(x, y, 1 + inf * 2.2, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(151,252,228,${0.022 + inf * 0.13})`;
+          ctx.fillStyle = `rgba(${ac},${(baseAlpha + inf * infAlpha).toFixed(3)})`;
           ctx.fill();
         }
       raf = requestAnimationFrame(draw);
@@ -381,6 +397,12 @@ export const Hero = () => {
       cancelAnimationFrame(raf);
     };
   }, []);
+
+  const ACCENT = t.accent;
+  const ADIM = t.ac_(0.55);
+  const ABORDER = t.ac_(0.18);
+  const ADIM2 = t.ac_(0.22);
+  const ac = t.accentRaw;
 
   return (
     <section
@@ -426,10 +448,11 @@ export const Hero = () => {
             fontFamily: "Space Mono, monospace",
             fontSize: "0.6rem",
             letterSpacing: "0.15em",
-            color: "rgba(226,226,226,0.18)",
+            color: t.fg_(0.18),
             textTransform: "uppercase",
             lineHeight: 2,
             textAlign: align as "left" | "right",
+            transition: "color 0.35s ease",
           }}
         >
           {lines.map((l) => (
@@ -455,7 +478,7 @@ export const Hero = () => {
           minHeight: "100vh",
         }}
       >
-        {/* ── LEFT — unchanged ────────────────────────────────── */}
+        {/* ── LEFT ────────────────────────────────── */}
         <div>
           <div
             style={{
@@ -480,21 +503,22 @@ export const Hero = () => {
               fontWeight: 700,
               lineHeight: 0.92,
               letterSpacing: "-0.03em",
-              color: "#e2e2e2",
+              color: t.fg,
               marginBottom: "1.5rem",
+              transition: "color 0.35s ease",
             }}
           >
             {active ? (
               <>
                 <ScrambleText text="ANISH" active={active} speed={28} />
                 <br />
-                <ScrambleText text="KUMAR" active={active} speed={28} />
+                <ScrambleText text="KADAM" active={active} speed={28} />
               </>
             ) : (
               <>
                 ANISH
                 <br />
-                KUMAR
+                KADAM
               </>
             )}
           </h1>
@@ -502,7 +526,7 @@ export const Hero = () => {
           <div
             style={{
               height: "1px",
-              background: "rgba(226,226,226,0.15)",
+              background: t.fg_(0.15),
               marginBottom: "2rem",
               transformOrigin: "left",
               maxWidth: "420px",
@@ -515,7 +539,7 @@ export const Hero = () => {
             style={{
               fontFamily: "Space Mono, monospace",
               fontSize: "clamp(0.7rem, 1.3vw, 0.9rem)",
-              color: "rgba(226,226,226,0.5)",
+              color: t.fg_(0.5),
               letterSpacing: "0.05em",
               maxWidth: "400px",
               lineHeight: 1.75,
@@ -570,6 +594,7 @@ export const Hero = () => {
                     fontWeight: 700,
                     color: ACCENT,
                     lineHeight: 1,
+                    transition: "color 0.35s ease",
                   }}
                 >
                   {n}
@@ -580,7 +605,7 @@ export const Hero = () => {
                     fontSize: "0.58rem",
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
-                    color: "rgba(226,226,226,0.22)",
+                    color: t.fg_(0.22),
                     marginTop: "0.2rem",
                   }}
                 >
@@ -591,7 +616,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* ── RIGHT — DEX terminal (improved) ─────────────────── */}
+        {/* ── RIGHT — DEX terminal ─────────────────── */}
         <div
           style={{
             opacity: threeVis ? 1 : 0,
@@ -603,19 +628,21 @@ export const Hero = () => {
           <div
             style={{
               position: "relative",
-              boxShadow: `0 0 48px rgba(151,252,228,0.04), 0 0 1px rgba(151,252,228,0.12) inset`,
+              boxShadow: `0 0 48px ${t.ac_(0.04)}, 0 0 1px ${t.ac_(0.12)} inset`,
+              transition: "box-shadow 0.35s ease",
             }}
           >
             <div
               style={{
                 border: `1px solid ${ABORDER}`,
-                background: "rgba(8,8,8,0.65)",
+                background: t.terminalBg,
                 backdropFilter: "blur(6px)",
                 position: "relative",
                 overflow: "hidden",
+                transition: "background 0.35s ease, border-color 0.35s ease",
               }}
             >
-              {/* Animated corner brackets */}
+              {/* Corner brackets */}
               {[
                 {
                   top: -1,
@@ -654,7 +681,7 @@ export const Hero = () => {
                 />
               ))}
 
-              {/* ── Header row 1 ── status + title + meta */}
+              {/* ── Header row 1 ── */}
               <div
                 style={{
                   display: "flex",
@@ -662,7 +689,8 @@ export const Hero = () => {
                   justifyContent: "space-between",
                   padding: "0.58rem 1rem",
                   borderBottom: `1px solid ${ABORDER}`,
-                  background: "rgba(151,252,228,0.025)",
+                  background: t.terminalHeaderBg,
+                  transition: "background 0.35s ease",
                 }}
               >
                 <div
@@ -721,7 +749,7 @@ export const Hero = () => {
                       fontFamily: "Space Mono, monospace",
                       fontSize: "0.5rem",
                       letterSpacing: "0.08em",
-                      color: "rgba(226,226,226,0.2)",
+                      color: t.fg_(0.2),
                     }}
                   >
                     upd {lastUpdated}
@@ -731,7 +759,7 @@ export const Hero = () => {
                       fontFamily: "Space Mono, monospace",
                       fontSize: "0.52rem",
                       letterSpacing: "0.08em",
-                      color: "rgba(226,226,226,0.25)",
+                      color: t.fg_(0.25),
                     }}
                   >
                     BLK #{blockNum.toLocaleString()}
@@ -739,16 +767,17 @@ export const Hero = () => {
                 </div>
               </div>
 
-              {/* ── Header row 2 ── network stats bar */}
+              {/* ── Header row 2 ── network stats */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "0.38rem 1rem",
-                  borderBottom: `1px solid rgba(151,252,228,0.05)`,
-                  background: "rgba(0,0,0,0.3)",
+                  borderBottom: `1px solid ${t.ac_(0.05)}`,
+                  background: t.terminalStatsBg,
                   gap: "1rem",
+                  transition: "background 0.35s ease",
                 }}
               >
                 <div
@@ -781,7 +810,7 @@ export const Hero = () => {
                           fontFamily: "Space Mono, monospace",
                           fontSize: "0.44rem",
                           letterSpacing: "0.14em",
-                          color: "rgba(226,226,226,0.22)",
+                          color: t.fg_(0.22),
                           textTransform: "uppercase",
                         }}
                       >
@@ -797,7 +826,7 @@ export const Hero = () => {
                             ? ACCENT
                             : fetchErr && label === "STATUS"
                               ? "#ff8080"
-                              : "rgba(226,226,226,0.65)",
+                              : t.fg_(0.65),
                         }}
                       >
                         {value}
@@ -805,7 +834,7 @@ export const Hero = () => {
                     </div>
                   ))}
                 </div>
-                <NetworkHealth tps={tps} blockNum={blockNum} />
+                <NetworkHealth tps={tps} blockNum={blockNum} accentRaw={ac} />
               </div>
 
               {/* ── 3D scene ── */}
@@ -816,9 +845,13 @@ export const Hero = () => {
                   overflow: "hidden",
                 }}
               >
-                <HeroThree />
+                {/* key forces re-mount on theme change so Three.js uses correct colors */}
+                <HeroThree
+                  key={t.isDark ? "dark" : "light"}
+                  isDark={t.isDark}
+                />
 
-                {/* Subtle scanline overlay on 3D */}
+                {/* Scanline overlay */}
                 <div
                   style={{
                     position: "absolute",
@@ -885,7 +918,7 @@ export const Hero = () => {
                           fontSize: "0.5rem",
                           letterSpacing: "0.12em",
                           textTransform: "uppercase",
-                          color: "rgba(151,252,228,0.35)",
+                          color: t.ac_(0.35),
                         }}
                       >
                         {label}
@@ -895,7 +928,7 @@ export const Hero = () => {
                       style={{
                         fontSize: "0.42rem",
                         letterSpacing: "0.1em",
-                        color: "rgba(151,252,228,0.18)",
+                        color: t.ac_(0.18),
                         marginTop: "0.15rem",
                         paddingLeft: dot ? "0.55rem" : "0",
                       }}
@@ -905,7 +938,7 @@ export const Hero = () => {
                   </div>
                 ))}
 
-                {/* Bottom-right HUD stats */}
+                {/* Bottom-right HUD */}
                 <div
                   style={{
                     position: "absolute",
@@ -914,7 +947,7 @@ export const Hero = () => {
                     fontFamily: "Space Mono, monospace",
                     fontSize: "0.46rem",
                     letterSpacing: "0.09em",
-                    color: "rgba(151,252,228,0.22)",
+                    color: t.ac_(0.22),
                     textAlign: "right",
                     lineHeight: 2.1,
                     zIndex: 3,
@@ -955,11 +988,9 @@ export const Hero = () => {
                         fontSize: "0.44rem",
                         letterSpacing: "0.12em",
                         padding: "0.1rem 0.4rem",
-                        border: `1px solid ${a ? "rgba(151,252,228,0.4)" : "rgba(151,252,228,0.1)"}`,
-                        color: a ? ADIM : "rgba(151,252,228,0.2)",
-                        background: a
-                          ? "rgba(151,252,228,0.06)"
-                          : "transparent",
+                        border: `1px solid ${a ? t.ac_(0.4) : t.ac_(0.1)}`,
+                        color: a ? ADIM : t.ac_(0.2),
+                        background: a ? t.ac_(0.06) : "transparent",
                       }}
                     >
                       {name}
@@ -969,18 +1000,23 @@ export const Hero = () => {
               </div>
 
               {/* ── Mempool activity strip ── */}
-              <ActivityStrip />
-              <Sep />
+              <ActivityStrip accentRaw={ac} />
+              <Sep accentRaw={ac} />
 
               {/* ── Ticker table ── */}
-              <div style={{ background: "rgba(8,8,8,0.82)" }}>
+              <div
+                style={{
+                  background: t.terminalRowBg,
+                  transition: "background 0.35s ease",
+                }}
+              >
                 {/* Column headers */}
                 <div
                   style={{
                     display: "grid",
                     gridTemplateColumns: "1fr 90px 64px 56px",
                     padding: "0.38rem 1rem",
-                    background: "rgba(151,252,228,0.02)",
+                    background: t.ac_(0.02),
                   }}
                 >
                   {["Pair", "Price (USD)", "24h", "Vol"].map((h) => (
@@ -991,32 +1027,30 @@ export const Hero = () => {
                         fontSize: "0.48rem",
                         letterSpacing: "0.12em",
                         textTransform: "uppercase",
-                        color: "rgba(226,226,226,0.2)",
+                        color: t.fg_(0.2),
                       }}
                     >
                       {h}
                     </span>
                   ))}
                 </div>
-                <Sep />
+                <Sep accentRaw={ac} />
 
-                {tickers.map((t, i) => {
+                {tickers.map((tk, i) => {
                   const isFlash = flashIdx === i;
-                  const up = t.change >= 0;
+                  const up = tk.change >= 0;
                   const priceUp =
-                    t.prevPrice !== undefined ? t.price >= t.prevPrice : up;
+                    tk.prevPrice !== undefined ? tk.price >= tk.prevPrice : up;
 
                   return (
-                    <div key={t.pair}>
+                    <div key={tk.pair}>
                       <div
                         style={{
                           display: "grid",
                           gridTemplateColumns: "1fr 90px 64px 56px",
                           alignItems: "center",
                           padding: "0.48rem 1rem",
-                          background: isFlash
-                            ? "rgba(151,252,228,0.045)"
-                            : "transparent",
+                          background: isFlash ? t.ac_(0.045) : "transparent",
                           transition: "background 0.35s ease",
                           borderLeft: isFlash
                             ? `2px solid ${ACCENT}`
@@ -1030,12 +1064,13 @@ export const Hero = () => {
                               fontFamily: "Space Mono, monospace",
                               fontSize: "0.66rem",
                               fontWeight: 700,
-                              color: "#e2e2e2",
+                              color: t.fg,
                               letterSpacing: "0.02em",
                               marginBottom: "2px",
+                              transition: "color 0.35s ease",
                             }}
                           >
-                            {t.pair}
+                            {tk.pair}
                           </div>
                           <svg width="64" height="16">
                             {sparks[i].length > 1 && (
@@ -1043,9 +1078,7 @@ export const Hero = () => {
                                 d={makeSpark(sparks[i], 64, 16)}
                                 fill="none"
                                 stroke={
-                                  up
-                                    ? "rgba(151,252,228,0.7)"
-                                    : "rgba(255,100,100,0.65)"
+                                  up ? t.ac_(0.7) : "rgba(255,100,100,0.65)"
                                 }
                                 strokeWidth="1.3"
                                 strokeLinejoin="round"
@@ -1063,13 +1096,13 @@ export const Hero = () => {
                               ? priceUp
                                 ? ACCENT
                                 : "#ff8080"
-                              : "rgba(226,226,226,0.75)",
+                              : t.fg_(0.75),
                             transition: "color 0.35s ease",
                             letterSpacing: "0.01em",
                             fontWeight: isFlash ? 700 : 400,
                           }}
                         >
-                          {t.price > 0 ? `$${fmtPrice(t.price)}` : "…"}
+                          {tk.price > 0 ? `$${fmtPrice(tk.price)}` : "…"}
                         </span>
 
                         {/* 24h change */}
@@ -1077,14 +1110,12 @@ export const Hero = () => {
                           style={{
                             fontFamily: "Space Mono, monospace",
                             fontSize: "0.58rem",
-                            color: up
-                              ? "rgba(151,252,228,0.85)"
-                              : "rgba(255,100,100,0.8)",
+                            color: up ? t.ac_(0.85) : "rgba(255,100,100,0.8)",
                             letterSpacing: "0.01em",
                           }}
                         >
-                          {t.price > 0
-                            ? `${up ? "▲" : "▼"} ${Math.abs(t.change).toFixed(2)}%`
+                          {tk.price > 0
+                            ? `${up ? "▲" : "▼"} ${Math.abs(tk.change).toFixed(2)}%`
                             : "—"}
                         </span>
 
@@ -1093,21 +1124,21 @@ export const Hero = () => {
                           style={{
                             fontFamily: "Space Mono, monospace",
                             fontSize: "0.54rem",
-                            color: "rgba(226,226,226,0.28)",
+                            color: t.fg_(0.28),
                             letterSpacing: "0.04em",
                           }}
                         >
-                          {t.vol !== "—" ? `$${t.vol}` : "—"}
+                          {tk.vol !== "—" ? `$${tk.vol}` : "—"}
                         </span>
                       </div>
-                      {i < tickers.length - 1 && <Sep />}
+                      {i < tickers.length - 1 && <Sep accentRaw={ac} />}
                     </div>
                   );
                 })}
               </div>
 
               {/* Sarcasm strip */}
-              <SarcasmTicker />
+              <SarcasmTicker accentRaw={ac} />
 
               {/* ── Footer ── */}
               <div
@@ -1116,10 +1147,11 @@ export const Hero = () => {
                   justifyContent: "space-between",
                   alignItems: "center",
                   padding: "0.48rem 1rem",
-                  background: "rgba(151,252,228,0.018)",
-                  borderTop: "1px solid rgba(151,252,228,0.07)",
+                  background: t.ac_(0.018),
+                  borderTop: `1px solid ${t.ac_(0.07)}`,
                   flexWrap: "wrap",
                   gap: "0.6rem",
+                  transition: "background 0.35s ease",
                 }}
               >
                 {[
@@ -1135,7 +1167,7 @@ export const Hero = () => {
                         fontSize: "0.44rem",
                         letterSpacing: "0.12em",
                         textTransform: "uppercase",
-                        color: "rgba(226,226,226,0.2)",
+                        color: t.fg_(0.2),
                         marginBottom: "0.1rem",
                       }}
                     >
@@ -1152,7 +1184,8 @@ export const Hero = () => {
                             ? ACCENT
                             : value === "ERROR"
                               ? "#ff8080"
-                              : "rgba(226,226,226,0.62)",
+                              : t.fg_(0.62),
+                        transition: "color 0.35s ease",
                       }}
                     >
                       {value}
@@ -1177,7 +1210,7 @@ export const Hero = () => {
                 fontSize: "0.48rem",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "rgba(151,252,228,0.18)",
+                color: t.ac_(0.18),
               }}
             >
               Data via CoinGecko · Not financial advice
@@ -1196,7 +1229,7 @@ export const Hero = () => {
           fontFamily: "Space Mono, monospace",
           fontSize: "0.58rem",
           letterSpacing: "0.15em",
-          color: "rgba(151,252,228,0.3)",
+          color: t.ac_(0.3),
           textTransform: "uppercase",
           zIndex: 2,
           animation: "fadeIn 1s ease 2s both",

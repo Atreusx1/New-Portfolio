@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
 
+/* ─── DARK (default) TOKENS ───────────────────────────────── */
 :root {
   --bg: #080808;
   --bg-2: #111111;
@@ -15,6 +16,22 @@
   --font-mono: "Space Mono", monospace;
 }
 
+/* ─── LIGHT TOKENS — Hyperliquid-inspired mint seafoam ────── */
+html[data-theme="light"] {
+  --bg: #caf7ee;
+  --bg-2: #b4f0e4;
+  --fg: #0a2018; /* near-black green — maximum readability */
+  --fg-dim: rgba(10, 32, 24, 0.65);
+  --fg-muted: rgba(10, 32, 24, 0.3);
+  --border: rgba(10, 32, 24, 0.1);
+  --border-active: rgba(10, 32, 24, 0.35);
+  --accent: rgb(0, 180, 130); /* vivid teal — clear on mint bg */
+  --accent-dim: rgba(0, 180, 130, 0.5);
+  --accent-muted: rgba(0, 180, 130, 0.1);
+  --accent-border: rgba(0, 180, 130, 0.28);
+}
+
+/* ─── RESET ───────────────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
@@ -32,23 +49,25 @@ body {
   color: var(--fg);
   overflow-x: hidden;
   line-height: 1.6;
-  cursor: crosshair;
+  cursor: none;
   -webkit-font-smoothing: antialiased;
+  transition:
+    background 0.35s ease,
+    color 0.35s ease;
 }
 
 /* Custom cursor */
 *,
 *::before,
 *::after {
-  cursor: crosshair;
+  cursor: none;
 }
-
 a,
 button {
-  cursor: crosshair;
+  cursor: pointer;
 }
 
-/* Scrollbar */
+/* ─── SCROLLBAR ───────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 2px;
 }
@@ -56,7 +75,7 @@ button {
   background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(226, 226, 226, 0.2);
+  background: var(--border-active);
 }
 
 /* ─── GRAIN NOISE ─────────────────────────────────────────── */
@@ -70,6 +89,11 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
   animation: grain 0.5s steps(1) infinite;
+}
+
+html[data-theme="light"] body::after {
+  opacity: 0.04;
+  mix-blend-mode: multiply;
 }
 
 @keyframes grain {
@@ -219,9 +243,9 @@ body::after {
 }
 
 .btn-outline:hover {
-  border-color: var(--fg);
-  color: var(--fg);
-  background: rgba(226, 226, 226, 0.04);
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-muted);
 }
 
 .btn-primary {
@@ -243,12 +267,6 @@ body::after {
 .btn-primary:hover {
   background: transparent;
   color: var(--accent);
-}
-
-.btn-outline:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-muted);
 }
 
 /* ─── CARDS ───────────────────────────────────────────────── */
@@ -284,7 +302,7 @@ body::after {
   color: var(--fg-muted);
 }
 
-/* ─── FORM ────────────────────────────────────────────────── */
+/* ─── FORMS ───────────────────────────────────────────────── */
 input,
 textarea {
   font-family: var(--font-mono);
@@ -303,8 +321,38 @@ input::placeholder,
 textarea::placeholder {
   color: var(--fg-muted);
 }
-
 input:focus,
 textarea:focus {
   border-color: var(--border-active);
+}
+
+/* ─── THEME TOGGLE BUTTON ─────────────────────────────────── */
+.theme-toggle {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── SECTION TRANSITION ──────────────────────────────────── */
+section,
+header,
+footer,
+nav {
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease;
 }

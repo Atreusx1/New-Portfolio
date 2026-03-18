@@ -1,44 +1,51 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-// ─── Color palette matching the Hero ──────────────────────────────────────────
-const C_TEAL = 0x97fce4; // rgb(151,252,228)
-const C_TEAL_MID = 0x4a9e8a;
-const C_TEAL_DARK = 0x1a4a40;
+// Dark: bright mint teal. Light: dark emerald teal (matches rgb(0,128,100))
+const DARK_TEAL = 0x97fce4;
+const LIGHT_TEAL = 0x008064;
 
-// ─── Token orbit config ───────────────────────────────────────────────────────
+const C_WARM = 0xffd590;
+
 const TOKENS = [
-  { r: 2.2, speed: 0.42, phase: 0, tiltX: Math.PI / 3.2, tiltZ: 0 },
-  { r: 2.2, speed: 0.42, phase: Math.PI, tiltX: Math.PI / 3.2, tiltZ: 0 },
+  { r: 2.4, speed: 0.38, phase: 0, tiltX: Math.PI / 3.2, tiltZ: 0 },
+  { r: 2.4, speed: 0.38, phase: Math.PI, tiltX: Math.PI / 3.2, tiltZ: 0 },
   {
-    r: 2.2,
-    speed: 0.42,
+    r: 2.4,
+    speed: 0.38,
     phase: Math.PI * 0.67,
     tiltX: Math.PI / 3.2,
     tiltZ: 0,
   },
-  { r: 3.0, speed: 0.24, phase: 0.4, tiltX: Math.PI / 2.1, tiltZ: 0.6 },
+  { r: 3.2, speed: 0.22, phase: 0.4, tiltX: Math.PI / 2.1, tiltZ: 0.6 },
   {
-    r: 3.0,
-    speed: 0.24,
+    r: 3.2,
+    speed: 0.22,
     phase: Math.PI + 0.4,
     tiltX: Math.PI / 2.1,
     tiltZ: 0.6,
   },
-  { r: 3.7, speed: 0.15, phase: 1.1, tiltX: 1.1, tiltZ: 1.0 },
+  { r: 3.9, speed: 0.14, phase: 1.1, tiltX: 1.1, tiltZ: 1.0 },
 ];
 
-export const HeroThree: React.FC = () => {
+interface HeroThreeProps {
+  isDark?: boolean;
+}
+
+export const HeroThree: React.FC<HeroThreeProps> = ({ isDark = true }) => {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
 
-    const W = mount.clientWidth;
-    const H = mount.clientHeight;
+    const C_TEAL = isDark ? DARK_TEAL : LIGHT_TEAL;
+    const C_TEAL_MID = isDark ? 0x4a9e8a : 0x005040;
+    const C_TEAL_DARK = isDark ? 0x1a4a40 : 0x003028;
 
-    // ── Renderer ──────────────────────────────────────────────────────────────
+    const W = mount.clientWidth,
+      H = mount.clientHeight;
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
@@ -46,18 +53,16 @@ export const HeroThree: React.FC = () => {
     mount.appendChild(renderer.domElement);
     Object.assign(renderer.domElement.style, {
       position: "absolute",
-      inset: 0,
+      inset: "0",
       width: "100%",
       height: "100%",
     });
 
-    // ── Scene & Camera ────────────────────────────────────────────────────────
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 200);
-    camera.position.set(0, 0.4, 7.5);
+    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 200);
+    camera.position.set(0, 0.3, 8.0);
     camera.lookAt(0, 0, 0);
 
-    // ── Mouse tracking ────────────────────────────────────────────────────────
     let mx = 0,
       my = 0;
     const onMouse = (e: MouseEvent) => {
@@ -67,7 +72,6 @@ export const HeroThree: React.FC = () => {
     };
     window.addEventListener("mousemove", onMouse);
 
-    // ── Resize ────────────────────────────────────────────────────────────────
     const onResize = () => {
       const nW = mount.clientWidth,
         nH = mount.clientHeight;
@@ -77,276 +81,427 @@ export const HeroThree: React.FC = () => {
     };
     window.addEventListener("resize", onResize);
 
-    // =========================================================================
-    // SCENE OBJECTS
-    // =========================================================================
+    // ── Tether logo ───────────────────────────────────────────────
+    const tetherGrp = new THREE.Group();
+    scene.add(tetherGrp);
 
-    // ── 1. Central Torus Knot — the "bonding curve" ───────────────────────────
-    const knotGeo = new THREE.TorusKnotGeometry(1.05, 0.3, 160, 20);
+    const S = 1.32;
+    const CB_W = 1.5 * S,
+      CB_H = 0.22 * S,
+      CB_Y = 0.52 * S;
+    const ST_W = 0.22 * S,
+      ST_H = 1.15 * S,
+      ST_Y = -0.08 * S;
+    const RING_Y = -0.02 * S;
 
-    // Wireframe shell — gives the structural lattice look
-    const knotWireMesh = new THREE.Mesh(
-      knotGeo,
-      new THREE.MeshBasicMaterial({
-        color: C_TEAL,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.1,
-      }),
-    );
-    scene.add(knotWireMesh);
-
-    // Solid inner tube — the glowing core
-    const knotCoreMesh = new THREE.Mesh(
-      new THREE.TorusKnotGeometry(1.05, 0.055, 160, 10),
-      new THREE.MeshBasicMaterial({
-        color: C_TEAL,
-        transparent: true,
-        opacity: 0.55,
-      }),
-    );
-    scene.add(knotCoreMesh);
-
-    // Fake glow layers: 3 progressively larger/dimmer shells
-    for (let i = 0; i < 3; i++) {
-      const scale = 1 + i * 0.055;
-      const glow = new THREE.Mesh(
-        new THREE.TorusKnotGeometry(1.05 * scale, 0.055 * scale, 80, 8),
-        new THREE.MeshBasicMaterial({
-          color: C_TEAL,
-          transparent: true,
-          opacity: 0.09 - i * 0.027,
-          side: THREE.BackSide,
-        }),
-      );
-      scene.add(glow);
-    }
-
-    // ── 2. Orbital rings ──────────────────────────────────────────────────────
-    const ringConfigs = [
-      { r: 2.2, tube: 0.008, rx: Math.PI / 3.2, ry: 0, rz: 0, opacity: 0.18 },
-      { r: 3.0, tube: 0.006, rx: Math.PI / 2.1, ry: 0, rz: 0.6, opacity: 0.11 },
-      { r: 3.7, tube: 0.005, rx: 1.1, ry: 0.3, rz: 1.0, opacity: 0.07 },
-    ];
-
-    const rings = ringConfigs.map((rc) => {
+    const makeSolid = (
+      w: number,
+      h: number,
+      x: number,
+      y: number,
+      opacity: number,
+    ) => {
       const mesh = new THREE.Mesh(
-        new THREE.TorusGeometry(rc.r, rc.tube, 2, 120),
+        new THREE.BoxGeometry(w, h, 0.12 * S),
         new THREE.MeshBasicMaterial({
           color: C_TEAL,
           transparent: true,
-          opacity: rc.opacity,
+          opacity,
         }),
       );
-      mesh.rotation.set(rc.rx, rc.ry, rc.rz);
-      scene.add(mesh);
+      mesh.position.set(x, y, 0);
       return mesh;
+    };
+
+    const makeGlow = (
+      w: number,
+      h: number,
+      x: number,
+      y: number,
+      opacity: number,
+    ) => {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(w, h, 0.22 * S),
+        new THREE.MeshBasicMaterial({
+          color: C_TEAL,
+          transparent: true,
+          opacity,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
+      mesh.position.set(x, y, 0);
+      return mesh;
+    };
+
+    tetherGrp.add(makeSolid(CB_W, CB_H, 0, CB_Y, 0.88));
+    tetherGrp.add(makeSolid(ST_W, ST_H, 0, ST_Y, 0.88));
+    tetherGrp.add(makeGlow(CB_W * 1.15, CB_H * 2.2, 0, CB_Y, 0.09));
+    tetherGrp.add(makeGlow(ST_W * 2.4, ST_H * 1.06, 0, ST_Y, 0.09));
+
+    // Wire T silhouette
+    const hw = CB_W / 2,
+      hcb = CB_H / 2,
+      hs = ST_W / 2;
+    const sTop = CB_Y + hcb,
+      sCbBot = CB_Y - hcb,
+      sStemBot = ST_Y - ST_H / 2;
+    const tPerim = [
+      new THREE.Vector3(-hw, sTop, 0),
+      new THREE.Vector3(hw, sTop, 0),
+      new THREE.Vector3(hw, sCbBot, 0),
+      new THREE.Vector3(hs, sCbBot, 0),
+      new THREE.Vector3(hs, sStemBot, 0),
+      new THREE.Vector3(-hs, sStemBot, 0),
+      new THREE.Vector3(-hs, sCbBot, 0),
+      new THREE.Vector3(-hw, sCbBot, 0),
+    ];
+    const tSegs: [THREE.Vector3, THREE.Vector3][] = tPerim.map((v, i) => [
+      v,
+      tPerim[(i + 1) % tPerim.length],
+    ]);
+    const tWireBuf = new Float32Array(tSegs.length * 6);
+    tSegs.forEach(([a, b], i) => {
+      tWireBuf.set([a.x, a.y, a.z], i * 6);
+      tWireBuf.set([b.x, b.y, b.z], i * 6 + 3);
+    });
+    const tWireGeo = new THREE.BufferGeometry();
+    tWireGeo.setAttribute("position", new THREE.BufferAttribute(tWireBuf, 3));
+    const tetherWire = new THREE.LineSegments(
+      tWireGeo,
+      new THREE.LineBasicMaterial({
+        color: C_TEAL,
+        transparent: true,
+        opacity: 0.92,
+      }),
+    );
+    tetherGrp.add(tetherWire);
+
+    // Elliptical Saturn ring
+    const RING_RX = 0.82 * S,
+      RING_RZ = 0.32 * S,
+      RING_SEGS = 120;
+    const buildEllipseRing = (
+      rx: number,
+      rz: number,
+      tube: number,
+      opacity: number,
+      additive = false,
+    ) => {
+      const pts: THREE.Vector3[] = [];
+      for (let i = 0; i <= RING_SEGS; i++) {
+        const a = (i / RING_SEGS) * Math.PI * 2;
+        pts.push(new THREE.Vector3(rx * Math.cos(a), 0, rz * Math.sin(a)));
+      }
+      const curve = new THREE.CatmullRomCurve3(pts, true);
+      const geo = new THREE.TubeGeometry(curve, RING_SEGS, tube, 8, true);
+      const mat = new THREE.MeshBasicMaterial({
+        color: C_TEAL,
+        transparent: true,
+        opacity,
+        ...(additive
+          ? { blending: THREE.AdditiveBlending, depthWrite: false }
+          : {}),
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.y = RING_Y;
+      return mesh;
+    };
+    const saturnRing = buildEllipseRing(RING_RX, RING_RZ, 0.038 * S, 0.9);
+    tetherGrp.add(saturnRing);
+    tetherGrp.add(buildEllipseRing(RING_RX, RING_RZ, 0.09 * S, 0.08, true));
+    tetherGrp.add(
+      buildEllipseRing(RING_RX * 1.04, RING_RZ * 1.08, 0.16 * S, 0.04, true),
+    );
+
+    // Wire ellipse
+    const ellLinePts: THREE.Vector3[] = [];
+    for (let i = 0; i <= RING_SEGS; i++) {
+      const a = (i / RING_SEGS) * Math.PI * 2;
+      ellLinePts.push(
+        new THREE.Vector3(RING_RX * Math.cos(a), RING_Y, RING_RZ * Math.sin(a)),
+      );
+    }
+    tetherGrp.add(
+      new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(ellLinePts),
+        new THREE.LineBasicMaterial({
+          color: C_TEAL,
+          transparent: true,
+          opacity: 0.5,
+        }),
+      ),
+    );
+
+    // Glow shells
+    const glowShells = [
+      { r: 0.85 * S, o: 0.07 },
+      { r: 1.1 * S, o: 0.04 },
+      { r: 1.45 * S, o: 0.02 },
+    ];
+    glowShells.forEach(({ r, o }) => {
+      tetherGrp.add(
+        new THREE.Mesh(
+          new THREE.SphereGeometry(r, 32, 32),
+          new THREE.MeshBasicMaterial({
+            color: C_TEAL,
+            transparent: true,
+            opacity: o,
+            side: THREE.BackSide,
+          }),
+        ),
+      );
     });
 
-    // ── 3. Token node spheres on orbits ───────────────────────────────────────
-    const nodeGeo = new THREE.SphereGeometry(0.065, 16, 16);
-    const glowGeo = new THREE.SphereGeometry(0.18, 16, 16);
+    // Core + apex
+    const corePoint = new THREE.Mesh(
+      new THREE.SphereGeometry(0.08 * S, 16, 16),
+      new THREE.MeshBasicMaterial({
+        color: C_TEAL,
+        transparent: true,
+        opacity: 0.95,
+      }),
+    );
+    tetherGrp.add(corePoint);
 
-    const tokenMeshes = TOKENS.map((td) => {
-      const node = new THREE.Mesh(
-        nodeGeo,
-        new THREE.MeshBasicMaterial({ color: C_TEAL }),
-      );
+    const warmHalo = new THREE.Mesh(
+      new THREE.SphereGeometry(0.18 * S, 16, 16),
+      new THREE.MeshBasicMaterial({
+        color: C_WARM,
+        transparent: true,
+        opacity: 0.08,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    );
+    tetherGrp.add(warmHalo);
 
-      // Glow halo around each token
-      const halo = new THREE.Mesh(
-        glowGeo,
+    const apexGem = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.12 * S),
+      new THREE.MeshBasicMaterial({
+        color: C_TEAL,
+        transparent: true,
+        opacity: 0.6,
+        wireframe: true,
+      }),
+    );
+    apexGem.position.y = CB_Y + CB_H / 2 + 0.08 * S;
+    tetherGrp.add(apexGem);
+
+    // Pulse rings
+    const pulseRings = Array.from({ length: 3 }, (_, i) => {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(0.22 * S, 0.008 * S, 8, 48),
         new THREE.MeshBasicMaterial({
           color: C_TEAL,
           transparent: true,
-          opacity: 0.07,
-          side: THREE.BackSide,
+          opacity: 0,
         }),
       );
-      node.add(halo);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = RING_Y;
+      tetherGrp.add(ring);
+      return ring;
+    });
+
+    // Orbit rings
+    const rings = [
+      new THREE.TorusGeometry(1.85 * S, 0.01 * S, 8, 64),
+      new THREE.TorusGeometry(2.6 * S, 0.007 * S, 8, 64),
+      new THREE.TorusGeometry(3.5 * S, 0.006 * S, 8, 64),
+    ].map((geo, i) => {
+      const m = new THREE.Mesh(
+        geo,
+        new THREE.MeshBasicMaterial({
+          color: C_TEAL,
+          transparent: true,
+          opacity: [0.22, 0.14, 0.09][i],
+        }),
+      );
+      const tilts = [Math.PI / 2.6, Math.PI / 3.4, Math.PI / 4.2];
+      m.rotation.x = tilts[i];
+      scene.add(m);
+      return m;
+    });
+
+    // Token nodes
+    const tokenMeshes = TOKENS.map((td) => {
+      const node = new THREE.Group();
+      const glowGeo = new THREE.SphereGeometry(0.18, 16, 16);
+      node.add(
+        new THREE.Mesh(
+          glowGeo,
+          new THREE.MeshBasicMaterial({
+            color: C_TEAL,
+            transparent: true,
+            opacity: 0.55,
+          }),
+        ),
+      );
+      const glowGeo2 = new THREE.SphereGeometry(0.28, 16, 16);
+      node.add(
+        new THREE.Mesh(
+          glowGeo2,
+          new THREE.MeshBasicMaterial({
+            color: C_TEAL,
+            transparent: true,
+            opacity: 0.08,
+            side: THREE.BackSide,
+          }),
+        ),
+      );
       scene.add(node);
       return { mesh: node, ...td };
     });
 
-    // ── 4. Connection lines between token nodes ───────────────────────────────
-    const MAX_SEGMENTS = TOKENS.length * TOKENS.length;
-    const connBuffer = new Float32Array(MAX_SEGMENTS * 6);
+    const connBuf = new Float32Array(TOKENS.length * TOKENS.length * 6);
     const connGeo = new THREE.BufferGeometry();
-    connGeo.setAttribute("position", new THREE.BufferAttribute(connBuffer, 3));
-    const connLines = new THREE.LineSegments(
-      connGeo,
-      new THREE.LineBasicMaterial({
-        color: C_TEAL,
-        transparent: true,
-        opacity: 0.14,
-      }),
+    connGeo.setAttribute("position", new THREE.BufferAttribute(connBuf, 3));
+    scene.add(
+      new THREE.LineSegments(
+        connGeo,
+        new THREE.LineBasicMaterial({
+          color: C_TEAL,
+          transparent: true,
+          opacity: 0.18,
+        }),
+      ),
     );
-    scene.add(connLines);
 
-    // ── 5. Particle disk — the liquidity "galaxy" ─────────────────────────────
-    const PARTICLE_COUNT = 900;
-    const pPositions = new Float32Array(PARTICLE_COUNT * 3);
-    const pSizes = new Float32Array(PARTICLE_COUNT);
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      // Arms of a loose spiral/disk
+    // Particles
+    const PC = 1100;
+    const pPos = new Float32Array(PC * 3);
+    for (let i = 0; i < PC; i++) {
       const arm = Math.floor(Math.random() * 3);
-      const armAng = (arm / 3) * Math.PI * 2;
-      const r = 0.6 + Math.random() ** 1.4 * 4.0;
-      const theta = armAng + r * 0.45 + Math.random() * 0.9;
-      const tiltX = Math.PI / 5.5;
-
-      const x = r * Math.cos(theta);
-      const yRaw = r * Math.sin(theta);
-      const y = yRaw * Math.cos(tiltX) + (Math.random() - 0.5) * 0.25;
-      const z = yRaw * Math.sin(tiltX) + (Math.random() - 0.5) * 0.25;
-
-      pPositions[i * 3] = x;
-      pPositions[i * 3 + 1] = y;
-      pPositions[i * 3 + 2] = z;
-      pSizes[i] = 0.6 + Math.random() * 1.6;
+      const aA = (arm / 3) * Math.PI * 2;
+      const r = 0.8 + Math.random() ** 1.3 * 4.2;
+      const th = aA + r * 0.45 + Math.random() * 1.0;
+      const tX = Math.PI / 5.5;
+      const x = r * Math.cos(th);
+      const yR = r * Math.sin(th);
+      pPos[i * 3] = x;
+      pPos[i * 3 + 1] = yR * Math.cos(tX) + (Math.random() - 0.5) * 0.3;
+      pPos[i * 3 + 2] = yR * Math.sin(tX) + (Math.random() - 0.5) * 0.3;
     }
-
-    const particleGeo = new THREE.BufferGeometry();
-    particleGeo.setAttribute(
-      "position",
-      new THREE.BufferAttribute(pPositions, 3),
-    );
-    particleGeo.setAttribute("size", new THREE.BufferAttribute(pSizes, 1));
-
-    const particleMat = new THREE.PointsMaterial({
-      color: C_TEAL,
-      size: 0.025,
-      transparent: true,
-      opacity: 0.48,
-      sizeAttenuation: true,
-    });
-    const particleSystem = new THREE.Points(particleGeo, particleMat);
-    scene.add(particleSystem);
-
-    // ── 6. Order book depth bars (bottom of scene) ────────────────────────────
-    const BAR_COUNT = 32;
-    const barMeshes: THREE.Mesh[] = [];
-    const barHeights: number[] = [];
-    const barTargets: number[] = [];
-
-    for (let i = 0; i < BAR_COUNT; i++) {
-      const isBid = i >= BAR_COUNT / 2;
-      const h0 = 0.1 + Math.random() * 0.9;
-      barHeights.push(h0);
-      barTargets.push(h0);
-
-      const barMat = new THREE.MeshBasicMaterial({
-        color: isBid ? C_TEAL : C_TEAL_MID,
-        transparent: true,
-        opacity: isBid ? 0.28 : 0.18,
-      });
-
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.0, 0.05), barMat);
-      // Pivot at base — move by translating then scaling
-      const x = (i - BAR_COUNT / 2) * 0.125;
-      bar.position.set(x, -3.1 + 0.5, -0.8);
-      bar.scale.y = h0;
-      scene.add(bar);
-      barMeshes.push(bar);
-    }
-
-    // ── 7. Horizontal mid-line grid ────────────────────────────────────────────
-    // A flat grid plane at y = -3.1 to "ground" the depth bars
-    const gridHelper = new THREE.GridHelper(9, 14, C_TEAL_DARK, C_TEAL_DARK);
-    gridHelper.position.y = -3.1;
-    gridHelper.position.z = -0.8;
-    (gridHelper.material as THREE.Material).transparent = true;
-    (gridHelper.material as THREE.Material).opacity = 0.25;
-    scene.add(gridHelper);
-
-    // ── 8. Flowing edge particles on connections ──────────────────────────────
-    const FLOW_COUNT = 80;
-    const flowPositions = new Float32Array(FLOW_COUNT * 3);
-    const flowGeo = new THREE.BufferGeometry();
-    flowGeo.setAttribute(
-      "position",
-      new THREE.BufferAttribute(flowPositions, 3),
-    );
-    const flowParticles = new THREE.Points(
-      flowGeo,
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
+    const particleSystem = new THREE.Points(
+      pGeo,
       new THREE.PointsMaterial({
         color: C_TEAL,
-        size: 0.05,
+        size: 0.022,
         transparent: true,
-        opacity: 0.7,
+        opacity: 0.44,
         sizeAttenuation: true,
       }),
     );
-    scene.add(flowParticles);
+    scene.add(particleSystem);
 
-    // Track flow state per particle
-    const flowState = Array.from({ length: FLOW_COUNT }, () => ({
+    // Depth bars + grid
+    const BAR = 36,
+      barM: THREE.Mesh[] = [],
+      barH: number[] = [],
+      barT: number[] = [];
+    for (let i = 0; i < BAR; i++) {
+      const isBid = i >= BAR / 2;
+      const h0 = 0.1 + Math.random() * 0.9;
+      barH.push(h0);
+      barT.push(h0);
+      const bar = new THREE.Mesh(
+        new THREE.BoxGeometry(0.095, 1.0, 0.05),
+        new THREE.MeshBasicMaterial({
+          color: isBid ? C_TEAL : C_TEAL_MID,
+          transparent: true,
+          opacity: isBid ? 0.3 : 0.18,
+        }),
+      );
+      bar.position.set((i - BAR / 2) * 0.12, -3.2 + 0.5, -0.8);
+      bar.scale.y = h0;
+      scene.add(bar);
+      barM.push(bar);
+    }
+    const gridHelper = new THREE.GridHelper(10, 16, C_TEAL_DARK, C_TEAL_DARK);
+    gridHelper.position.y = -3.2;
+    gridHelper.position.z = -0.8;
+    (gridHelper.material as THREE.Material).transparent = true;
+    (gridHelper.material as THREE.Material).opacity = 0.28;
+    scene.add(gridHelper);
+
+    // Flow particles
+    const FLOW = 90;
+    const flowPos = new Float32Array(FLOW * 3);
+    const fGeo = new THREE.BufferGeometry();
+    fGeo.setAttribute("position", new THREE.BufferAttribute(flowPos, 3));
+    scene.add(
+      new THREE.Points(
+        fGeo,
+        new THREE.PointsMaterial({
+          color: C_TEAL,
+          size: 0.055,
+          transparent: true,
+          opacity: 0.75,
+          sizeAttenuation: true,
+        }),
+      ),
+    );
+    const flowState = Array.from({ length: FLOW }, () => ({
       a: Math.floor(Math.random() * TOKENS.length),
       b: Math.floor(Math.random() * TOKENS.length),
       t: Math.random(),
-      speed: 0.6 + Math.random() * 0.8,
+      speed: 0.55 + Math.random() * 0.9,
     }));
 
-    // =========================================================================
-    // ANIMATION LOOP
-    // =========================================================================
+    // ── Animation loop ────────────────────────────────────────────
     const clock = new THREE.Clock();
-    let camTargX = 0,
-      camTargY = 0;
-    let rafId: number;
+    let camX = 0,
+      camY = 0,
+      rafId: number;
 
     const animate = () => {
       rafId = requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      // ── Torus knot ──
-      knotWireMesh.rotation.x = t * 0.17;
-      knotWireMesh.rotation.y = t * 0.28;
-      knotCoreMesh.rotation.x = t * 0.17;
-      knotCoreMesh.rotation.y = t * 0.28;
-      scene.children.forEach((c) => {
-        if (
-          c instanceof THREE.Mesh &&
-          c !== knotWireMesh &&
-          c !== knotCoreMesh &&
-          c.geometry instanceof THREE.TorusKnotGeometry
-        ) {
-          c.rotation.x = t * 0.17;
-          c.rotation.y = t * 0.28;
-        }
+      tetherGrp.rotation.y = t * 0.22 + mx * 0.08;
+      tetherGrp.rotation.x = Math.sin(t * 0.18) * 0.18 + -my * 0.08;
+      tetherGrp.rotation.z = Math.sin(t * 0.11) * 0.06;
+
+      corePoint.scale.setScalar(1 + Math.sin(t * 2.6) * 0.22);
+      warmHalo.scale.setScalar(1 + Math.sin(t * 1.5) * 0.32);
+      apexGem.scale.setScalar(1 + Math.sin(t * 3.2) * 0.18);
+      (tetherWire.material as THREE.LineBasicMaterial).opacity =
+        0.68 + 0.24 * Math.sin(t * 0.95);
+      (saturnRing.material as THREE.MeshBasicMaterial).opacity =
+        0.78 + 0.18 * Math.sin(t * 1.1 + 0.5);
+
+      pulseRings.forEach((ring, i) => {
+        const phase = (t * 0.28 + i * 0.2) % 1;
+        ring.scale.setScalar(0.5 + phase * 7.0);
+        (ring.material as THREE.MeshBasicMaterial).opacity = (1 - phase) * 0.28;
       });
 
-      // ── Rings ──
-      rings[0].rotation.z = t * 0.14;
-      rings[1].rotation.z = -t * 0.09;
-      rings[2].rotation.z = t * 0.06;
+      rings[0].rotation.z = t * 0.13;
+      rings[1].rotation.z = -t * 0.085;
+      rings[2].rotation.z = t * 0.055;
 
-      // ── Token orbits ──
       tokenMeshes.forEach((tn) => {
         const a = t * tn.speed + tn.phase;
         const x = tn.r * Math.cos(a);
         const yR = tn.r * Math.sin(a);
         const y = yR * Math.cos(tn.tiltX);
         const z = yR * Math.sin(tn.tiltX);
-        // Apply tiltZ rotation around Z axis
-        const cosZ = Math.cos(tn.tiltZ),
-          sinZ = Math.sin(tn.tiltZ);
-        tn.mesh.position.set(x * cosZ - y * sinZ, x * sinZ + y * cosZ, z);
-        // Gentle self-rotation
+        const cZ = Math.cos(tn.tiltZ),
+          sZ = Math.sin(tn.tiltZ);
+        tn.mesh.position.set(x * cZ - y * sZ, x * sZ + y * cZ, z);
         tn.mesh.rotation.y = t * 0.5;
       });
 
-      // ── Connection lines ──
       let li = 0;
       const lp = connGeo.attributes.position as THREE.BufferAttribute;
-      for (let a = 0; a < tokenMeshes.length; a++) {
+      for (let a = 0; a < tokenMeshes.length; a++)
         for (let b = a + 1; b < tokenMeshes.length; b++) {
-          // Only draw "short" connections for a cleaner graph
           const pa = tokenMeshes[a].mesh.position;
           const pb = tokenMeshes[b].mesh.position;
-          const dist = pa.distanceTo(pb);
-          if (dist < 3.8) {
+          if (pa.distanceTo(pb) < 3.8) {
             lp.array[li++] = pa.x;
             lp.array[li++] = pa.y;
             lp.array[li++] = pa.z;
@@ -355,12 +510,10 @@ export const HeroThree: React.FC = () => {
             lp.array[li++] = pb.z;
           }
         }
-      }
       lp.needsUpdate = true;
       connGeo.setDrawRange(0, li / 3);
 
-      // ── Flow particles along connection edges ──
-      const fp = flowGeo.attributes.position as THREE.BufferAttribute;
+      const fp = fGeo.attributes.position as THREE.BufferAttribute;
       flowState.forEach((fs, i) => {
         fs.t += fs.speed * (1 / 60);
         if (fs.t > 1) {
@@ -371,60 +524,48 @@ export const HeroThree: React.FC = () => {
         }
         const pa = tokenMeshes[fs.a].mesh.position;
         const pb = tokenMeshes[fs.b].mesh.position;
-        // Lerp with a slight arc
-        const ease = fs.t;
-        fp.array[i * 3] = pa.x + (pb.x - pa.x) * ease;
+        const e = fs.t;
+        fp.array[i * 3] = pa.x + (pb.x - pa.x) * e;
         fp.array[i * 3 + 1] =
-          pa.y + (pb.y - pa.y) * ease + Math.sin(ease * Math.PI) * 0.4;
-        fp.array[i * 3 + 2] = pa.z + (pb.z - pa.z) * ease;
+          pa.y + (pb.y - pa.y) * e + Math.sin(e * Math.PI) * 0.5;
+        fp.array[i * 3 + 2] = pa.z + (pb.z - pa.z) * e;
       });
       fp.needsUpdate = true;
 
-      // ── Particle disk drift ──
-      particleSystem.rotation.y = t * 0.055;
-      particleSystem.rotation.z = t * 0.018;
+      particleSystem.rotation.y = t * 0.05;
+      particleSystem.rotation.z = t * 0.017;
 
-      // ── Depth bar animation ──
-      if (Math.random() < 0.06) {
-        const idx = Math.floor(Math.random() * BAR_COUNT);
-        barTargets[idx] = 0.08 + Math.random() ** 1.5;
+      if (Math.random() < 0.07) {
+        const idx = Math.floor(Math.random() * BAR);
+        barT[idx] = 0.08 + Math.random() ** 1.5;
       }
-      barMeshes.forEach((bar, i) => {
-        barHeights[i] += (barTargets[i] - barHeights[i]) * 0.07;
-        bar.scale.y = barHeights[i];
-        // Keep base anchored at bottom
-        bar.position.y = -3.1 + barHeights[i] * 0.5;
+      barM.forEach((bar, i) => {
+        barH[i] += (barT[i] - barH[i]) * 0.07;
+        bar.scale.y = barH[i];
+        bar.position.y = -3.2 + barH[i] * 0.5;
       });
-
-      // ── Grid pulse ──
       (gridHelper.material as THREE.Material).opacity =
-        0.12 + 0.08 * Math.sin(t * 0.8);
+        0.14 + 0.09 * Math.sin(t * 0.75);
 
-      // ── Camera parallax ──
-      camTargX += (mx * 0.7 - camTargX) * 0.035;
-      camTargY += (-my * 0.4 - camTargY) * 0.035;
-      camera.position.x = camTargX;
-      camera.position.y = 0.4 + camTargY;
+      camX += (mx * 0.65 - camX) * 0.032;
+      camY += (-my * 0.38 - camY) * 0.032;
+      camera.position.x = camX;
+      camera.position.y = 0.3 + camY;
       camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
     };
-
     animate();
 
-    // =========================================================================
-    // CLEANUP
-    // =========================================================================
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("mousemove", onMouse);
       window.removeEventListener("resize", onResize);
       renderer.dispose();
-      if (mount.contains(renderer.domElement)) {
+      if (mount.contains(renderer.domElement))
         mount.removeChild(renderer.domElement);
-      }
     };
-  }, []);
+  }, [isDark]);
 
   return (
     <div

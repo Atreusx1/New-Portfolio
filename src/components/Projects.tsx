@@ -2,13 +2,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { projectsData, type Project } from "../data/projects";
 import { Github, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { ScrambleText } from "./ScrambleText";
-
-const ACCENT = "rgb(151, 252, 228)";
-const ACCENT_DIM = "rgba(151, 252, 228, 0.5)";
+import { useTheme } from "../context/ThemeContext";
 
 const CATEGORIES = ["all", "web", "blockchain", "fullstack", "build-tools"];
 
 export const Projects = () => {
+  const t = useTheme();
   const [filter, setFilter] = useState("all");
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -21,6 +20,7 @@ export const Projects = () => {
     filter === "all"
       ? projectsData
       : projectsData.filter((p) => p.category === filter);
+
   useEffect(() => {
     setCurrent(0);
   }, [filter]);
@@ -75,8 +75,9 @@ export const Projects = () => {
       ref={ref}
       id="projects"
       style={{
-        borderTop: "1px solid rgba(226,226,226,0.08)",
+        borderTop: `1px solid ${t.fg_(0.08)}`,
         padding: "8rem 0",
+        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 2rem" }}>
@@ -102,7 +103,7 @@ export const Projects = () => {
                 fontFamily: "Space Mono, monospace",
                 fontSize: "0.6rem",
                 letterSpacing: "0.2em",
-                color: "rgba(226,226,226,0.25)",
+                color: t.fg_(0.25),
               }}
             >
               02
@@ -113,7 +114,8 @@ export const Projects = () => {
                 fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
                 fontWeight: 700,
                 letterSpacing: "-0.02em",
-                color: "#e2e2e2",
+                color: t.fg,
+                transition: "color 0.35s ease",
               }}
             >
               {visible ? (
@@ -123,17 +125,18 @@ export const Projects = () => {
               )}
             </h2>
           </div>
+
           {/* Counter + arrows */}
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <span
               style={{
                 fontFamily: "Space Mono, monospace",
                 fontSize: "0.65rem",
-                color: "rgba(226,226,226,0.25)",
+                color: t.fg_(0.25),
                 letterSpacing: "0.1em",
               }}
             >
-              <span style={{ color: ACCENT }}>
+              <span style={{ color: t.accent }}>
                 {String(current + 1).padStart(2, "0")}
               </span>
               {" / "}
@@ -152,9 +155,9 @@ export const Projects = () => {
                   style={{
                     width: 36,
                     height: 36,
-                    border: `1px solid ${isDisabled ? "rgba(226,226,226,0.08)" : "rgba(226,226,226,0.2)"}`,
+                    border: `1px solid ${isDisabled ? t.fg_(0.08) : t.fg_(0.2)}`,
                     background: "transparent",
-                    color: isDisabled ? "rgba(226,226,226,0.2)" : "#e2e2e2",
+                    color: isDisabled ? t.fg_(0.2) : t.fg,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -163,18 +166,14 @@ export const Projects = () => {
                   onMouseEnter={(e) => {
                     if (!isDisabled) {
                       const b = e.currentTarget as HTMLButtonElement;
-                      b.style.borderColor = ACCENT;
-                      b.style.color = ACCENT;
+                      b.style.borderColor = t.accent;
+                      b.style.color = t.accent;
                     }
                   }}
                   onMouseLeave={(e) => {
                     const b = e.currentTarget as HTMLButtonElement;
-                    b.style.borderColor = isDisabled
-                      ? "rgba(226,226,226,0.08)"
-                      : "rgba(226,226,226,0.2)";
-                    b.style.color = isDisabled
-                      ? "rgba(226,226,226,0.2)"
-                      : "#e2e2e2";
+                    b.style.borderColor = isDisabled ? t.fg_(0.08) : t.fg_(0.2);
+                    b.style.color = isDisabled ? t.fg_(0.2) : t.fg;
                   }}
                 >
                   {dir === "prev" ? (
@@ -192,13 +191,12 @@ export const Projects = () => {
         <div
           style={{
             display: "flex",
-            gap: "0",
             marginBottom: "3.5rem",
-            border: "1px solid rgba(226,226,226,0.08)",
+            border: `1px solid ${t.fg_(0.08)}`,
             width: "fit-content",
             flexWrap: "wrap",
             opacity: visible ? 1 : 0,
-            transition: "opacity 0.7s ease 0.15s",
+            transition: "opacity 0.7s ease 0.15s, border-color 0.35s ease",
           }}
         >
           {CATEGORIES.map((cat, i) => (
@@ -211,12 +209,12 @@ export const Projects = () => {
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 padding: "0.6rem 1.1rem",
-                background: filter === cat ? ACCENT : "transparent",
-                color: filter === cat ? "#080808" : "rgba(226,226,226,0.4)",
+                background: filter === cat ? t.accent : "transparent",
+                color: filter === cat ? t.bg : t.fg_(0.4),
                 border: "none",
                 borderRight:
                   i < CATEGORIES.length - 1
-                    ? "1px solid rgba(226,226,226,0.08)"
+                    ? `1px solid ${t.fg_(0.08)}`
                     : "none",
                 transition: "all 0.2s ease",
                 fontWeight: filter === cat ? 700 : 400,
@@ -250,50 +248,44 @@ export const Projects = () => {
             transition: dragging
               ? "none"
               : "transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)",
-            willChange: "transform",
-            userSelect: "none",
           }}
         >
-          {filtered.map((project, i) => (
+          {filtered.map((project, idx) => (
             <ProjectCard
-              key={project.id}
+              key={project.title}
               project={project}
-              index={i}
+              index={idx}
               current={current}
               visible={visible}
               cardWidth={CARD_W}
             />
           ))}
         </div>
-      </div>
 
-      {/* Progress dots */}
-      <div
-        style={{
-          display: "flex",
-          gap: "0.4rem",
-          justifyContent: "center",
-          marginTop: "2.5rem",
-          padding: "0 2rem",
-          opacity: visible ? 1 : 0,
-          transition: "opacity 0.7s ease 0.4s",
-        }}
-      >
-        {filtered.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            style={{
-              width: i === current ? "24px" : "6px",
-              height: "6px",
-              borderRadius: "3px",
-              background: i === current ? ACCENT : "rgba(226,226,226,0.15)",
-              border: "none",
-              transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
-              padding: 0,
-            }}
-          />
-        ))}
+        {/* Dots */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "0.4rem",
+            marginTop: "2rem",
+          }}
+        >
+          {filtered.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              style={{
+                width: i === current ? 20 : 6,
+                height: 2,
+                background: i === current ? t.accent : t.fg_(0.15),
+                border: "none",
+                transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
+                padding: 0,
+              }}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -312,6 +304,7 @@ const ProjectCard = ({
   visible: boolean;
   cardWidth: number;
 }) => {
+  const t = useTheme();
   const [hovered, setHovered] = useState(false);
   const isActive = index === current;
   const distance = Math.abs(index - current);
@@ -323,8 +316,10 @@ const ProjectCard = ({
       style={{
         width: `${cardWidth}px`,
         flexShrink: 0,
-        border: `1px solid ${isActive ? (hovered ? "rgba(151,252,228,0.4)" : "rgba(151,252,228,0.18)") : "rgba(226,226,226,0.06)"}`,
-        background: isActive ? "#111" : "#0b0b0b",
+        border: `1px solid ${
+          isActive ? (hovered ? t.ac_(0.4) : t.ac_(0.18)) : t.fg_(0.06)
+        }`,
+        background: isActive ? t.cardBg : t.cardBgDim,
         padding: "2rem",
         display: "flex",
         flexDirection: "column",
@@ -352,7 +347,7 @@ const ProjectCard = ({
             left: 0,
             right: 0,
             height: "1px",
-            background: `linear-gradient(90deg, transparent, ${ACCENT}, transparent)`,
+            background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)`,
             opacity: 0.5,
           }}
         />
@@ -362,7 +357,7 @@ const ProjectCard = ({
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(151,252,228,0.02)",
+            background: t.ac_(0.02),
             pointerEvents: "none",
           }}
         />
@@ -382,7 +377,8 @@ const ProjectCard = ({
             fontFamily: "Space Mono, monospace",
             fontSize: "0.58rem",
             letterSpacing: "0.2em",
-            color: isActive ? ACCENT_DIM : "rgba(226,226,226,0.15)",
+            color: isActive ? t.ac_(0.5) : t.fg_(0.15),
+            transition: "color 0.35s ease",
           }}
         >
           {String(index + 1).padStart(2, "0")}
@@ -393,9 +389,10 @@ const ProjectCard = ({
             fontSize: "0.55rem",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: isActive ? ACCENT_DIM : "rgba(226,226,226,0.15)",
+            color: isActive ? t.ac_(0.5) : t.fg_(0.15),
             padding: "0.2rem 0.5rem",
-            border: `1px solid ${isActive ? "rgba(151,252,228,0.15)" : "rgba(226,226,226,0.06)"}`,
+            border: `1px solid ${isActive ? t.ac_(0.15) : t.fg_(0.06)}`,
+            transition: "all 0.35s ease",
           }}
         >
           {project.category}
@@ -407,7 +404,7 @@ const ProjectCard = ({
           fontFamily: "Space Mono, monospace",
           fontSize: "1.05rem",
           fontWeight: 700,
-          color: isActive ? "#e2e2e2" : "rgba(226,226,226,0.35)",
+          color: isActive ? t.fg : t.fg_(0.35),
           letterSpacing: "-0.01em",
           lineHeight: 1.3,
           marginBottom: "0.75rem",
@@ -420,7 +417,7 @@ const ProjectCard = ({
         style={{
           fontFamily: "Space Mono, monospace",
           fontSize: "0.73rem",
-          color: isActive ? "rgba(226,226,226,0.45)" : "rgba(226,226,226,0.2)",
+          color: isActive ? t.fg_(0.45) : t.fg_(0.2),
           lineHeight: 1.7,
           flex: 1,
           marginBottom: "1.5rem",
@@ -445,11 +442,9 @@ const ProjectCard = ({
               fontFamily: "Space Mono, monospace",
               fontSize: "0.58rem",
               letterSpacing: "0.06em",
-              color: isActive
-                ? "rgba(151,252,228,0.6)"
-                : "rgba(226,226,226,0.2)",
+              color: isActive ? t.ac_(0.65) : t.fg_(0.2),
               padding: "0.15rem 0.45rem",
-              border: `1px solid ${isActive ? "rgba(151,252,228,0.12)" : "rgba(226,226,226,0.06)"}`,
+              border: `1px solid ${isActive ? t.ac_(0.12) : t.fg_(0.06)}`,
               transition: "all 0.3s ease",
             }}
           >
@@ -461,7 +456,7 @@ const ProjectCard = ({
             style={{
               fontFamily: "Space Mono, monospace",
               fontSize: "0.58rem",
-              color: "rgba(226,226,226,0.2)",
+              color: t.fg_(0.2),
               padding: "0.15rem 0.4rem",
             }}
           >
@@ -475,7 +470,7 @@ const ProjectCard = ({
           display: "flex",
           gap: "1rem",
           paddingTop: "1rem",
-          borderTop: `1px solid ${isActive ? "rgba(151,252,228,0.08)" : "rgba(226,226,226,0.04)"}`,
+          borderTop: `1px solid ${isActive ? t.ac_(0.08) : t.fg_(0.04)}`,
         }}
       >
         {project.github && project.github !== "Private REPO" && (
@@ -491,17 +486,17 @@ const ProjectCard = ({
               fontSize: "0.65rem",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: isActive ? ACCENT_DIM : "rgba(226,226,226,0.2)",
+              color: isActive ? t.ac_(0.5) : t.fg_(0.2),
               textDecoration: "none",
               transition: "color 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color = ACCENT;
+              (e.currentTarget as HTMLAnchorElement).style.color = t.accent;
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLAnchorElement).style.color = isActive
-                ? ACCENT_DIM
-                : "rgba(226,226,226,0.2)";
+                ? t.ac_(0.5)
+                : t.fg_(0.2);
             }}
           >
             <Github size={12} /> Code
@@ -520,17 +515,17 @@ const ProjectCard = ({
               fontSize: "0.65rem",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: isActive ? ACCENT_DIM : "rgba(226,226,226,0.2)",
+              color: isActive ? t.ac_(0.5) : t.fg_(0.2),
               textDecoration: "none",
               transition: "color 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color = ACCENT;
+              (e.currentTarget as HTMLAnchorElement).style.color = t.accent;
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLAnchorElement).style.color = isActive
-                ? ACCENT_DIM
-                : "rgba(226,226,226,0.2)";
+                ? t.ac_(0.5)
+                : t.fg_(0.2);
             }}
           >
             <ArrowUpRight size={12} /> Live

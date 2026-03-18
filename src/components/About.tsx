@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrambleText } from "./ScrambleText";
+import { useTheme } from "../context/ThemeContext";
 
 export const About = () => {
+  const t = useTheme();
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
@@ -35,8 +37,9 @@ export const About = () => {
       ref={ref}
       id="about"
       style={{
-        borderTop: "1px solid rgba(226,226,226,0.08)",
+        borderTop: `1px solid ${t.fg_(0.08)}`,
         padding: "8rem 2rem",
+        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -57,7 +60,7 @@ export const About = () => {
               fontFamily: "Space Mono, monospace",
               fontSize: "0.6rem",
               letterSpacing: "0.2em",
-              color: "rgba(226,226,226,0.25)",
+              color: t.fg_(0.25),
             }}
           >
             01
@@ -68,7 +71,8 @@ export const About = () => {
               fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
               fontWeight: 700,
               letterSpacing: "-0.02em",
-              color: "#e2e2e2",
+              color: t.fg,
+              transition: "color 0.35s ease",
             }}
           >
             {visible ? (
@@ -96,44 +100,25 @@ export const About = () => {
               transition: "all 0.8s ease 0.2s",
             }}
           >
-            <p
-              style={{
-                fontFamily: "Space Mono, monospace",
-                fontSize: "0.85rem",
-                lineHeight: 1.9,
-                color: "rgba(226,226,226,0.6)",
-                marginBottom: "1.5rem",
-              }}
-            >
-              I'm a passionate full-stack developer with a deep interest in
-              blockchain technologies and immersive web experiences. With over 3
-              years of professional experience, I've built diverse projects from
-              high-performance web apps to decentralized systems.
-            </p>
-            <p
-              style={{
-                fontFamily: "Space Mono, monospace",
-                fontSize: "0.85rem",
-                lineHeight: 1.9,
-                color: "rgba(226,226,226,0.6)",
-                marginBottom: "1.5rem",
-              }}
-            >
-              Recently deep in blockchain development — zkSNARKs, smart
-              contracts, and decentralized applications. I believe the future is
-              decentralized, and I'm building tools to make it possible.
-            </p>
-            <p
-              style={{
-                fontFamily: "Space Mono, monospace",
-                fontSize: "0.85rem",
-                lineHeight: 1.9,
-                color: "rgba(226,226,226,0.6)",
-              }}
-            >
-              When not coding: exploring new technologies, contributing to open
-              source, experimenting with 3D graphics and generative art.
-            </p>
+            {[
+              "I'm a passionate full-stack developer with a deep interest in blockchain technologies and immersive web experiences. With over 3 years of professional experience, I've built diverse projects from high-performance web apps to decentralized systems.",
+              "Recently deep in blockchain development — zkSNARKs, smart contracts, and decentralized applications. I believe the future is decentralized, and I'm building tools to make it possible.",
+              "When not coding: exploring new technologies, contributing to open source, experimenting with 3D graphics and generative art.",
+            ].map((text, i) => (
+              <p
+                key={i}
+                style={{
+                  fontFamily: "Space Mono, monospace",
+                  fontSize: "0.85rem",
+                  lineHeight: 1.9,
+                  color: t.fg_(0.6),
+                  marginBottom: i < 2 ? "1.5rem" : 0,
+                  transition: "color 0.35s ease",
+                }}
+              >
+                {text}
+              </p>
+            ))}
           </div>
 
           {/* Right — stats + traits */}
@@ -149,9 +134,9 @@ export const About = () => {
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "0",
                 marginBottom: "3rem",
-                border: "1px solid rgba(226,226,226,0.08)",
+                border: `1px solid ${t.fg_(0.08)}`,
+                transition: "border-color 0.35s ease",
               }}
             >
               {stats.map((s, i) => (
@@ -161,8 +146,9 @@ export const About = () => {
                     padding: "1.5rem 1rem",
                     borderRight:
                       i < stats.length - 1
-                        ? "1px solid rgba(226,226,226,0.08)"
+                        ? `1px solid ${t.fg_(0.08)}`
                         : "none",
+                    transition: "border-color 0.35s ease",
                   }}
                 >
                   <div
@@ -170,9 +156,10 @@ export const About = () => {
                       fontFamily: "Space Mono, monospace",
                       fontSize: "2rem",
                       fontWeight: 700,
-                      color: "rgb(151, 252, 228)",
+                      color: t.accent,
                       lineHeight: 1,
                       marginBottom: "0.4rem",
+                      transition: "color 0.35s ease",
                     }}
                   >
                     {s.num}
@@ -183,7 +170,8 @@ export const About = () => {
                       fontSize: "0.6rem",
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
-                      color: "rgba(226,226,226,0.3)",
+                      color: t.fg_(0.3),
+                      transition: "color 0.35s ease",
                     }}
                   >
                     {s.label}
@@ -193,7 +181,12 @@ export const About = () => {
             </div>
 
             {/* Traits */}
-            <div style={{ borderTop: "1px solid rgba(226,226,226,0.08)" }}>
+            <div
+              style={{
+                borderTop: `1px solid ${t.fg_(0.08)}`,
+                transition: "border-color 0.35s ease",
+              }}
+            >
               {traits.map((trait, i) => (
                 <div
                   key={trait}
@@ -202,22 +195,17 @@ export const About = () => {
                     alignItems: "center",
                     gap: "1rem",
                     padding: "0.85rem 0",
-                    borderBottom: "1px solid rgba(226,226,226,0.08)",
+                    borderBottom: `1px solid ${t.fg_(0.08)}`,
                     fontFamily: "Space Mono, monospace",
                     fontSize: "0.75rem",
-                    color: "rgba(226,226,226,0.55)",
+                    color: t.fg_(0.55),
                     letterSpacing: "0.02em",
                     opacity: visible ? 1 : 0,
                     transform: visible ? "none" : "translateX(12px)",
                     transition: `all 0.5s ease ${0.4 + i * 0.07}s`,
                   }}
                 >
-                  <span
-                    style={{
-                      color: "rgba(226,226,226,0.2)",
-                      fontSize: "0.6rem",
-                    }}
-                  >
+                  <span style={{ color: t.fg_(0.2), fontSize: "0.6rem" }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {trait}

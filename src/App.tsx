@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./components/Hero";
 import { About } from "./components/About";
@@ -8,7 +9,9 @@ import { Experience } from "./components/Experience";
 import { Contact } from "./components/Contact";
 import { FloatingParticles } from "./components/FloatingParticles";
 
-function App() {
+// ── Inner app consumes theme ──────────────────────────────────────────────────
+const AppInner = () => {
+  const t = useTheme();
   const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
@@ -45,7 +48,13 @@ function App() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#080808" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: t.bg,
+        transition: "background 0.35s ease",
+      }}
+    >
       <FloatingParticles />
       <Navigation onNavigate={handleNavigate} activeSection={activeSection} />
 
@@ -60,7 +69,7 @@ function App() {
 
       <footer
         style={{
-          borderTop: "1px solid rgba(226,226,226,0.08)",
+          borderTop: `1px solid ${t.fg_(0.08)}`,
           padding: "2rem",
           display: "flex",
           alignItems: "center",
@@ -74,7 +83,7 @@ function App() {
             fontFamily: "Space Mono, monospace",
             fontSize: "0.65rem",
             letterSpacing: "0.1em",
-            color: "rgba(226,226,226,0.2)",
+            color: t.fg_(0.2),
           }}
         >
           © 2025 Anish kadam
@@ -84,13 +93,22 @@ function App() {
             fontFamily: "Space Mono, monospace",
             fontSize: "0.65rem",
             letterSpacing: "0.1em",
-            color: "rgba(226,226,226,0.2)",
+            color: t.fg_(0.2),
           }}
         >
           Built with React
         </span>
       </footer>
     </div>
+  );
+};
+
+// ── Root wraps with provider ──────────────────────────────────────────────────
+function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }
 
