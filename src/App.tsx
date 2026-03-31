@@ -8,6 +8,7 @@ import { Skills } from "./components/Skills";
 import { Experience } from "./components/Experience";
 import { Contact } from "./components/Contact";
 import { FloatingParticles } from "./components/FloatingParticles";
+import { SectionCanvas } from "./components/SectionCanvas";
 
 // ── Inner app consumes theme ──────────────────────────────────────────────────
 const AppInner = () => {
@@ -48,6 +49,7 @@ const AppInner = () => {
   };
 
   return (
+    // Outer div stays themed (handles nav bar area + any overflow)
     <div
       style={{
         minHeight: "100vh",
@@ -55,16 +57,33 @@ const AppInner = () => {
         transition: "background 0.35s ease",
       }}
     >
+      {/* Fixed canvas — visible behind all non-hero sections */}
+      <SectionCanvas />
+
       <FloatingParticles />
       <Navigation onNavigate={handleNavigate} activeSection={activeSection} />
 
       <main style={{ paddingTop: "53px" }}>
-        <Hero />
-        <About />
-        <Projects />
-        <Skills />
-        <Experience />
-        <Contact />
+        {/* Hero: solid bg so it fully masks the SectionCanvas below */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            background: t.bg,
+            transition: "background 0.35s ease",
+          }}
+        >
+          <Hero />
+        </div>
+
+        {/* Non-hero sections: transparent bg — SectionCanvas shows through */}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <About />
+          <Projects />
+          <Skills />
+          <Experience />
+          <Contact />
+        </div>
       </main>
 
       <footer
