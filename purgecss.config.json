@@ -1,0 +1,42 @@
+{
+  "content": [
+    "./src/**/*.{js,jsx,ts,tsx,html}",
+    "./public/index.html",
+    "./build/index.html",
+    "./build/static/js/**/*.js"
+  ],
+  "css": [
+    "./build/static/css/**/*.css"
+  ],
+  "safelist": {
+    "standard": [
+      "--(\\w+)",       
+      "^fa-",          
+      "^leaflet-",     
+      "active",
+      "disabled",
+      "modal-open",
+      "modal-backdrop",
+      "tooltip",
+      "popover"
+      
+    ],
+    "deep": [
+      "^modal",
+      "^dropdown",
+      "^collapse",
+      "^carousel",
+      "^offcanvas",
+      "^alert"
+    ],
+    "greedy": [],
+    "keyframes": [
+      "fade",
+      "show"
+    ],
+    "variables": []
+  },
+  "output": "./build/static/css/",
+  "fontFace": true,
+  "rejected": false
+}
