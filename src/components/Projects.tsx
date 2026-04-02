@@ -3,8 +3,11 @@ import { projectsData, type Project } from "../data/projects";
 import { Github, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { ScrambleText } from "./ScrambleText";
 import { useTheme } from "../context/ThemeContext";
+import { DEXOrderBook } from "./DEXorderbook";
 
 const CATEGORIES = ["all", "web", "blockchain", "fullstack", "build-tools"];
+// Add a special sentinel value for the DEX tab
+const ALL_TABS = [...CATEGORIES, "dex"];
 
 export const Projects = () => {
   const t = useTheme();
@@ -16,8 +19,11 @@ export const Projects = () => {
   const [dragDelta, setDragDelta] = useState(0);
   const ref = useRef<HTMLElement>(null);
 
-  const filtered =
-    filter === "all"
+  const isDexTab = filter === "dex";
+
+  const filtered = isDexTab
+    ? []
+    : filter === "all"
       ? projectsData
       : projectsData.filter((p) => p.category === filter);
 
@@ -43,13 +49,14 @@ export const Projects = () => {
   );
 
   useEffect(() => {
+    if (isDexTab) return;
     const h = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prev();
       if (e.key === "ArrowRight") next();
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [prev, next]);
+  }, [prev, next, isDexTab]);
 
   const onDragStart = (x: number) => {
     setDragging(true);
@@ -126,65 +133,69 @@ export const Projects = () => {
             </h2>
           </div>
 
-          {/* Counter + arrows */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <span
-              style={{
-                fontFamily: "Space Mono, monospace",
-                fontSize: "0.65rem",
-                color: t.fg_(0.25),
-                letterSpacing: "0.1em",
-              }}
-            >
-              <span style={{ color: t.accent }}>
-                {String(current + 1).padStart(2, "0")}
+          {/* Counter + arrows — hidden on dex tab */}
+          {!isDexTab && (
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <span
+                style={{
+                  fontFamily: "Space Mono, monospace",
+                  fontSize: "0.65rem",
+                  color: t.fg_(0.25),
+                  letterSpacing: "0.1em",
+                }}
+              >
+                <span style={{ color: t.accent }}>
+                  {String(current + 1).padStart(2, "0")}
+                </span>
+                {" / "}
+                {String(filtered.length).padStart(2, "0")}
               </span>
-              {" / "}
-              {String(filtered.length).padStart(2, "0")}
-            </span>
-            {(["prev", "next"] as const).map((dir) => {
-              const isDisabled =
-                dir === "prev"
-                  ? current === 0
-                  : current === filtered.length - 1;
-              return (
-                <button
-                  key={dir}
-                  onClick={dir === "prev" ? prev : next}
-                  disabled={isDisabled}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    border: `1px solid ${isDisabled ? t.fg_(0.08) : t.fg_(0.2)}`,
-                    background: "transparent",
-                    color: isDisabled ? t.fg_(0.2) : t.fg,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isDisabled) {
+              {(["prev", "next"] as const).map((dir) => {
+                const isDisabled =
+                  dir === "prev"
+                    ? current === 0
+                    : current === filtered.length - 1;
+                return (
+                  <button
+                    key={dir}
+                    onClick={dir === "prev" ? prev : next}
+                    disabled={isDisabled}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      border: `1px solid ${isDisabled ? t.fg_(0.08) : t.fg_(0.2)}`,
+                      background: "transparent",
+                      color: isDisabled ? t.fg_(0.2) : t.fg,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isDisabled) {
+                        const b = e.currentTarget as HTMLButtonElement;
+                        b.style.borderColor = t.accent;
+                        b.style.color = t.accent;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
                       const b = e.currentTarget as HTMLButtonElement;
-                      b.style.borderColor = t.accent;
-                      b.style.color = t.accent;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    const b = e.currentTarget as HTMLButtonElement;
-                    b.style.borderColor = isDisabled ? t.fg_(0.08) : t.fg_(0.2);
-                    b.style.color = isDisabled ? t.fg_(0.2) : t.fg;
-                  }}
-                >
-                  {dir === "prev" ? (
-                    <ChevronLeft size={14} />
-                  ) : (
-                    <ChevronRight size={14} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                      b.style.borderColor = isDisabled
+                        ? t.fg_(0.08)
+                        : t.fg_(0.2);
+                      b.style.color = isDisabled ? t.fg_(0.2) : t.fg;
+                    }}
+                  >
+                    {dir === "prev" ? (
+                      <ChevronLeft size={14} />
+                    ) : (
+                      <ChevronRight size={14} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Filter tabs */}
@@ -199,94 +210,167 @@ export const Projects = () => {
             transition: "opacity 0.7s ease 0.15s, border-color 0.35s ease",
           }}
         >
-          {CATEGORIES.map((cat, i) => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
+          {ALL_TABS.map((cat, i) => {
+            const isDex = cat === "dex";
+            const isActive = filter === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                style={{
+                  fontFamily: "Space Mono, monospace",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  padding: "0.6rem 1.1rem",
+                  background: isActive
+                    ? isDex
+                      ? t.accent // DEX tab uses solid accent
+                      : t.accent
+                    : "transparent",
+                  color: isActive ? t.bg : isDex ? t.ac_(0.6) : t.fg_(0.4),
+                  border: "none",
+                  borderRight:
+                    i < ALL_TABS.length - 1
+                      ? `1px solid ${t.fg_(0.08)}`
+                      : "none",
+                  transition: "all 0.2s ease",
+                  fontWeight: isActive ? 700 : 400,
+                  position: "relative",
+                }}
+              >
+                {isDex ? (
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.4rem",
+                    }}
+                  >
+                    {/* Blink dot for DEX tab */}
+                    {!isActive && (
+                      <span
+                        style={{
+                          width: 4,
+                          height: 4,
+                          borderRadius: "50%",
+                          background: t.accent,
+                          display: "inline-block",
+                          animation: "blink 2s ease-in-out infinite",
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                    DEX / Order Book
+                  </span>
+                ) : cat === "build-tools" ? (
+                  "Build Tools"
+                ) : (
+                  cat
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* DEX Order Book — full width inside container */}
+        {isDexTab && (
+          <div
+            style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? "none" : "translateY(20px)",
+              transition: "all 0.7s ease 0.1s",
+            }}
+          >
+            <div
               style={{
-                fontFamily: "Space Mono, monospace",
-                fontSize: "0.6rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                padding: "0.6rem 1.1rem",
-                background: filter === cat ? t.accent : "transparent",
-                color: filter === cat ? t.bg : t.fg_(0.4),
-                border: "none",
-                borderRight:
-                  i < CATEGORIES.length - 1
-                    ? `1px solid ${t.fg_(0.08)}`
-                    : "none",
-                transition: "all 0.2s ease",
-                fontWeight: filter === cat ? 700 : 400,
+                marginBottom: "1rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
               }}
             >
-              {cat === "build-tools" ? "Build Tools" : cat}
-            </button>
-          ))}
-        </div>
+              <span
+                style={{
+                  fontFamily: "Space Mono, monospace",
+                  fontSize: "0.55rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: t.fg_(0.22),
+                }}
+              >
+                Decentralized Order Book · Live price feed · Simulated CLOB
+                depth
+              </span>
+            </div>
+            <DEXOrderBook />
+          </div>
+        )}
       </div>
 
-      {/* Carousel — full bleed */}
-      <div
-        style={{ overflow: "hidden", position: "relative" }}
-        onMouseDown={(e) => onDragStart(e.clientX)}
-        onMouseMove={(e) => onDragMove(e.clientX)}
-        onMouseUp={onDragEnd}
-        onMouseLeave={() => {
-          if (dragging) onDragEnd();
-        }}
-        onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
-        onTouchMove={(e) => onDragMove(e.touches[0].clientX)}
-        onTouchEnd={onDragEnd}
-      >
+      {/* Carousel — full bleed (only when not on DEX tab) */}
+      {!isDexTab && (
         <div
-          style={{
-            display: "flex",
-            gap: `${CARD_GAP}px`,
-            padding: "0 2rem",
-            transform: `translateX(calc(-${current * (CARD_W + CARD_GAP)}px + ${dragging ? dragDelta : 0}px))`,
-            transition: dragging
-              ? "none"
-              : "transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)",
+          style={{ overflow: "hidden", position: "relative" }}
+          onMouseDown={(e) => onDragStart(e.clientX)}
+          onMouseMove={(e) => onDragMove(e.clientX)}
+          onMouseUp={onDragEnd}
+          onMouseLeave={() => {
+            if (dragging) onDragEnd();
           }}
+          onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
+          onTouchMove={(e) => onDragMove(e.touches[0].clientX)}
+          onTouchEnd={onDragEnd}
         >
-          {filtered.map((project, idx) => (
-            <ProjectCard
-              key={project.title}
-              project={project}
-              index={idx}
-              current={current}
-              visible={visible}
-              cardWidth={CARD_W}
-            />
-          ))}
-        </div>
+          <div
+            style={{
+              display: "flex",
+              gap: `${CARD_GAP}px`,
+              padding: "0 2rem",
+              transform: `translateX(calc(-${current * (CARD_W + CARD_GAP)}px + ${dragging ? dragDelta : 0}px))`,
+              transition: dragging
+                ? "none"
+                : "transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            {filtered.map((project, idx) => (
+              <ProjectCard
+                key={project.title}
+                project={project}
+                index={idx}
+                current={current}
+                visible={visible}
+                cardWidth={CARD_W}
+              />
+            ))}
+          </div>
 
-        {/* Dots */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "0.4rem",
-            marginTop: "2rem",
-          }}
-        >
-          {filtered.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              style={{
-                width: i === current ? 20 : 6,
-                height: 2,
-                background: i === current ? t.accent : t.fg_(0.15),
-                border: "none",
-                transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
-                padding: 0,
-              }}
-            />
-          ))}
+          {/* Dots */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "0.4rem",
+              marginTop: "2rem",
+            }}
+          >
+            {filtered.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                style={{
+                  width: i === current ? 20 : 6,
+                  height: 2,
+                  background: i === current ? t.accent : t.fg_(0.15),
+                  border: "none",
+                  transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
+                  padding: 0,
+                }}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };

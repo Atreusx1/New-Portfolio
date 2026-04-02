@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { WalletProvider } from "./components/WalletContext";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./components/Hero";
 import { About } from "./components/About";
@@ -49,7 +50,6 @@ const AppInner = () => {
   };
 
   return (
-    // Outer div stays themed (handles nav bar area + any overflow)
     <div
       style={{
         minHeight: "100vh",
@@ -57,9 +57,7 @@ const AppInner = () => {
         transition: "background 0.35s ease",
       }}
     >
-      {/* Fixed canvas — visible behind all non-hero sections */}
       <SectionCanvas />
-
       <FloatingParticles />
       <Navigation onNavigate={handleNavigate} activeSection={activeSection} />
 
@@ -105,7 +103,7 @@ const AppInner = () => {
             color: t.fg_(0.2),
           }}
         >
-          © 2025 Anish kadam
+          © 2025 Anish Kadam
         </span>
         <span
           style={{
@@ -122,11 +120,13 @@ const AppInner = () => {
   );
 };
 
-// ── Root wraps with provider ──────────────────────────────────────────────────
+// ── Root wraps with both providers ───────────────────────────────────────────
 function App() {
   return (
     <ThemeProvider>
-      <AppInner />
+      <WalletProvider>
+        <AppInner />
+      </WalletProvider>
     </ThemeProvider>
   );
 }

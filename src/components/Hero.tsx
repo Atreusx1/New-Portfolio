@@ -1,17 +1,23 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ScrambleText } from "./ScrambleText";
 import { HeroThree } from "./HeroThree";
 import { useTheme } from "../context/ThemeContext";
+import { usePythPrice, computeBasisBps } from "./usePythPrice";
 
-// ─── CoinGecko coin IDs → display pairs ──────────────────────────
-const COIN_MAP = [
-  { id: "ethereum", pair: "ETH/USDC" },
-  { id: "bitcoin", pair: "BTC/USDT" },
-  { id: "solana", pair: "SOL/USDC" },
-  { id: "arbitrum", pair: "ARB/USDC" },
+// ─── Binance symbol → display pair ───────────────────────────
+const PAIR_MAP = [
+  { symbol: "ethusdt", pair: "ETH/USDC" },
+  { symbol: "btcusdt", pair: "BTC/USDT" },
+  { symbol: "solusdt", pair: "SOL/USDC" },
+  { symbol: "arbusdt", pair: "ARB/USDC" },
 ];
 
-// ─── Sarcastic wisdom from the blockchain oracle ──────────────────
+// Binance combined stream URL
+const BINANCE_WS_URL =
+  "wss://stream.binance.com:9443/stream?streams=" +
+  PAIR_MAP.map((p) => `${p.symbol}@ticker`).join("/");
+
+// ─── Sarcastic wisdom from the blockchain oracle ──────────────
 const SARCASM = [
   "pro tip: buy high, sell low",
   "just one more dip",
@@ -238,21 +244,24 @@ export const Hero = () => {
   const [threeVis, setThreeVis] = useState(false);
 
   const [tickers, setTickers] = useState<Ticker[]>(
-    COIN_MAP.map((c) => ({ pair: c.pair, price: 0, change: 0, vol: "—" })),
+    PAIR_MAP.map((c) => ({ pair: c.pair, price: 0, change: 0, vol: "—" })),
   );
   const [sparks, setSparks] = useState<number[][]>(
-    COIN_MAP.map(() =>
+    PAIR_MAP.map(() =>
       Array.from({ length: 16 }, () => 50 + Math.random() * 50),
     ),
   );
   const [flashIdx, setFlashIdx] = useState(-1);
-  const [upIdx, setUpIdx] = useState<boolean[]>(COIN_MAP.map(() => true));
+  const [upIdx, setUpIdx] = useState<boolean[]>(PAIR_MAP.map(() => true));
   const [blockNum, setBlockNum] = useState(19_482_341);
   const [tps, setTps] = useState(4218);
   const [fetchErr, setFetchErr] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("—");
   const [latency, setLatency] = useState(18);
   const [gasPrice, setGasPrice] = useState(24);
+
+  // ── Pyth oracle price for ETH (for basis display) ────────────
+  const pythEth = usePythPrice("ETH/USDC");
 
   const gridRef = useRef<HTMLCanvasElement>(null);
   // Refs so the canvas loop always reads the latest theme without restarting
@@ -275,60 +284,100 @@ export const Hero = () => {
     return () => ts.forEach(clearTimeout);
   }, []);
 
-  // ── CoinGecko live fetch ────────────────────────────────────────
-  const fetchPrices = useCallback(async () => {
-    try {
-      const ids = COIN_MAP.map((c) => c.id).join(",");
-      const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("non-200");
-      const data = await res.json();
-
-      setTickers((prev) =>
-        COIN_MAP.map((c, i) => {
-          const raw = data[c.id];
-          if (!raw) return prev[i];
-          return {
-            pair: c.pair,
-            price: raw.usd as number,
-            change: +(raw.usd_24h_change as number).toFixed(2),
-            vol: fmtVol(raw.usd_24h_vol as number),
-            prevPrice: prev[i].price || raw.usd,
-          };
-        }),
-      );
-      setUpIdx((prev) =>
-        COIN_MAP.map((c, i) => {
-          const raw = data[c.id];
-          return raw ? (raw.usd_24h_change as number) >= 0 : prev[i];
-        }),
-      );
-      setSparks((prev) =>
-        COIN_MAP.map((c, i) => {
-          const raw = data[c.id];
-          if (!raw) return prev[i];
-          return [...prev[i].slice(1), raw.usd as number];
-        }),
-      );
-      setFetchErr(false);
-      const now = new Date();
-      setLastUpdated(
-        `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`,
-      );
-      const fi = Math.floor(Math.random() * COIN_MAP.length);
-      setFlashIdx(fi);
-      setTimeout(() => setFlashIdx(-1), 500);
-      setLatency(12 + Math.floor(Math.random() * 28));
-    } catch {
-      setFetchErr(true);
-    }
-  }, []);
-
+  // ── Binance WebSocket live prices ──────────────────────────────
   useEffect(() => {
-    fetchPrices();
-    const id = setInterval(fetchPrices, 30_000);
-    return () => clearInterval(id);
-  }, [fetchPrices]);
+    let ws: WebSocket;
+    let reconnectTimer: ReturnType<typeof setTimeout>;
+    let alive = true;
+
+    const connect = () => {
+      ws = new WebSocket(BINANCE_WS_URL);
+
+      ws.onopen = () => {
+        setFetchErr(false);
+      };
+
+      ws.onmessage = (evt: MessageEvent) => {
+        try {
+          const msg = JSON.parse(evt.data as string) as {
+            stream: string;
+            data: {
+              s: string; // symbol e.g. "ETHUSDT"
+              c: string; // last price
+              P: string; // price change percent (24h)
+              q: string; // total quote asset volume (24h)
+            };
+          };
+
+          const { s, c, P, q } = msg.data;
+          const symbol = s.toLowerCase(); // "ethusdt"
+          const idx = PAIR_MAP.findIndex((p) => p.symbol === symbol);
+          if (idx === -1) return;
+
+          const newPrice = parseFloat(c);
+          const newChange = parseFloat(P);
+          const newVol = fmtVol(parseFloat(q));
+
+          setTickers((prev) => {
+            const next = [...prev];
+            const old = next[idx];
+            next[idx] = {
+              pair: old.pair,
+              price: newPrice,
+              change: +newChange.toFixed(2),
+              vol: newVol,
+              prevPrice: old.price || newPrice,
+            };
+            return next;
+          });
+
+          setUpIdx((prev) => {
+            const next = [...prev];
+            next[idx] = newChange >= 0;
+            return next;
+          });
+
+          setSparks((prev) => {
+            const next = [...prev];
+            next[idx] = [...prev[idx].slice(1), newPrice];
+            return next;
+          });
+
+          // Flash the updated row briefly
+          setFlashIdx(idx);
+          setTimeout(() => setFlashIdx(-1), 500);
+
+          const now = new Date();
+          setLastUpdated(
+            `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`,
+          );
+          setLatency(8 + Math.floor(Math.random() * 18));
+        } catch {
+          /* ignore malformed frames */
+        }
+      };
+
+      ws.onerror = () => setFetchErr(true);
+
+      ws.onclose = () => {
+        if (alive) {
+          setFetchErr(true);
+          // Auto-reconnect after 3s
+          reconnectTimer = setTimeout(() => {
+            if (alive) connect();
+          }, 3000);
+        }
+      };
+    };
+
+    connect();
+
+    return () => {
+      alive = false;
+      clearTimeout(reconnectTimer);
+      ws?.close();
+    };
+  }, []);
 
   // ── Block counter + TPS + Gas ───────────────────────────────────
   useEffect(() => {
@@ -348,7 +397,6 @@ export const Hero = () => {
   }, []);
 
   // ── Background grid canvas ──────────────────────────────────────
-  // Runs once — reads accent color from ref so it adapts to theme changes
   useEffect(() => {
     const canvas = gridRef.current;
     if (!canvas) return;
@@ -375,7 +423,6 @@ export const Hero = () => {
       const rows = Math.ceil(canvas.height / S) + 1;
       const ac = accentRawRef.current;
       const dark = isDarkRef.current;
-      // Light mode needs slightly higher base opacity so dots read on pale bg
       const baseAlpha = dark ? 0.022 : 0.042;
       const infAlpha = dark ? 0.13 : 0.2;
       for (let c = 0; c < cols; c++)
@@ -403,6 +450,16 @@ export const Hero = () => {
   const ABORDER = t.ac_(0.18);
   const ADIM2 = t.ac_(0.22);
   const ac = t.accentRaw;
+
+  // ── Derived Pyth values ─────────────────────────────────────────
+  const ethMid = tickers[0]?.price ?? 0;
+  const basisBps =
+    pythEth && ethMid ? computeBasisBps(ethMid, pythEth.price) : null;
+  const basisStr =
+    basisBps !== null
+      ? `${basisBps >= 0 ? "+" : ""}${basisBps.toFixed(1)} bps`
+      : "—";
+  const pythPriceStr = pythEth ? `$${fmtPrice(pythEth.price)}` : "—";
 
   return (
     <section
@@ -733,7 +790,7 @@ export const Hero = () => {
                         letterSpacing: "0.08em",
                       }}
                     >
-                      [fallback]
+                      [reconnecting]
                     </span>
                   )}
                 </div>
@@ -1052,9 +1109,9 @@ export const Hero = () => {
                           padding: "0.48rem 1rem",
                           background: isFlash ? t.ac_(0.045) : "transparent",
                           transition: "background 0.35s ease",
-                          borderLeft: isFlash
-                            ? `2px solid ${ACCENT}`
-                            : "2px solid transparent",
+                          // borderLeft: isFlash
+                          //   ? `2px solid ${ACCENT}`
+                          //   : "2px solid transparent",
                         }}
                       >
                         {/* Pair + sparkline */}
@@ -1155,8 +1212,8 @@ export const Hero = () => {
                 }}
               >
                 {[
-                  ["Source", "CoinGecko"],
-                  ["Interval", "30s"],
+                  ["Source", "Binance WS"],
+                  ["Feed", "Pyth Network"],
                   ["Status", fetchErr ? "ERROR" : "LIVE"],
                   ["Gas", `${gasPrice} gwei`],
                 ].map(([label, value]) => (
@@ -1192,6 +1249,67 @@ export const Hero = () => {
                     </div>
                   </div>
                 ))}
+
+                {/* Pyth oracle ETH price + basis */}
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "Space Mono, monospace",
+                      fontSize: "0.44rem",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: t.fg_(0.2),
+                      marginBottom: "0.1rem",
+                    }}
+                  >
+                    Oracle ETH
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "Space Mono, monospace",
+                      fontSize: "0.58rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.04em",
+                      color: t.fg_(0.62),
+                      transition: "color 0.35s ease",
+                    }}
+                  >
+                    {pythPriceStr}
+                  </div>
+                </div>
+
+                {/* Basis bps */}
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "Space Mono, monospace",
+                      fontSize: "0.44rem",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: t.fg_(0.2),
+                      marginBottom: "0.1rem",
+                    }}
+                  >
+                    Basis
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "Space Mono, monospace",
+                      fontSize: "0.58rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.04em",
+                      color:
+                        basisBps === null
+                          ? t.fg_(0.62)
+                          : basisBps > 0
+                            ? t.ac_(0.9)
+                            : "rgba(255,120,120,0.9)",
+                      transition: "color 0.35s ease",
+                    }}
+                  >
+                    {basisStr}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1213,7 +1331,7 @@ export const Hero = () => {
                 color: t.ac_(0.18),
               }}
             >
-              Data via CoinGecko · Not financial advice
+              Prices via Binance WS · Oracle via Pyth · Not financial advice
             </span>
           </div>
         </div>
