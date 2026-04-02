@@ -1,10 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { ScrambleText } from "./Scrambletext";
 import { HeroThree } from "./HeroThree";
 import { useTheme } from "../context/ThemeContext";
 import { usePythPrice, computeBasisBps } from "./usePythPrice";
 
-// ─── Binance symbol → display pair ───────────────────────────
+// ─── Pairs ────────────────────────────────────────────────────
 const PAIR_MAP = [
   { symbol: "ethusdt", pair: "ETH/USDC" },
   { symbol: "btcusdt", pair: "BTC/USDT" },
@@ -12,12 +12,11 @@ const PAIR_MAP = [
   { symbol: "arbusdt", pair: "ARB/USDC" },
 ];
 
-// Binance combined stream URL
 const BINANCE_WS_URL =
   "wss://stream.binance.com:9443/stream?streams=" +
   PAIR_MAP.map((p) => `${p.symbol}@ticker`).join("/");
 
-// ─── Sarcastic wisdom from the blockchain oracle ──────────────
+// ─── Sarcasm ──────────────────────────────────────────────────
 const SARCASM = [
   "pro tip: buy high, sell low",
   "just one more dip",
@@ -51,16 +50,43 @@ interface Ticker {
   prevPrice?: number;
 }
 
-const makeSpark = (pts: number[], w = 64, h = 18) => {
-  const mn = Math.min(...pts),
-    mx = Math.max(...pts);
+// ─── Smooth Catmull-Rom sparkline ─────────────────────────────
+// Returns {line, area} SVG path strings for a given price series.
+const makeSmoothSpark = (
+  pts: number[],
+  w: number,
+  h: number,
+): { line: string; area: string } => {
+  if (pts.length < 2) return { line: "", area: "" };
+  const mn = Math.min(...pts);
+  const mx = Math.max(...pts);
   const range = mx - mn || 1;
-  return pts
-    .map(
-      (p, i) =>
-        `${i === 0 ? "M" : "L"}${((i / (pts.length - 1)) * w).toFixed(1)},${(h - ((p - mn) / range) * h).toFixed(1)}`,
-    )
-    .join(" ");
+  const pad = h * 0.08;
+
+  const coords = pts.map((p, i) => ({
+    x: (i / (pts.length - 1)) * w,
+    y: pad + (1 - (p - mn) / range) * (h - pad * 2),
+  }));
+
+  // Catmull-Rom → cubic bezier
+  let line = `M ${coords[0].x.toFixed(2)},${coords[0].y.toFixed(2)}`;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const p0 = coords[Math.max(0, i - 1)];
+    const p1 = coords[i];
+    const p2 = coords[i + 1];
+    const p3 = coords[Math.min(coords.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    line += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
+  }
+
+  const last = coords[coords.length - 1];
+  const area =
+    line + ` L ${last.x.toFixed(2)},${h} L ${coords[0].x.toFixed(2)},${h} Z`;
+
+  return { line, area };
 };
 
 const fmtVol = (v: number) => {
@@ -73,7 +99,7 @@ const fmtPrice = (p: number) =>
     ? p.toLocaleString("en", { maximumFractionDigits: 0 })
     : p.toFixed(p < 10 ? 4 : 2);
 
-// ── Themed sub-components (receive accent prop) ───────────────────
+// ─── Sub-components ───────────────────────────────────────────
 
 const Sep = ({ accentRaw }: { accentRaw: string }) => (
   <div style={{ height: "1px", background: `rgba(${accentRaw},0.07)` }} />
@@ -82,7 +108,6 @@ const Sep = ({ accentRaw }: { accentRaw: string }) => (
 const SarcasmTicker = ({ accentRaw }: { accentRaw: string }) => {
   const [idx, setIdx] = useState(0);
   const [visible, setVisible] = useState(true);
-
   useEffect(() => {
     const cycle = setInterval(() => {
       setVisible(false);
@@ -93,7 +118,6 @@ const SarcasmTicker = ({ accentRaw }: { accentRaw: string }) => {
     }, 4500);
     return () => clearInterval(cycle);
   }, []);
-
   return (
     <div
       style={{
@@ -128,7 +152,6 @@ const ActivityStrip = ({ accentRaw }: { accentRaw: string }) => {
       type: Math.random() > 0.5 ? "SWAP" : "BRIDGE",
     })),
   );
-
   useEffect(() => {
     const id = setInterval(() => {
       setHashes((prev) => [
@@ -138,7 +161,6 @@ const ActivityStrip = ({ accentRaw }: { accentRaw: string }) => {
     }, 1800);
     return () => clearInterval(id);
   }, []);
-
   return (
     <div
       style={{
@@ -201,6 +223,7 @@ const ActivityStrip = ({ accentRaw }: { accentRaw: string }) => {
 
 const NetworkHealth = ({
   tps,
+  blockNum,
   accentRaw,
 }: {
   tps: number;
@@ -209,7 +232,6 @@ const NetworkHealth = ({
 }) => {
   const bars = 16;
   const health = Math.min(1, (tps - 3800) / 1200);
-
   return (
     <div style={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
       {Array.from({ length: bars }, (_, i) => {
@@ -233,7 +255,68 @@ const NetworkHealth = ({
   );
 };
 
-// ─── Hero ─────────────────────────────────────────────────────────
+// ─── Sparkline with gradient fill ─────────────────────────────
+const SparkLine = ({
+  pts,
+  up,
+  accentRaw,
+  id,
+}: {
+  pts: number[];
+  up: boolean;
+  accentRaw: string;
+  id: string;
+}) => {
+  const W = 88;
+  const H = 28;
+  const { line, area } = makeSmoothSpark(pts, W, H);
+  const lineColor = up ? `rgb(${accentRaw})` : "rgb(255,90,90)";
+  const fillId = `spark-fill-${id}`;
+
+  return (
+    <svg
+      width={W}
+      height={H}
+      viewBox={`0 0 ${W} ${H}`}
+      style={{ display: "block", overflow: "visible" }}
+    >
+      <defs>
+        <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+          <stop
+            offset="0%"
+            stopColor={lineColor}
+            stopOpacity={up ? 0.22 : 0.18}
+          />
+          <stop offset="100%" stopColor={lineColor} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      {area && <path d={area} fill={`url(#${fillId})`} />}
+      {line && (
+        <path
+          d={line}
+          fill="none"
+          stroke={lineColor}
+          strokeWidth="1.4"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      )}
+      {/* Live dot at end */}
+      {pts.length > 1 &&
+        (() => {
+          const mn = Math.min(...pts),
+            mx = Math.max(...pts);
+          const range = mx - mn || 1;
+          const pad = H * 0.08;
+          const ly =
+            pad + (1 - (pts[pts.length - 1] - mn) / range) * (H - pad * 2);
+          return <circle cx={W} cy={ly} r="2" fill={lineColor} opacity="0.9" />;
+        })()}
+    </svg>
+  );
+};
+
+// ─── Hero ─────────────────────────────────────────────────────
 export const Hero = () => {
   const t = useTheme();
 
@@ -246,13 +329,9 @@ export const Hero = () => {
   const [tickers, setTickers] = useState<Ticker[]>(
     PAIR_MAP.map((c) => ({ pair: c.pair, price: 0, change: 0, vol: "—" })),
   );
-  const [sparks, setSparks] = useState<number[][]>(
-    PAIR_MAP.map(() =>
-      Array.from({ length: 16 }, () => 50 + Math.random() * 50),
-    ),
-  );
+  // sparks[i] = array of close prices from Binance klines (24 hr, 15-min candles)
+  const [sparks, setSparks] = useState<number[][]>(PAIR_MAP.map(() => []));
   const [flashIdx, setFlashIdx] = useState(-1);
-  const [upIdx, setUpIdx] = useState<boolean[]>(PAIR_MAP.map(() => true));
   const [blockNum, setBlockNum] = useState(19_482_341);
   const [tps, setTps] = useState(4218);
   const [fetchErr, setFetchErr] = useState(false);
@@ -260,11 +339,9 @@ export const Hero = () => {
   const [latency, setLatency] = useState(18);
   const [gasPrice, setGasPrice] = useState(24);
 
-  // ── Pyth oracle price for ETH (for basis display) ────────────
   const pythEth = usePythPrice("ETH/USDC");
 
   const gridRef = useRef<HTMLCanvasElement>(null);
-  // Refs so the canvas loop always reads the latest theme without restarting
   const accentRawRef = useRef(t.accentRaw);
   const isDarkRef = useRef(t.isDark);
   useEffect(() => {
@@ -272,7 +349,7 @@ export const Hero = () => {
     isDarkRef.current = t.isDark;
   }, [t.accentRaw, t.isDark]);
 
-  // ── Reveals ────────────────────────────────────────────────────
+  // ── Reveals ────────────────────────────────────────────────
   useEffect(() => {
     const ts = [
       setTimeout(() => setActive(true), 280),
@@ -284,7 +361,34 @@ export const Hero = () => {
     return () => ts.forEach(clearTimeout);
   }, []);
 
-  // ── Binance WebSocket live prices ──────────────────────────────
+  // ── Fetch 24 hr kline history from Binance REST ─────────────
+  // 96 × 15-min candles = 24 hr of smooth data
+  const fetchKlines = useCallback(async () => {
+    const results = await Promise.allSettled(
+      PAIR_MAP.map(({ symbol }) =>
+        fetch(
+          `https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=15m&limit=96`,
+        )
+          .then((r) => r.json())
+          .then(
+            (data: [number, string, string, string, string, ...unknown[]][]) =>
+              data.map((k) => parseFloat(k[4])), // close price
+          ),
+      ),
+    );
+    setSparks(
+      results.map((r, i) => (r.status === "fulfilled" ? r.value : sparks[i])),
+    );
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    fetchKlines();
+    // Refresh kline history every 15 min to keep it aligned
+    const id = setInterval(fetchKlines, 15 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [fetchKlines]);
+
+  // ── Binance WebSocket — real-time ticker updates ─────────────
   useEffect(() => {
     let ws: WebSocket;
     let reconnectTimer: ReturnType<typeof setTimeout>;
@@ -292,58 +396,56 @@ export const Hero = () => {
 
     const connect = () => {
       ws = new WebSocket(BINANCE_WS_URL);
-
       ws.onopen = () => {
-        setFetchErr(false);
+        if (alive) setFetchErr(false);
       };
-
+      ws.onerror = () => {
+        if (alive) setFetchErr(true);
+      };
+      ws.onclose = () => {
+        if (alive) {
+          setFetchErr(true);
+          reconnectTimer = setTimeout(() => {
+            if (alive) connect();
+          }, 3000);
+        }
+      };
       ws.onmessage = (evt: MessageEvent) => {
+        if (!alive) return;
         try {
           const msg = JSON.parse(evt.data as string) as {
             stream: string;
-            data: {
-              s: string; // symbol e.g. "ETHUSDT"
-              c: string; // last price
-              P: string; // price change percent (24h)
-              q: string; // total quote asset volume (24h)
-            };
+            data: { s: string; c: string; P: string; q: string };
           };
-
           const { s, c, P, q } = msg.data;
-          const symbol = s.toLowerCase(); // "ethusdt"
+          const symbol = s.toLowerCase();
           const idx = PAIR_MAP.findIndex((p) => p.symbol === symbol);
           if (idx === -1) return;
 
           const newPrice = parseFloat(c);
           const newChange = parseFloat(P);
-          const newVol = fmtVol(parseFloat(q));
 
           setTickers((prev) => {
             const next = [...prev];
-            const old = next[idx];
             next[idx] = {
-              pair: old.pair,
+              pair: next[idx].pair,
               price: newPrice,
               change: +newChange.toFixed(2),
-              vol: newVol,
-              prevPrice: old.price || newPrice,
+              vol: fmtVol(parseFloat(q)),
+              prevPrice: next[idx].price || newPrice,
             };
             return next;
           });
 
-          setUpIdx((prev) => {
-            const next = [...prev];
-            next[idx] = newChange >= 0;
-            return next;
-          });
-
+          // Replace the last kline close with the live price so the chart
+          // tail tracks the current price in real-time
           setSparks((prev) => {
+            if (prev[idx].length === 0) return prev;
             const next = [...prev];
-            next[idx] = [...prev[idx].slice(1), newPrice];
+            next[idx] = [...prev[idx].slice(0, -1), newPrice];
             return next;
           });
 
-          // Flash the updated row briefly
           setFlashIdx(idx);
           setTimeout(() => setFlashIdx(-1), 500);
 
@@ -353,25 +455,12 @@ export const Hero = () => {
           );
           setLatency(8 + Math.floor(Math.random() * 18));
         } catch {
-          /* ignore malformed frames */
-        }
-      };
-
-      ws.onerror = () => setFetchErr(true);
-
-      ws.onclose = () => {
-        if (alive) {
-          setFetchErr(true);
-          // Auto-reconnect after 3s
-          reconnectTimer = setTimeout(() => {
-            if (alive) connect();
-          }, 3000);
+          /* ignore */
         }
       };
     };
 
     connect();
-
     return () => {
       alive = false;
       clearTimeout(reconnectTimer);
@@ -379,7 +468,7 @@ export const Hero = () => {
     };
   }, []);
 
-  // ── Block counter + TPS + Gas ───────────────────────────────────
+  // ── Block counter + TPS + Gas ───────────────────────────────
   useEffect(() => {
     const id = setInterval(() => {
       setBlockNum((n) => n + Math.floor(Math.random() * 3));
@@ -396,7 +485,7 @@ export const Hero = () => {
     return () => clearInterval(id);
   }, []);
 
-  // ── Background grid canvas ──────────────────────────────────────
+  // ── Background grid canvas ──────────────────────────────────
   useEffect(() => {
     const canvas = gridRef.current;
     if (!canvas) return;
@@ -451,7 +540,6 @@ export const Hero = () => {
   const ADIM2 = t.ac_(0.22);
   const ac = t.accentRaw;
 
-  // ── Derived Pyth values ─────────────────────────────────────────
   const ethMid = tickers[0]?.price ?? 0;
   const basisBps =
     pythEth && ethMid ? computeBasisBps(ethMid, pythEth.price) : null;
@@ -483,7 +571,7 @@ export const Hero = () => {
         }}
       />
 
-      {/* Corner meta labels */}
+      {/* Corner meta labels — hidden on small screens */}
       {[
         {
           pos: { top: "5.5rem", left: "2rem" },
@@ -498,6 +586,7 @@ export const Hero = () => {
       ].map(({ pos, align, lines }) => (
         <div
           key={align}
+          className="hero-corner-label"
           style={{
             position: "absolute",
             ...pos,
@@ -518,7 +607,7 @@ export const Hero = () => {
         </div>
       ))}
 
-      {/* ── Two-column grid ──────────────────────────────────── */}
+      {/* ── Two-column grid ──────────────────────────── */}
       <div
         className="hero-grid"
         style={{
@@ -535,7 +624,7 @@ export const Hero = () => {
           minHeight: "100vh",
         }}
       >
-        {/* ── LEFT ────────────────────────────────── */}
+        {/* ── LEFT ──────────────────────────────────── */}
         <div>
           <div
             style={{
@@ -556,7 +645,7 @@ export const Hero = () => {
           <h1
             style={{
               fontFamily: "Space Mono, monospace",
-              fontSize: "clamp(3rem, 7.5vw, 7.5rem)",
+              fontSize: "clamp(2.6rem, 7.5vw, 7.5rem)",
               fontWeight: 700,
               lineHeight: 0.92,
               letterSpacing: "-0.03em",
@@ -673,15 +762,15 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* ── RIGHT — DEX terminal ─────────────────── */}
+        {/* ── RIGHT — DEX terminal ──────────────────── */}
         <div
+          className="hero-terminal-wrapper"
           style={{
             opacity: threeVis ? 1 : 0,
             transform: threeVis ? "none" : "translateX(24px)",
             transition: "all 1s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
-          {/* Outer glow wrapper */}
           <div
             style={{
               position: "relative",
@@ -824,7 +913,7 @@ export const Hero = () => {
                 </div>
               </div>
 
-              {/* ── Header row 2 ── network stats */}
+              {/* ── Header row 2 — network stats ── */}
               <div
                 style={{
                   display: "flex",
@@ -894,21 +983,19 @@ export const Hero = () => {
                 <NetworkHealth tps={tps} blockNum={blockNum} accentRaw={ac} />
               </div>
 
-              {/* ── 3D scene ── */}
+              {/* ── 3D scene — hidden on mobile ── */}
               <div
+                className="hero-threejs-panel"
                 style={{
-                  height: "380px",
+                  height: "280px",
                   position: "relative",
                   overflow: "hidden",
                 }}
               >
-                {/* key forces re-mount on theme change so Three.js uses correct colors */}
                 <HeroThree
                   key={t.isDark ? "dark" : "light"}
                   isDark={t.isDark}
                 />
-
-                {/* Scanline overlay */}
                 <div
                   style={{
                     position: "absolute",
@@ -919,8 +1006,6 @@ export const Hero = () => {
                     zIndex: 2,
                   }}
                 />
-
-                {/* Corner HUD labels */}
                 {[
                   {
                     style: { top: "10%", left: "7%" },
@@ -994,8 +1079,6 @@ export const Hero = () => {
                     </div>
                   </div>
                 ))}
-
-                {/* Bottom-right HUD */}
                 <div
                   style={{
                     position: "absolute",
@@ -1020,8 +1103,6 @@ export const Hero = () => {
                     VALIDATORS <span style={{ color: ADIM2 }}>512</span>
                   </div>
                 </div>
-
-                {/* Bottom-left — chain selector pills */}
                 <div
                   style={{
                     position: "absolute",
@@ -1056,7 +1137,7 @@ export const Hero = () => {
                 </div>
               </div>
 
-              {/* ── Mempool activity strip ── */}
+              {/* ── Mempool strip ── */}
               <ActivityStrip accentRaw={ac} />
               <Sep accentRaw={ac} />
 
@@ -1067,11 +1148,10 @@ export const Hero = () => {
                   transition: "background 0.35s ease",
                 }}
               >
-                {/* Column headers */}
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 90px 64px 56px",
+                    gridTemplateColumns: "1fr 88px 62px 54px",
                     padding: "0.38rem 1rem",
                     background: t.ac_(0.02),
                   }}
@@ -1104,9 +1184,9 @@ export const Hero = () => {
                       <div
                         style={{
                           display: "grid",
-                          gridTemplateColumns: "1fr 90px 64px 56px",
+                          gridTemplateColumns: "1fr 88px 62px 54px",
                           alignItems: "center",
-                          padding: "0.48rem 1rem",
+                          padding: "0.44rem 1rem",
                           background: isFlash ? t.ac_(0.045) : "transparent",
                           transition: "background 0.35s ease",
                           // borderLeft: isFlash
@@ -1114,7 +1194,7 @@ export const Hero = () => {
                           //   : "2px solid transparent",
                         }}
                       >
-                        {/* Pair + sparkline */}
+                        {/* Pair + smooth 24h sparkline */}
                         <div>
                           <div
                             style={{
@@ -1123,25 +1203,31 @@ export const Hero = () => {
                               fontWeight: 700,
                               color: t.fg,
                               letterSpacing: "0.02em",
-                              marginBottom: "2px",
+                              marginBottom: "3px",
                               transition: "color 0.35s ease",
                             }}
                           >
                             {tk.pair}
                           </div>
-                          <svg width="64" height="16">
-                            {sparks[i].length > 1 && (
-                              <path
-                                d={makeSpark(sparks[i], 64, 16)}
-                                fill="none"
-                                stroke={
-                                  up ? t.ac_(0.7) : "rgba(255,100,100,0.65)"
-                                }
-                                strokeWidth="1.3"
-                                strokeLinejoin="round"
-                              />
-                            )}
-                          </svg>
+                          {sparks[i].length > 1 ? (
+                            <SparkLine
+                              pts={sparks[i]}
+                              up={up}
+                              accentRaw={ac}
+                              id={`${tk.pair}-${i}`}
+                            />
+                          ) : (
+                            /* Skeleton while klines load */
+                            <div
+                              style={{
+                                width: 88,
+                                height: 28,
+                                background: `rgba(${ac},0.05)`,
+                                borderRadius: 2,
+                                animation: "blink 1.5s ease-in-out infinite",
+                              }}
+                            />
+                          )}
                         </div>
 
                         {/* Price */}
@@ -1194,11 +1280,11 @@ export const Hero = () => {
                 })}
               </div>
 
-              {/* Sarcasm strip */}
               <SarcasmTicker accentRaw={ac} />
 
               {/* ── Footer ── */}
               <div
+                className="hero-terminal-footer"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -1216,6 +1302,8 @@ export const Hero = () => {
                   ["Feed", "Pyth Network"],
                   ["Status", fetchErr ? "ERROR" : "LIVE"],
                   ["Gas", `${gasPrice} gwei`],
+                  ["Oracle ETH", pythPriceStr],
+                  ["Basis", basisStr],
                 ].map(([label, value]) => (
                   <div key={label}>
                     <div
@@ -1241,7 +1329,11 @@ export const Hero = () => {
                             ? ACCENT
                             : value === "ERROR"
                               ? "#ff8080"
-                              : t.fg_(0.62),
+                              : label === "Basis" && basisBps !== null
+                                ? basisBps > 0
+                                  ? t.ac_(0.9)
+                                  : "rgba(255,120,120,0.9)"
+                                : t.fg_(0.62),
                         transition: "color 0.35s ease",
                       }}
                     >
@@ -1249,72 +1341,10 @@ export const Hero = () => {
                     </div>
                   </div>
                 ))}
-
-                {/* Pyth oracle ETH price + basis */}
-                <div>
-                  <div
-                    style={{
-                      fontFamily: "Space Mono, monospace",
-                      fontSize: "0.44rem",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: t.fg_(0.2),
-                      marginBottom: "0.1rem",
-                    }}
-                  >
-                    Oracle ETH
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "Space Mono, monospace",
-                      fontSize: "0.58rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.04em",
-                      color: t.fg_(0.62),
-                      transition: "color 0.35s ease",
-                    }}
-                  >
-                    {pythPriceStr}
-                  </div>
-                </div>
-
-                {/* Basis bps */}
-                <div>
-                  <div
-                    style={{
-                      fontFamily: "Space Mono, monospace",
-                      fontSize: "0.44rem",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: t.fg_(0.2),
-                      marginBottom: "0.1rem",
-                    }}
-                  >
-                    Basis
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "Space Mono, monospace",
-                      fontSize: "0.58rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.04em",
-                      color:
-                        basisBps === null
-                          ? t.fg_(0.62)
-                          : basisBps > 0
-                            ? t.ac_(0.9)
-                            : "rgba(255,120,120,0.9)",
-                      transition: "color 0.35s ease",
-                    }}
-                  >
-                    {basisStr}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
 
-          {/* Sub-caption */}
           <div
             style={{
               marginTop: "0.6rem",
@@ -1374,8 +1404,37 @@ export const Hero = () => {
       </div>
 
       <style>{`
+        /* ── Mobile: stack layout ───────────────────────── */
         @media (max-width: 820px) {
-          .hero-grid { grid-template-columns: 1fr !important; padding-top: 7rem !important; align-items: start !important; }
+          .hero-grid {
+            grid-template-columns: 1fr !important;
+            padding-top: 6rem !important;
+            padding-bottom: 3rem !important;
+            align-items: start !important;
+            min-height: unset !important;
+            gap: 2.5rem !important;
+          }
+          .hero-corner-label { display: none !important; }
+          .hero-terminal-wrapper {
+            transform: none !important;
+            opacity: 1 !important;
+          }
+          /* Hide the heavy Three.js panel on mobile — keeps perf smooth */
+          .hero-threejs-panel { display: none !important; }
+          /* Compress footer into 2×3 grid */
+          .hero-terminal-footer {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 0.5rem 0.6rem !important;
+          }
+        }
+
+        /* ── Very small screens ─────────────────────────── */
+        @media (max-width: 420px) {
+          .hero-grid { padding: 5rem 1rem 2rem !important; }
+          .hero-terminal-footer {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
         }
       `}</style>
     </section>
