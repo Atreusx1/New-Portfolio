@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { ScrambleText } from "./ScrambleText";
+import { ScrambleText } from "./Scrambletext";
 import { HeroThree } from "./HeroThree";
 import { useTheme } from "../context/ThemeContext";
 import { usePythPrice, computeBasisBps } from "./usePythPrice";

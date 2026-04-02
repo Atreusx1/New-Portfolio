@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { Github, Linkedin, Mail, ArrowUpRight } from "lucide-react";
 import { RESUME } from "../data/constants";
-import { ScrambleText } from "./ScrambleText";
+import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
 
 export const Contact = () => {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { SKILLS } from "../data/constants";
-import { ScrambleText } from "./ScrambleText";
+import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
 
 export const Skills = () => {

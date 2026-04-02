@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { projectsData, type Project } from "../data/projects";
 import { Github, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { ScrambleText } from "./ScrambleText";
+import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
-import { DEXOrderBook } from "./DEXorderbook";
+import { DEXOrderBook } from "./Dexorderbook";
 
 const CATEGORIES = ["all", "web", "blockchain", "fullstack", "build-tools"];
 // Add a special sentinel value for the DEX tab

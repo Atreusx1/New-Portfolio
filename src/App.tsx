@@ -9,7 +9,7 @@ import { Skills } from "./components/Skills";
 import { Experience } from "./components/Experience";
 import { Contact } from "./components/Contact";
 import { FloatingParticles } from "./components/FloatingParticles";
-import { SectionCanvas } from "./components/SectionCanvas";
+import { SectionCanvas } from "./components/Sectioncanvas";
 
 // ── Inner app consumes theme ──────────────────────────────────────────────────
 const AppInner = () => {
