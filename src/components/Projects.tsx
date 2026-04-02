@@ -11,7 +11,7 @@ const ALL_TABS = [...CATEGORIES, "dex"];
 
 export const Projects = () => {
   const t = useTheme();
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("dex");
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState(0);
   const [dragging, setDragging] = useState(false);

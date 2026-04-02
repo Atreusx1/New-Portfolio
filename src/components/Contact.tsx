@@ -21,7 +21,7 @@ export const Contact = () => {
   }, []);
 
   const links = [
-    { icon: Github, label: "GitHub", url: RESUME.github, handle: "@anishk" },
+    { icon: Github, label: "GitHub", url: RESUME.github, handle: "@Atreusx1" },
     {
       icon: Linkedin,
       label: "LinkedIn",

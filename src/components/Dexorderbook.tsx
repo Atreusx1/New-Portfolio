@@ -932,7 +932,21 @@ export const DEXOrderBook = () => {
         </span>
         <div style={{ display: "flex", gap: "1rem" }}>
           <a
-            href="https://app.uniswap.org"
+            href="https://app.hyperliquid.xyz/trade"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: "0.46rem",
+              letterSpacing: "0.1em",
+              color: t.ac_(0.45),
+              textDecoration: "none",
+            }}
+          >
+            Trade on Hyperliquid ↗
+          </a>
+
+          <a
+            href="https://app.uniswap.org/explore"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -945,7 +959,7 @@ export const DEXOrderBook = () => {
             Trade on Uniswap ↗
           </a>
           <a
-            href="https://dydx.exchange"
+            href="https://dydx.trade/trade/BTC-USD"
             target="_blank"
             rel="noopener noreferrer"
             style={{

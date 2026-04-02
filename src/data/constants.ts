@@ -1,40 +1,83 @@
 export const RESUME = {
-  name: 'Anish K',
-  title: 'Full-Stack Developer & Blockchain Engineer',
-  bio: 'Passionate about building cutting-edge web experiences and decentralized applications. Specializing in React, Three.js, and blockchain technologies.',
-  email: 'anish@example.com',
-  github: 'https://github.com/Atreusx1',
-  linkedin: 'https://linkedin.com',
-  twitter: 'https://twitter.com',
+  name: "Anish Kadam",
+  title: "Full-Stack Blockchain Developer",
+  bio: "Full-Stack Blockchain Developer with 2+ years of experience building scalable Web2 and Web3 applications—from high-performance APIs to smart contracts across multiple blockchain networks. Focused on DeFi systems, zk technologies, and delivering production-ready decentralized applications.",
+  email: "anishkadam92@gmail.com",
+  github: "https://github.com/Atreusx1",
+  linkedin: "https://www.linkedin.com/in/anish-defi/",
+  twitter: "https://twitter.com",
 };
 
 export const SKILLS = {
-  frontend: ['React', 'Three.js', 'TypeScript', 'Tailwind CSS', 'Next.js', 'Vite', 'Web3.js', 'Ether.js'],
-  backend: ['Node.js', 'Express', 'MongoDB', 'PostgreSQL', 'Rust', 'Substrate'],
-  blockchain: ['Solidity', 'Smart Contracts', 'Hardhat', 'Circom', 'zkSNARK', 'Web3', 'IPFS'],
-  tools: ['Git', 'Docker', 'AWS', 'Vercel', 'Figma', 'Linux'],
+  frontend: [
+    "React",
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "Three.js",
+    "Vite",
+    "Ethers.js",
+  ],
+  backend: [
+    "Node.js",
+    "Express",
+    "Django",
+    "MongoDB",
+    "PostgreSQL",
+    "DynamoDB",
+  ],
+  blockchain: [
+    "Solidity",
+    "Smart Contracts",
+    "Hardhat",
+    "Hyperledger Fabric Basics",
+    "zkSNARK",
+    "Ethereum",
+    "IPFS",
+    "Token Standards (ERC-20, ERC-721)",
+  ],
+  tools: [
+    "Git",
+    "Docker",
+    "AWS (Lambda, S3, EC2)",
+    "Alchemy",
+    "MetaMask",
+    "Prisma",
+    "Linux",
+  ],
 };
 
 export const EXPERIENCE = [
   {
     id: 1,
-    role: 'Senior Full-Stack Developer',
-    company: 'Tech Startup',
-    period: '2023 - Present',
-    description: 'Leading development of high-performance web applications with React and Node.js.',
+    role: "Freelance Full-Stack Blockchain Developer",
+    company: "Self-Employed",
+    period: "Jun 2025 - Present",
+    description:
+      "Engineered ICO platforms and NFT systems using MERN stack and Hardhat, integrated Stripe for seamless fiat-to-crypto payments, and implemented meta-transactions and cross-chain communication for scalable Web3 applications.",
   },
   {
     id: 2,
-    role: 'Blockchain Developer',
-    company: 'Web3 Labs',
-    period: '2022 - 2023',
-    description: 'Developed smart contracts and decentralized applications using Solidity and Web3.js.',
+    role: "Full-Stack Blockchain Developer",
+    company: "TecMetaverse",
+    period: "Nov 2024 - Jun 2025",
+    description:
+      "Built and deployed Web3 dApps across Ethereum, Polygon, Avalanche, and Solana, implemented DeFi protocols and staking systems, and developed scalable backend services using Node.js and AWS while leading blockchain initiatives.",
   },
   {
     id: 3,
-    role: 'React Developer',
-    company: 'Digital Agency',
-    period: '2021 - 2022',
-    description: 'Built responsive web applications with React, Three.js, and modern frontend tooling.',
+    role: "Software Developer Intern",
+    company: "Portalwiz Technologies",
+    period: "Feb 2024 - Aug 2024",
+    description:
+      "Developed Django APIs and React interfaces, integrated MongoDB, and delivered chatbot-based solutions to improve client workflows and user engagement.",
+  },
+  {
+    id: 4,
+    role: "Software Intern",
+    company: "Alpha Analytics Services",
+    period: "Jan 2023 - Dec 2023",
+    description:
+      "Built full-stack web applications using the MERN stack, developed responsive React frontends and robust Node.js APIs, and optimized application performance through testing and debugging.",
   },
 ];
