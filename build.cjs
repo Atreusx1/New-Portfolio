@@ -2,106 +2,55 @@ const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 const glob = require("glob");
-const chalk = require("chalk");
 const zlib = require("zlib");
 const { pipeline } = require("stream/promises");
 
-// --- Configuration ---
-const PROJECT_ROOT = path.resolve(__dirname);
-const BUILD_DIR = path.join(PROJECT_ROOT, "dist");
-const ASSETS_DIR = path.join(BUILD_DIR, "assets");
+// --- Paths ---
+const ROOT = __dirname;
+const DIST = path.join(ROOT, "dist");
 
-// --- Logging ---
-function log(message, type = "info") {
-  const timestamp = new Date().toLocaleTimeString();
-  const prefix = `[${timestamp}]`;
-  switch (type) {
-    case "success":
-      console.log(chalk.green(`${prefix} ✓ ${message}`));
-      break;
-    case "error":
-      console.error(chalk.red(`${prefix} ✗ ${message}`));
-      break;
-    case "warn":
-      console.warn(chalk.yellow(`${prefix} ⚠ ${message}`));
-      break;
-    default:
-      console.log(chalk.blue(`${prefix} ℹ ${message}`));
-  }
+// --- Logger ---
+function log(msg) {
+  console.log(`[${new Date().toLocaleTimeString()}] ${msg}`);
 }
 
-// --- Utilities ---
-function runCommand(command) {
-  try {
-    log(`Running: ${command}`);
-    execSync(command, { stdio: "inherit", cwd: PROJECT_ROOT });
-    return true;
-  } catch (error) {
-    log(`Command failed: ${command}`, "error");
-    return false;
-  }
-}
+// --- Step 1: Build (safe for Vercel) ---
+function build() {
+  log("Building Vite app...");
 
-function findFiles(pattern, description) {
-  log(`Searching for ${description} using pattern: ${pattern}`);
   try {
-    const files = glob.sync(pattern, {
-      cwd: BUILD_DIR,
-      absolute: true,
-      nodir: true,
-    });
-    log(`Found ${files.length} ${description}`);
-    return files;
+    execSync("npx vite build", { stdio: "inherit" });
+    log("Build complete ✅");
   } catch (err) {
-    log(`Error finding files: ${err.message}`, "error");
-    return [];
-  }
-}
-
-function formatBytes(bytes) {
-  if (!bytes) return "0 Bytes";
-  const sizes = ["Bytes", "KB", "MB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
-}
-
-// --- Step 1: Build ---
-function buildApp() {
-  log("Starting Vite production build");
-  process.env.NODE_ENV = "production";
-
-  if (!runCommand("npm run build")) {
-    log("Build failed", "error");
+    console.error("Build failed ❌");
     process.exit(1);
   }
-
-  log("Build completed successfully", "success");
 }
 
-// --- Step 2: Brotli Compression ---
-async function compressAssets() {
-  log("Starting Brotli compression");
+// --- Step 2: Ensure dist exists ---
+function ensureDist() {
+  if (!fs.existsSync(DIST)) {
+    console.error("dist folder not found ❌");
+    process.exit(1);
+  }
+}
 
-  const patterns = [
-    "assets/**/*.js",
-    "assets/**/*.css",
-    "*.html",
-    "*.json",
-    "*.svg",
-  ];
+// --- Step 3: Compress ---
+async function compress() {
+  log("Compressing assets (brotli)...");
 
-  const files = patterns.flatMap((p) => findFiles(p, "assets"));
+  const files = glob.sync("dist/**/*.{js,css,html,svg,json}", {
+    absolute: true,
+  });
 
-  if (files.length === 0) {
-    log("No files found for compression", "warn");
+  if (!files.length) {
+    log("No files to compress ⚠");
     return;
   }
 
-  let success = 0;
-
   await Promise.all(
     files.map(async (file) => {
-      const output = `${file}.br`;
+      const output = file + ".br";
 
       try {
         const source = fs.createReadStream(file);
@@ -115,64 +64,43 @@ async function compressAssets() {
 
         await pipeline(source, brotli, dest);
 
-        const original = fs.statSync(file).size;
-        const compressed = fs.statSync(output).size;
-
-        log(
-          `Compressed: ${path.basename(file)} (${formatBytes(original)} → ${formatBytes(compressed)})`,
-          "success",
-        );
-
-        success++;
+        log(`✔ ${path.basename(file)}`);
       } catch (err) {
-        log(`Failed: ${file}`, "error");
+        console.error(`✗ Failed: ${file}`);
       }
     }),
   );
 
-  log(`Brotli compression done: ${success} files`, "success");
+  log("Compression done 🚀");
 }
 
-// --- Step 3: Report ---
-function generateReport(startTime) {
-  log("Generating optimization report");
+// --- Step 4: Report ---
+function report(start) {
+  const duration = ((Date.now() - start) / 1000).toFixed(2);
 
-  const jsFiles = findFiles("assets/**/*.js", "JS files");
-  const cssFiles = findFiles("assets/**/*.css", "CSS files");
+  const files = glob.sync("dist/**/*.{js,css}", { absolute: true });
 
-  const report = {
-    date: new Date().toISOString(),
-    duration: `${((Date.now() - startTime) / 1000).toFixed(2)}s`,
-    js: jsFiles.map((f) => ({
-      file: path.basename(f),
-      size: formatBytes(fs.statSync(f).size),
-    })),
-    css: cssFiles.map((f) => ({
-      file: path.basename(f),
-      size: formatBytes(fs.statSync(f).size),
-    })),
-  };
+  const stats = files.map((f) => ({
+    file: path.basename(f),
+    size: (fs.statSync(f).size / 1024).toFixed(2) + " KB",
+  }));
 
-  const reportPath = path.join(BUILD_DIR, "report.json");
-  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  fs.writeFileSync(
+    path.join(DIST, "report.json"),
+    JSON.stringify({ duration, files: stats }, null, 2),
+  );
 
-  log(`Report saved: dist/report.json`, "success");
+  log("Report generated 📊");
 }
 
 // --- Main ---
-async function run() {
+(async () => {
   const start = Date.now();
 
-  log(`Starting optimization in ${PROJECT_ROOT}`);
-  log(`Node: ${process.version}`);
+  build(); // build once
+  ensureDist(); // verify output
+  await compress(); // optimize
+  report(start); // summary
 
-  buildApp();
-  await compressAssets();
-  generateReport(start);
-
-  log("Build + optimization complete 🚀", "success");
-}
-
-run().catch((err) => {
-  log(err.message, "error");
-});
+  log("Done 🎉");
+})();
