@@ -41,9 +41,8 @@ export const Contact = () => {
       ref={ref}
       id="contact"
       style={{
-        borderTop: `1px solid ${t.fg_(0.08)}`,
+        borderTop: "1px solid var(--border)",
         padding: "8rem 2rem",
-        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -132,7 +131,7 @@ export const Contact = () => {
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "1rem 0",
-                    borderBottom: `1px solid ${t.fg_(0.08)}`,
+                    borderBottom: "1px solid var(--border)",
                     textDecoration: "none",
                     opacity: visible ? 1 : 0,
                     transform: visible ? "none" : "translateY(8px)",

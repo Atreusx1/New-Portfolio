@@ -86,7 +86,7 @@ const AppInner = () => {
 
       <footer
         style={{
-          borderTop: `1px solid ${t.fg_(0.08)}`,
+          borderTop: "1px solid var(--border)",
           padding: "2rem",
           display: "flex",
           alignItems: "center",

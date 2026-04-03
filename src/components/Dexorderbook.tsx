@@ -446,7 +446,7 @@ export const DEXOrderBook = () => {
                 border: `1px solid ${pairIdx === i ? t.ac_(0.25) : "transparent"}`,
                 borderRight:
                   i < PAIRS.length - 1
-                    ? `1px solid ${t.fg_(0.06)}`
+                    ? "1px solid var(--border-subtle)"
                     : `1px solid ${pairIdx === i ? t.ac_(0.25) : "transparent"}`,
                 transition: "all 0.2s ease",
                 cursor: "crosshair",
@@ -491,7 +491,7 @@ export const DEXOrderBook = () => {
           alignItems: "flex-start",
           justifyContent: "space-between",
           padding: "0.6rem 0.9rem",
-          borderBottom: `1px solid ${t.fg_(0.06)}`,
+          borderBottom: "1px solid var(--border-subtle)",
           flexWrap: "wrap",
           gap: "0.75rem",
           background: t.terminalStatsBg,
@@ -583,7 +583,7 @@ export const DEXOrderBook = () => {
       <div
         style={{
           display: "flex",
-          borderBottom: `1px solid ${t.fg_(0.07)}`,
+          borderBottom: "1px solid var(--border-mid)",
         }}
       >
         {(["book", "depth", "trades"] as const).map((t2) => (
@@ -656,7 +656,7 @@ export const DEXOrderBook = () => {
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr 1fr",
                 padding: "0.28rem 0.75rem",
-                borderBottom: `1px solid ${t.fg_(0.05)}`,
+                borderBottom: "1px solid var(--border-faint)",
               }}
             >
               {["Price (USDT)", "Size", "Total"].map((h) => (
@@ -824,7 +824,7 @@ export const DEXOrderBook = () => {
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr 1fr",
                 padding: "0.28rem 0.75rem",
-                borderBottom: `1px solid ${t.fg_(0.05)}`,
+                borderBottom: "1px solid var(--border-faint)",
               }}
             >
               {["Price", "Size", "Time"].map((h) => (
@@ -864,7 +864,7 @@ export const DEXOrderBook = () => {
                       display: "grid",
                       gridTemplateColumns: "1fr 1fr 1fr",
                       padding: "0.22rem 0.75rem",
-                      borderBottom: `1px solid ${t.fg_(0.04)}`,
+                      borderBottom: "1px solid var(--border-faint)",
                       animation: i === 0 ? "fadeIn 0.25s ease" : undefined,
                     }}
                   >
@@ -915,7 +915,7 @@ export const DEXOrderBook = () => {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "0.4rem 0.9rem",
-          borderTop: `1px solid ${t.fg_(0.06)}`,
+          borderTop: "1px solid var(--border-subtle)",
           background: t.ac_(0.015),
           flexWrap: "wrap",
           gap: "0.4rem",

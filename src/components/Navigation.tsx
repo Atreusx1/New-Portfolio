@@ -86,7 +86,7 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
           opacity: mounted ? 1 : 0,
         }}
       >
-        <div style={{ height: "1px", background: t.fg_(0.08) }} />
+        <div style={{ height: "1px", background: "var(--border)" }} />
 
         <div
           style={{
@@ -227,7 +227,7 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
                         <div
                           style={{
                             padding: "0.75rem 1rem",
-                            borderBottom: `1px solid ${t.fg_(0.07)}`,
+                            borderBottom: "1px solid var(--border-mid)",
                           }}
                         >
                           <div
@@ -266,7 +266,7 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
                             padding: "0.65rem 1rem",
                             background: "transparent",
                             border: "none",
-                            borderBottom: `1px solid ${t.fg_(0.07)}`,
+                            borderBottom: "1px solid var(--border-mid)",
                             color: t.fg_(0.5),
                             fontFamily: "Space Mono, monospace",
                             fontSize: "0.6rem",
@@ -298,7 +298,7 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
                             alignItems: "center",
                             gap: "0.6rem",
                             padding: "0.65rem 1rem",
-                            borderBottom: `1px solid ${t.fg_(0.07)}`,
+                            borderBottom: "1px solid var(--border-mid)",
                             color: t.fg_(0.5),
                             fontFamily: "Space Mono, monospace",
                             fontSize: "0.6rem",
@@ -422,7 +422,7 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
           </div>
         </div>
 
-        <div style={{ height: "1px", background: t.fg_(0.08) }} />
+        <div style={{ height: "1px", background: "var(--border)" }} />
 
         <style>{`
           @media (max-width: 768px) {

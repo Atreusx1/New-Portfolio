@@ -37,9 +37,8 @@ export const About = () => {
       ref={ref}
       id="about"
       style={{
-        borderTop: `1px solid ${t.fg_(0.08)}`,
+        borderTop: "1px solid var(--border)",
         padding: "8rem 2rem",
-        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -135,8 +134,7 @@ export const About = () => {
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 1fr)",
                 marginBottom: "3rem",
-                border: `1px solid ${t.fg_(0.08)}`,
-                transition: "border-color 0.35s ease",
+                border: "1px solid var(--border)",
               }}
             >
               {stats.map((s, i) => (
@@ -145,10 +143,7 @@ export const About = () => {
                   style={{
                     padding: "1.5rem 1rem",
                     borderRight:
-                      i < stats.length - 1
-                        ? `1px solid ${t.fg_(0.08)}`
-                        : "none",
-                    transition: "border-color 0.35s ease",
+                      i < stats.length - 1 ? "1px solid var(--border)" : "none",
                   }}
                 >
                   <div
@@ -183,8 +178,7 @@ export const About = () => {
             {/* Traits */}
             <div
               style={{
-                borderTop: `1px solid ${t.fg_(0.08)}`,
-                transition: "border-color 0.35s ease",
+                borderTop: "1px solid var(--border)",
               }}
             >
               {traits.map((trait, i) => (
@@ -195,7 +189,7 @@ export const About = () => {
                     alignItems: "center",
                     gap: "1rem",
                     padding: "0.85rem 0",
-                    borderBottom: `1px solid ${t.fg_(0.08)}`,
+                    borderBottom: "1px solid var(--border)",
                     fontFamily: "Space Mono, monospace",
                     fontSize: "0.75rem",
                     color: t.fg_(0.55),

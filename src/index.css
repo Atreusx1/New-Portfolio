@@ -7,7 +7,13 @@
   --fg: #e2e2e2;
   --fg-dim: rgba(226, 226, 226, 0.45);
   --fg-muted: rgba(226, 226, 226, 0.15);
-  --border: rgba(226, 226, 226, 0.08);
+  /* Solid equivalents of rgba(226,226,226,N) composited over #080808.
+     Same perceived color, but opaque — the animated SectionCanvas
+     cannot bleed through section borders in dark mode. */
+  --border: #191919;
+  --border-mid: #171717;
+  --border-subtle: #151515;
+  --border-faint: #121212;
   --border-active: rgba(226, 226, 226, 0.25);
   --accent: rgb(151, 252, 228);
   --accent-dim: rgba(151, 252, 228, 0.45);
@@ -24,6 +30,9 @@ html[data-theme="light"] {
   --fg-dim: rgba(10, 32, 24, 0.65);
   --fg-muted: rgba(10, 32, 24, 0.3);
   --border: rgba(10, 32, 24, 0.1);
+  --border-mid: rgba(10, 32, 24, 0.08);
+  --border-subtle: rgba(10, 32, 24, 0.06);
+  --border-faint: rgba(10, 32, 24, 0.04);
   --border-active: rgba(10, 32, 24, 0.35);
   --accent: rgb(0, 180, 130); /* vivid teal — clear on mint bg */
   --accent-dim: rgba(0, 180, 130, 0.5);
@@ -82,7 +91,9 @@ button {
 body::after {
   content: "";
   position: fixed;
-  inset: 0;
+  /* Oversize by 10% on each side so the ±3-4% translate in @keyframes grain
+     can never slide the grain layer off the viewport edge */
+  inset: -10%;
   z-index: 9999;
   pointer-events: none;
   opacity: 0.035;

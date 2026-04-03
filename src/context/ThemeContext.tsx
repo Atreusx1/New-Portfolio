@@ -12,9 +12,12 @@ export type ThemeMode = "dark" | "light";
 // Dark: classic light-on-dark with mint teal accent
 const DARK_FG = "226,226,226";
 const DARK_AC = "151,252,228";
-// Light: Hyperliquid-style — near-black teal text on mint seafoam bg
-const LIGHT_FG = "10,32,24"; // near-black with green tint — high contrast on mint
-const LIGHT_AC = "0,180,130"; // vivid emerald — readable against mint bg
+
+// COMPLIMENTARY LIGHT THEME: "CEMENT & OBSIDIAN"
+// Deep obsidian-charcoal for text
+const LIGHT_FG = "18, 20, 20";
+// Desaturated Spruce — a sophisticated version of the dark mint for light surfaces
+const LIGHT_AC = "12, 84, 76";
 
 export interface Theme {
   mode: ThemeMode;
@@ -55,30 +58,31 @@ const buildTheme = (mode: ThemeMode, toggle: () => void): Theme => {
   const fg_ = (a: number) => `rgba(${fgRaw},${a})`;
   const ac_ = (a: number) => `rgba(${accentRaw},${a})`;
 
-  // Light surfaces: mint seafoam family (Hyperliquid-inspired)
-  const MINT_BG = "#dbfbf6";
-  const MINT_BG2 = "#bdfce8";
-  const MINT_BG3 = "#a0ead8";
+  // Cement surfaces: Matte, low-glare neutrals
+  const CEMENT_BG = "#dcdedc"; // A solid, warm gray base
+  const CEMENT_BG2 = "#ced1ce"; // Slightly deeper concrete
+  const CEMENT_BG3 = "#bfc4bf"; // Inset/Dimmed surface
 
   return {
     mode,
     isDark,
     toggle,
-    bg: isDark ? "#080808" : MINT_BG,
-    bg2: isDark ? "#111111" : MINT_BG2,
-    fg: isDark ? "#e2e2e2" : "#0a2018",
+    bg: isDark ? "#080808" : CEMENT_BG,
+    bg2: isDark ? "#111111" : CEMENT_BG2,
+    fg: isDark ? "#e2e2e2" : `rgb(${LIGHT_FG})`,
     fgRaw,
     accentRaw,
     accent: isDark ? `rgb(${DARK_AC})` : `rgb(${LIGHT_AC})`,
-    navBg: isDark ? "rgba(8,8,8,0.88)" : "rgba(211, 248, 241, 0.92)",
-    cardBg: isDark ? "#111111" : MINT_BG2,
-    cardBgDim: isDark ? "#0b0b0b" : MINT_BG3,
-    terminalBg: isDark ? "rgba(8,8,8,0.72)" : "rgba(211, 248, 241, 0.92)",
+    navBg: isDark ? "rgba(8,8,8,0.88)" : "rgba(220, 222, 220, 0.94)",
+    cardBg: isDark ? "#111111" : CEMENT_BG2,
+    cardBgDim: isDark ? "#0b0b0b" : CEMENT_BG3,
+    // Terminal: "Matte Paper" look to kill the blue-light glare
+    terminalBg: isDark ? "rgba(8,8,8,0.72)" : "rgba(255, 255, 255, 0.75)",
     terminalHeaderBg: isDark
       ? "rgba(151,252,228,0.025)"
-      : "rgba(0,180,130,0.08)",
-    terminalStatsBg: isDark ? "rgba(0,0,0,0.30)" : "rgba(0,0,0,0.04)",
-    terminalRowBg: isDark ? "rgba(8,8,8,0.82)" : "rgba(202,247,238,0.82)",
+      : "rgba(12, 84, 76, 0.1)",
+    terminalStatsBg: isDark ? "rgba(0,0,0,0.30)" : "rgba(0, 0, 0, 0.05)",
+    terminalRowBg: isDark ? "rgba(8,8,8,0.82)" : "rgba(255, 255, 255, 0.3)",
     fg_,
     ac_,
   };

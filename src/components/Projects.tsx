@@ -82,9 +82,8 @@ export const Projects = () => {
       ref={ref}
       id="projects"
       style={{
-        borderTop: `1px solid ${t.fg_(0.08)}`,
+        borderTop: "1px solid var(--border)",
         padding: "8rem 0",
-        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 2rem" }}>
@@ -203,11 +202,11 @@ export const Projects = () => {
           style={{
             display: "flex",
             marginBottom: "3.5rem",
-            border: `1px solid ${t.fg_(0.08)}`,
+            border: "1px solid var(--border)",
             width: "fit-content",
             flexWrap: "wrap",
             opacity: visible ? 1 : 0,
-            transition: "opacity 0.7s ease 0.15s, border-color 0.35s ease",
+            transition: "opacity 0.7s ease 0.15s",
           }}
         >
           {ALL_TABS.map((cat, i) => {
@@ -232,7 +231,7 @@ export const Projects = () => {
                   border: "none",
                   borderRight:
                     i < ALL_TABS.length - 1
-                      ? `1px solid ${t.fg_(0.08)}`
+                      ? "1px solid var(--border)"
                       : "none",
                   transition: "all 0.2s ease",
                   fontWeight: isActive ? 700 : 400,

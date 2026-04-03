@@ -31,9 +31,8 @@ export const Skills = () => {
       ref={ref}
       id="skills"
       style={{
-        borderTop: `1px solid ${t.fg_(0.08)}`,
+        borderTop: "1px solid var(--border)",
         padding: "8rem 2rem",
-        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -82,8 +81,7 @@ export const Skills = () => {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
-            border: `1px solid ${t.fg_(0.08)}`,
-            transition: "border-color 0.35s ease",
+            border: "1px solid var(--border)",
           }}
           className="skills-grid"
         >
@@ -91,7 +89,7 @@ export const Skills = () => {
             <div
               key={cat.key}
               style={{
-                borderRight: ci < 3 ? `1px solid ${t.fg_(0.08)}` : "none",
+                borderRight: ci < 3 ? "1px solid var(--border)" : "none",
                 padding: "2rem",
                 opacity: visible ? 1 : 0,
                 transform: visible ? "none" : "translateY(16px)",
@@ -103,7 +101,7 @@ export const Skills = () => {
                 style={{
                   marginBottom: "1.5rem",
                   paddingBottom: "1rem",
-                  borderBottom: `1px solid ${t.fg_(0.08)}`,
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 <div

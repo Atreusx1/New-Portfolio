@@ -24,9 +24,8 @@ export const Experience = () => {
       ref={ref}
       id="experience"
       style={{
-        borderTop: `1px solid ${t.fg_(0.08)}`,
+        borderTop: "1px solid var(--border)",
         padding: "8rem 2rem",
-        transition: "border-color 0.35s ease",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -80,7 +79,7 @@ export const Experience = () => {
               top: 0,
               bottom: 0,
               width: "1px",
-              background: t.fg_(0.08),
+              background: "var(--border)",
               transformOrigin: "top",
               transform: visible ? "scaleY(1)" : "scaleY(0)",
               transition: "transform 1s ease 0.3s",
@@ -116,7 +115,7 @@ const ExperienceRow = ({
         gridTemplateColumns: "6rem 1fr",
         gap: "2rem",
         padding: "2rem 0",
-        borderBottom: `1px solid ${t.fg_(0.08)}`,
+        borderBottom: "1px solid var(--border)",
         opacity: visible ? 1 : 0,
         transform: visible ? "none" : "translateY(16px)",
         transition: `all 0.6s ease ${0.2 + index * 0.1}s`,

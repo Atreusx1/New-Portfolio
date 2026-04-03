@@ -254,8 +254,14 @@ export const SectionCanvas = () => {
 
     let W = window.innerWidth;
     let H = window.innerHeight;
-    canvas.width = W;
-    canvas.height = H;
+
+    // ── DPR scaling — prevents blurry/shimmering edges on retina displays ──
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = `${W}px`;
+    canvas.style.height = `${H}px`;
+    ctx.scale(dpr, dpr);
 
     let nodes = makeNodes(W, H);
 
@@ -266,8 +272,12 @@ export const SectionCanvas = () => {
     const resize = () => {
       W = window.innerWidth;
       H = window.innerHeight;
-      canvas.width = W;
-      canvas.height = H;
+      // Re-apply DPR — setting canvas.width resets the context transform
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width = `${W}px`;
+      canvas.style.height = `${H}px`;
+      ctx.scale(dpr, dpr);
       nodes = makeNodes(W, H);
     };
 
@@ -287,7 +297,11 @@ export const SectionCanvas = () => {
     let raf: number;
 
     const draw = () => {
-      ctx.clearRect(0, 0, W, H);
+      // Fill with page background instead of clearRect — eliminates the
+      // transparent-surface flash at viewport edges between frames.
+      const bgColor = isDarkRef.current ? "#080808" : "#caf7ee";
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, W, H);
       const ac = accentRef.current;
       const isDark = isDarkRef.current;
       const mouse = mouseRef.current;
@@ -383,10 +397,10 @@ export const SectionCanvas = () => {
       style={{
         position: "fixed",
         inset: 0,
-        width: "100%",
-        height: "100%",
         pointerEvents: "none",
         zIndex: 0,
+        // Matches --bg so there's no flash before the first draw frame
+        backgroundColor: "var(--bg)",
       }}
     />
   );
