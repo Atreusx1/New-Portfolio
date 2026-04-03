@@ -227,7 +227,11 @@ export const Projects = () => {
                       ? t.accent // DEX tab uses solid accent
                       : t.accent
                     : "transparent",
-                  color: isActive ? t.bg : isDex ? t.ac_(0.6) : t.fg_(0.4),
+                  color: isActive
+                    ? "var(--bg)"
+                    : isDex
+                      ? t.ac_(0.6)
+                      : t.fg_(0.4),
                   border: "none",
                   borderRight:
                     i < ALL_TABS.length - 1

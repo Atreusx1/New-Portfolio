@@ -95,7 +95,7 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
             justifyContent: "space-between",
             padding: "0 2rem",
             height: "52px",
-            background: t.navBg,
+            background: "var(--bg)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
             transition: "background 0.35s ease",

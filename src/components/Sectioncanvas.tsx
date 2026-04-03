@@ -297,11 +297,10 @@ export const SectionCanvas = () => {
     let raf: number;
 
     const draw = () => {
-      // Fill with page background instead of clearRect — eliminates the
-      // transparent-surface flash at viewport edges between frames.
-      const bgColor = isDarkRef.current ? "#080808" : "#caf7ee";
-      ctx.fillStyle = bgColor;
-      ctx.fillRect(0, 0, W, H);
+      // clearRect makes canvas pixels transparent — the CSS backgroundColor
+      // (var(--bg)) on the canvas element shows through, so we never need
+      // to hardcode a color here and it stays in sync with theme switches.
+      ctx.clearRect(0, 0, W, H);
       const ac = accentRef.current;
       const isDark = isDarkRef.current;
       const mouse = mouseRef.current;

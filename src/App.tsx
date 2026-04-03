@@ -53,7 +53,7 @@ const AppInner = () => {
     <div
       style={{
         minHeight: "100vh",
-        background: t.bg,
+        background: "var(--bg)",
         transition: "background 0.35s ease",
       }}
     >
@@ -67,7 +67,7 @@ const AppInner = () => {
           style={{
             position: "relative",
             zIndex: 1,
-            background: t.bg,
+            background: "var(--bg)",
             transition: "background 0.35s ease",
           }}
         >
