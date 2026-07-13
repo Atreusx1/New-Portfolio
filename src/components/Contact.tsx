@@ -179,8 +179,13 @@ export const Contact = () => {
 
             {/* Resume */}
             <div style={{ marginTop: "2rem" }}>
-              <a href="#" className="btn-outline">
-                Download Resume <ArrowUpRight size={12} />
+              <a
+                href="/resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline"
+              >
+                View Resume <ArrowUpRight size={12} />
               </a>
             </div>
           </div>
