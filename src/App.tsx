@@ -1,6 +1,17 @@
+/**
+ * App.tsx — reference wiring for the redesign.
+ *
+ * Boot plays once per session, then the portfolio fades in over the
+ * living blockchain-universe canvas. Section order is compressed:
+ * Hero → About → Projects → Skills → Experience → Contact, each at
+ * roughly half its previous height.
+ */
 import { useEffect, useState } from "react";
-import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { WalletProvider } from "./components/WalletContext";
+import { Boot } from "./components/Boot";
+import { SectionCanvas } from "./components/Sectioncanvas";
+import { FloatingParticles } from "./components/FloatingParticles";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./components/Hero";
 import { About } from "./components/About";
@@ -8,127 +19,81 @@ import { Projects } from "./components/Projects";
 import { Skills } from "./components/Skills";
 import { Experience } from "./components/Experience";
 import { Contact } from "./components/Contact";
-import { FloatingParticles } from "./components/FloatingParticles";
-import { SectionCanvas } from "./components/Sectioncanvas";
 
-// ── Inner app consumes theme ──────────────────────────────────────────────────
-const AppInner = () => {
-  const t = useTheme();
-  const [activeSection, setActiveSection] = useState("home");
+const SECTION_IDS = ["home", "about", "projects", "skills", "experience", "contact"] as const;
 
+const App = () => {
+  const [booted, setBooted] = useState(false);
+  const [active, setActive] = useState("home");
+
+  // Scroll-spy for the nav indicator.
   useEffect(() => {
-    const sections = [
-      "home",
-      "about",
-      "projects",
-      "skills",
-      "experience",
-      "contact",
-    ];
-    const handleScroll = () => {
-      for (const id of sections) {
-        const el = document.getElementById(id);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (
-            rect.top <= window.innerHeight / 2 &&
-            rect.bottom >= window.innerHeight / 2
-          ) {
-            setActiveSection(id);
-            break;
-          }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActive(e.target.id);
         }
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+      },
+      { rootMargin: "-40% 0px -55% 0px" },
+    );
+    for (const id of SECTION_IDS) {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    }
+    return () => obs.disconnect();
+  }, [booted]);
 
-  const handleNavigate = (id: string) => {
+  const navigate = (id: string): void => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    setActiveSection(id);
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--bg)",
-        transition: "background 0.35s ease",
-      }}
-    >
-      <SectionCanvas />
-      <FloatingParticles />
-      <Navigation onNavigate={handleNavigate} activeSection={activeSection} />
+    <ThemeProvider>
+      <WalletProvider>
+        {!booted && <Boot onDone={() => setBooted(true)} />}
 
-      <main style={{ paddingTop: "53px" }}>
-        {/* Hero: solid bg so it fully masks the SectionCanvas below */}
+        <SectionCanvas />
+        <FloatingParticles />
+
         <div
           style={{
             position: "relative",
             zIndex: 1,
-            background: "var(--bg)",
-            transition: "background 0.35s ease",
+            opacity: booted ? 1 : 0,
+            transition: "opacity 0.8s ease",
           }}
         >
-          <Hero />
+          <Navigation onNavigate={navigate} activeSection={active} />
+          <main>
+            <Hero />
+            <About />
+            <Projects />
+            <Skills />
+            <Experience />
+            <Contact />
+          </main>
+          <footer
+            style={{
+              borderTop: "1px solid var(--border-subtle)",
+              padding: "2rem",
+              textAlign: "center",
+            }}
+          >
+            <span
+              className="data-text"
+              style={{
+                fontSize: "0.6rem",
+                letterSpacing: "0.14em",
+                color: "var(--fg-muted)",
+              }}
+            >
+              © {new Date().getFullYear()} ANISH KADAM · BUILT ON-CHAIN-ISH
+            </span>
+          </footer>
         </div>
-
-        {/* Non-hero sections: transparent bg — SectionCanvas shows through */}
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <About />
-          <Projects />
-          <Skills />
-          <Experience />
-          <Contact />
-        </div>
-      </main>
-
-      <footer
-        style={{
-          borderTop: "1px solid var(--border)",
-          padding: "2rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          maxWidth: "1200px",
-          margin: "0 auto",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "Space Mono, monospace",
-            fontSize: "0.65rem",
-            letterSpacing: "0.1em",
-            color: t.fg_(0.2),
-          }}
-        >
-          © 2025 Anish Kadam
-        </span>
-        <span
-          style={{
-            fontFamily: "Space Mono, monospace",
-            fontSize: "0.65rem",
-            letterSpacing: "0.1em",
-            color: t.fg_(0.2),
-          }}
-        >
-          Built with React
-        </span>
-      </footer>
-    </div>
-  );
-};
-
-// ── Root wraps with both providers ───────────────────────────────────────────
-function App() {
-  return (
-    <ThemeProvider>
-      <WalletProvider>
-        <AppInner />
       </WalletProvider>
     </ThemeProvider>
   );
-}
+};
 
 export default App;

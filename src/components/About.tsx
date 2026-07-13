@@ -1,172 +1,110 @@
-import { useEffect, useRef, useState } from "react";
+/**
+ * About.tsx — redesigned.
+ *
+ * Body copy moves from mono to Inter at a real reading size and width;
+ * stats become quiet cards; traits become chips instead of a numbered
+ * list (the numbers encoded nothing). Section height roughly halved.
+ */
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
+import { Reveal } from "./motion/Reveal";
+
+const PARAGRAPHS = [
+  "I'm a full-stack developer with a deep interest in blockchain and immersive web experiences. Over three years I've shipped everything from high-performance web apps to decentralized systems.",
+  "Lately I've been deep in zkSNARKs, smart contracts, and dApps — building tools for a decentralized future. Off the clock: open source, 3-D graphics, and generative art.",
+] as const;
+
+const STATS = [
+  { num: "3+", label: "Years experience" },
+  { num: "8+", label: "Projects shipped" },
+  { num: "20+", label: "Technologies" },
+] as const;
+
+const TRAITS = [
+  "React & Three.js",
+  "Smart contracts",
+  "zkSNARKs",
+  "Open source",
+  "Generative art",
+] as const;
 
 export const About = () => {
   const t = useTheme();
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) setVisible(true);
-      },
-      { threshold: 0.1 },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
-
-  const stats = [
-    { num: "3+", label: "Years Experience" },
-    { num: "8+", label: "Projects Shipped" },
-    { num: "20+", label: "Technologies" },
-  ];
-
-  const traits = [
-    "React & Three.js Specialist",
-    "Blockchain Developer",
-    "zkSNARKs & Smart Contracts",
-    "Open Source Contributor",
-    "Generative Art Enthusiast",
-  ];
 
   return (
-    <section
-      ref={ref}
-      id="about"
-      style={{
-        borderTop: "1px solid var(--border)",
-        padding: "8rem 2rem",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Section header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            gap: "1.5rem",
-            marginBottom: "5rem",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "none" : "translateY(16px)",
-            transition: "all 0.7s ease",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "Space Mono, monospace",
-              fontSize: "0.6rem",
-              letterSpacing: "0.2em",
-              color: t.fg_(0.25),
-            }}
-          >
-            01
-          </span>
-          <h2
-            style={{
-              fontFamily: "Space Mono, monospace",
-              fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: t.fg,
-              transition: "color 0.35s ease",
-            }}
-          >
-            {visible ? (
-              <ScrambleText text="About" active={visible} speed={35} />
-            ) : (
-              "About"
-            )}
+    <section id="about" className="section">
+      <div className="container">
+        <Reveal className="section-head">
+          <span className="mono-label">About</span>
+          <h2 className="section-title">
+            <ScrambleText text="Builder of decentralized things" active speed={16} />
           </h2>
-        </div>
+        </Reveal>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "6rem",
-            alignItems: "start",
-          }}
-          className="about-grid"
-        >
-          {/* Left — text */}
-          <div
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateY(20px)",
-              transition: "all 0.8s ease 0.2s",
-            }}
-          >
-            {[
-              "I'm a passionate full-stack developer with a deep interest in blockchain technologies and immersive web experiences. With over 3 years of professional experience, I've built diverse projects from high-performance web apps to decentralized systems.",
-              "Recently deep in blockchain development — zkSNARKs, smart contracts, and decentralized applications. I believe the future is decentralized, and I'm building tools to make it possible.",
-              "When not coding: exploring new technologies, contributing to open source, experimenting with 3D graphics and generative art.",
-            ].map((text, i) => (
+        <div className="grid-2">
+          {/* Narrative */}
+          <Reveal delay={0.08}>
+            {PARAGRAPHS.map((text, i) => (
               <p
                 key={i}
-                style={{
-                  fontFamily: "Space Mono, monospace",
-                  fontSize: "0.85rem",
-                  lineHeight: 1.9,
-                  color: t.fg_(0.6),
-                  marginBottom: i < 2 ? "1.5rem" : 0,
-                  transition: "color 0.35s ease",
-                }}
+                className="body-text"
+                style={{ marginBottom: i < PARAGRAPHS.length - 1 ? "1.25rem" : 0 }}
               >
                 {text}
               </p>
             ))}
-          </div>
 
-          {/* Right — stats + traits */}
-          <div
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateY(20px)",
-              transition: "all 0.8s ease 0.35s",
-            }}
-          >
-            {/* Stats */}
+            <div
+              style={{
+                display: "flex",
+                gap: "0.5rem",
+                flexWrap: "wrap",
+                marginTop: "1.75rem",
+              }}
+            >
+              {TRAITS.map((trait) => (
+                <span key={trait} className="chip">
+                  {trait}
+                </span>
+              ))}
+            </div>
+          </Reveal>
+
+          {/* Stats */}
+          <Reveal delay={0.16}>
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 1fr)",
-                marginBottom: "3rem",
-                border: "1px solid var(--border)",
+                gap: "0.9rem",
               }}
             >
-              {stats.map((s, i) => (
+              {STATS.map((s) => (
                 <div
                   key={s.label}
-                  style={{
-                    padding: "1.5rem 1rem",
-                    borderRight:
-                      i < stats.length - 1 ? "1px solid var(--border)" : "none",
-                  }}
+                  className="card"
+                  style={{ padding: "1.4rem 1.1rem" }}
                 >
                   <div
                     style={{
-                      fontFamily: "Space Mono, monospace",
+                      fontFamily: "var(--font-display)",
                       fontSize: "2rem",
-                      fontWeight: 700,
+                      fontWeight: 600,
+                      letterSpacing: "-0.03em",
                       color: t.accent,
                       lineHeight: 1,
-                      marginBottom: "0.4rem",
-                      transition: "color 0.35s ease",
+                      marginBottom: "0.45rem",
                     }}
                   >
                     {s.num}
                   </div>
                   <div
                     style={{
-                      fontFamily: "Space Mono, monospace",
-                      fontSize: "0.6rem",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: t.fg_(0.3),
-                      transition: "color 0.35s ease",
+                      fontFamily: "var(--font-body)",
+                      fontSize: "0.7rem",
+                      fontWeight: 500,
+                      color: t.fg_(0.45),
+                      letterSpacing: "0.02em",
                     }}
                   >
                     {s.label}
@@ -175,46 +113,16 @@ export const About = () => {
               ))}
             </div>
 
-            {/* Traits */}
-            <div
-              style={{
-                borderTop: "1px solid var(--border)",
-              }}
+            <p
+              className="body-text"
+              style={{ marginTop: "1.5rem", fontSize: "0.85rem", color: t.fg_(0.45) }}
             >
-              {traits.map((trait, i) => (
-                <div
-                  key={trait}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "1rem",
-                    padding: "0.85rem 0",
-                    borderBottom: "1px solid var(--border)",
-                    fontFamily: "Space Mono, monospace",
-                    fontSize: "0.75rem",
-                    color: t.fg_(0.55),
-                    letterSpacing: "0.02em",
-                    opacity: visible ? 1 : 0,
-                    transform: visible ? "none" : "translateX(12px)",
-                    transition: `all 0.5s ease ${0.4 + i * 0.07}s`,
-                  }}
-                >
-                  <span style={{ color: t.fg_(0.2), fontSize: "0.6rem" }}>
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  {trait}
-                </div>
-              ))}
-            </div>
-          </div>
+              Currently open to new opportunities — especially anything at the
+              intersection of protocol engineering and product craft.
+            </p>
+          </Reveal>
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          .about-grid { grid-template-columns: 1fr !important; gap: 3rem !important; }
-        }
-      `}</style>
     </section>
   );
 };

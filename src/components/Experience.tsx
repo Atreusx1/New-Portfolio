@@ -1,92 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+/**
+ * Experience.tsx — redesigned.
+ *
+ * The full-width timeline with a 6rem gutter becomes a compact stack of
+ * quiet rows: period in mono (it's data), role in the display face,
+ * description in Inter at reading size. Hover lights the accent rail.
+ */
+import { useState } from "react";
 import { EXPERIENCE } from "../data/constants";
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
+import { Reveal } from "./motion/Reveal";
 
 export const Experience = () => {
-  const t = useTheme();
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) setVisible(true);
-      },
-      { threshold: 0.1 },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
-
   return (
-    <section
-      ref={ref}
-      id="experience"
-      style={{
-        borderTop: "1px solid var(--border)",
-        padding: "8rem 2rem",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            gap: "1.5rem",
-            marginBottom: "5rem",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "none" : "translateY(16px)",
-            transition: "all 0.7s ease",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "Space Mono, monospace",
-              fontSize: "0.6rem",
-              letterSpacing: "0.2em",
-              color: t.fg_(0.25),
-            }}
-          >
-            04
-          </span>
-          <h2
-            style={{
-              fontFamily: "Space Mono, monospace",
-              fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: t.fg,
-              transition: "color 0.35s ease",
-            }}
-          >
-            {visible ? (
-              <ScrambleText text="Experience" active={visible} speed={28} />
-            ) : (
-              "Experience"
-            )}
+    <section id="experience" className="section">
+      <div className="container">
+        <Reveal className="section-head">
+          <span className="mono-label">Experience</span>
+          <h2 className="section-title">
+            <ScrambleText text="Where I've shipped" active speed={20} />
           </h2>
-        </div>
+        </Reveal>
 
-        {/* Timeline */}
-        <div style={{ position: "relative" }}>
-          {/* Vertical line */}
-          <div
-            style={{
-              position: "absolute",
-              left: "6rem",
-              top: 0,
-              bottom: 0,
-              width: "1px",
-              background: "var(--border)",
-              transformOrigin: "top",
-              transform: visible ? "scaleY(1)" : "scaleY(0)",
-              transition: "transform 1s ease 0.3s",
-            }}
-          />
+        <div style={{ maxWidth: "760px" }}>
           {EXPERIENCE.map((exp, i) => (
-            <ExperienceRow key={exp.id} exp={exp} index={i} visible={visible} />
+            <Reveal key={exp.id} delay={0.06 * i}>
+              <ExperienceRow exp={exp} />
+            </Reveal>
           ))}
         </div>
       </div>
@@ -94,15 +34,7 @@ export const Experience = () => {
   );
 };
 
-const ExperienceRow = ({
-  exp,
-  index,
-  visible,
-}: {
-  exp: (typeof EXPERIENCE)[0];
-  index: number;
-  visible: boolean;
-}) => {
+const ExperienceRow = ({ exp }: { exp: (typeof EXPERIENCE)[0] }) => {
   const t = useTheme();
   const [hovered, setHovered] = useState(false);
 
@@ -111,78 +43,78 @@ const ExperienceRow = ({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: "grid",
-        gridTemplateColumns: "6rem 1fr",
-        gap: "2rem",
-        padding: "2rem 0",
-        borderBottom: "1px solid var(--border)",
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(16px)",
-        transition: `all 0.6s ease ${0.2 + index * 0.1}s`,
+        position: "relative",
+        padding: "1.4rem 0 1.4rem 1.5rem",
+        borderBottom: "1px solid var(--border-subtle)",
       }}
     >
-      {/* Period */}
-      <div
+      {/* Accent rail */}
+      <span
+        aria-hidden="true"
         style={{
-          fontFamily: "Space Mono, monospace",
-          fontSize: "0.6rem",
-          letterSpacing: "0.08em",
-          color: t.fg_(0.2),
-          lineHeight: 1.6,
-          textAlign: "right",
-          paddingRight: "2rem",
-          paddingTop: "0.25rem",
+          position: "absolute",
+          left: 0,
+          top: "1.4rem",
+          bottom: "1.4rem",
+          width: 2,
+          borderRadius: 2,
+          background: hovered ? t.accent : "var(--border)",
+          transform: hovered ? "scaleY(1)" : "scaleY(0.6)",
+          transformOrigin: "top",
+          transition:
+            "background 0.25s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1)",
         }}
-      >
-        {exp.period.split(" — ").map((p, i) => (
-          <div key={i}>{p}</div>
-        ))}
-      </div>
+      />
 
-      {/* Content */}
       <div
         style={{
-          paddingLeft: "1.5rem",
-          borderLeft: `1px solid ${hovered ? t.ac_(0.45) : "transparent"}`,
-          transition: "border-color 0.2s ease",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          gap: "1rem",
+          flexWrap: "wrap",
+          marginBottom: "0.3rem",
         }}
       >
-        <div style={{ marginBottom: "0.5rem" }}>
-          <h3
-            style={{
-              fontFamily: "Space Mono, monospace",
-              fontSize: "0.95rem",
-              fontWeight: 700,
-              color: hovered ? t.accent : t.fg_(0.85),
-              letterSpacing: "-0.01em",
-              transition: "color 0.2s ease",
-              marginBottom: "0.2rem",
-            }}
-          >
-            {exp.role}
-          </h3>
+        <h3
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "1.0625rem",
+            fontWeight: 600,
+            letterSpacing: "-0.015em",
+            color: hovered ? t.accent : t.fg,
+            transition: "color 0.2s ease",
+          }}
+        >
+          {exp.role}
           <span
             style={{
-              fontFamily: "Space Mono, monospace",
-              fontSize: "0.7rem",
-              color: t.fg_(0.35),
-              letterSpacing: "0.05em",
+              fontFamily: "var(--font-body)",
+              fontSize: "0.8rem",
+              fontWeight: 450,
+              color: t.fg_(0.45),
+              marginLeft: "0.7rem",
             }}
           >
             {exp.company}
           </span>
-        </div>
-        <p
+        </h3>
+        <span
+          className="data-text"
           style={{
-            fontFamily: "Space Mono, monospace",
-            fontSize: "0.78rem",
-            color: t.fg_(0.4),
-            lineHeight: 1.8,
+            fontSize: "0.62rem",
+            letterSpacing: "0.08em",
+            color: t.fg_(0.35),
+            whiteSpace: "nowrap",
           }}
         >
-          {exp.description}
-        </p>
+          {exp.period}
+        </span>
       </div>
+
+      <p className="body-text" style={{ fontSize: "0.875rem" }}>
+        {exp.description}
+      </p>
     </div>
   );
 };

@@ -1,24 +1,38 @@
-import { useRef, useEffect, useState } from "react";
+/**
+ * Contact.tsx — redesigned.
+ *
+ * Inputs get floating labels + focus rings + inline validation; submit
+ * plays a drawn-check success animation, then opens a pre-filled mailto
+ * (no backend required — swap `submitMessage` for your API later).
+ * Links keep their identity but read in Inter, not mono.
+ */
+import { useState, FormEvent } from "react";
 import { Github, Linkedin, Mail, ArrowUpRight } from "lucide-react";
 import { RESUME } from "../data/constants";
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
+import { Reveal } from "./motion/Reveal";
+import { Magnetic } from "./motion/Magnetic";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+interface FormState {
+  name: string;
+  email: string;
+  message: string;
+}
+
+type FieldKey = keyof FormState;
 
 export const Contact = () => {
   const t = useTheme();
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) setVisible(true);
-      },
-      { threshold: 0.1 },
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
+  const [form, setForm] = useState<FormState>({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
+  const [sent, setSent] = useState(false);
 
   const links = [
     { icon: Github, label: "GitHub", url: RESUME.github, handle: "@Atreusx1" },
@@ -26,7 +40,7 @@ export const Contact = () => {
       icon: Linkedin,
       label: "LinkedIn",
       url: RESUME.linkedin,
-      handle: "Anish kadam",
+      handle: "Anish Kadam",
     },
     {
       icon: Mail,
@@ -34,228 +48,306 @@ export const Contact = () => {
       url: `mailto:${RESUME.email}`,
       handle: RESUME.email,
     },
-  ];
+  ] as const;
+
+  const set =
+    (key: FieldKey) =>
+    (value: string): void => {
+      setForm((f) => ({ ...f, [key]: value }));
+      setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
+    };
+
+  const validate = (): boolean => {
+    const next: Partial<Record<FieldKey, string>> = {};
+    if (!form.name.trim()) next.name = "Add your name";
+    if (!EMAIL_RE.test(form.email)) next.email = "Enter a valid email";
+    if (form.message.trim().length < 8) next.message = "Say a little more";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const submitMessage = (e: FormEvent): void => {
+    e.preventDefault();
+    if (!validate()) return;
+    setSent(true);
+    const subject = encodeURIComponent(`Portfolio — ${form.name}`);
+    const body = encodeURIComponent(
+      `${form.message}\n\n— ${form.name} (${form.email})`,
+    );
+    // Open the visitor's mail client pre-filled; swap for an API call later.
+    window.setTimeout(() => {
+      window.location.href = `mailto:${RESUME.email}?subject=${subject}&body=${body}`;
+    }, 900);
+  };
 
   return (
-    <section
-      ref={ref}
-      id="contact"
-      style={{
-        borderTop: "1px solid var(--border)",
-        padding: "8rem 2rem",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            gap: "1.5rem",
-            marginBottom: "5rem",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "none" : "translateY(16px)",
-            transition: "all 0.7s ease",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "Space Mono, monospace",
-              fontSize: "0.6rem",
-              letterSpacing: "0.2em",
-              color: t.fg_(0.25),
-            }}
-          >
-            05
-          </span>
-          <h2
-            style={{
-              fontFamily: "Space Mono, monospace",
-              fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: t.fg,
-              transition: "color 0.35s ease",
-            }}
-          >
-            {visible ? (
-              <ScrambleText text="Contact" active={visible} speed={35} />
-            ) : (
-              "Contact"
-            )}
+    <section id="contact" className="section">
+      <div className="container">
+        <Reveal className="section-head">
+          <span className="mono-label">Contact</span>
+          <h2 className="section-title">
+            <ScrambleText text="Let's build something" active speed={20} />
           </h2>
-        </div>
+        </Reveal>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "6rem",
-            alignItems: "start",
-          }}
-          className="contact-grid"
-        >
-          {/* Left */}
-          <div
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateY(16px)",
-              transition: "all 0.7s ease 0.2s",
-            }}
-          >
-            <p
-              style={{
-                fontFamily: "Space Mono, monospace",
-                fontSize: "0.85rem",
-                lineHeight: 1.9,
-                color: t.fg_(0.5),
-                marginBottom: "3rem",
-                transition: "color 0.35s ease",
-              }}
-            >
-              Open to new opportunities, collaborations, and conversations.
-              <br />
-              Reach out through any channel below.
+        <div className="grid-2">
+          {/* Left — channels */}
+          <Reveal delay={0.06}>
+            <p className="body-text" style={{ marginBottom: "2rem" }}>
+              Open to new opportunities, collaborations, and good conversations.
+              Pick whichever channel suits you.
             </p>
 
-            {/* Links */}
             <div style={{ display: "flex", flexDirection: "column" }}>
-              {links.map((link, i) => (
+              {links.map((link) => (
                 <a
                   key={link.label}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="contact-link"
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    padding: "1rem 0",
-                    borderBottom: "1px solid var(--border)",
+                    padding: "0.95rem 0.25rem",
+                    borderBottom: "1px solid var(--border-subtle)",
                     textDecoration: "none",
-                    opacity: visible ? 1 : 0,
-                    transform: visible ? "none" : "translateY(8px)",
-                    transition: `all 0.5s ease ${0.3 + i * 0.08}s`,
                     color: "inherit",
+                    borderRadius: "6px",
+                    transition: "background 0.2s ease",
                   }}
-                  className="contact-link"
                 >
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "1rem",
+                      gap: "0.9rem",
                     }}
                   >
-                    <link.icon size={14} style={{ color: t.fg_(0.3) }} />
+                    <link.icon size={15} style={{ color: t.fg_(0.35) }} />
                     <div>
                       <div
                         style={{
-                          fontFamily: "Space Mono, monospace",
-                          fontSize: "0.65rem",
-                          letterSpacing: "0.12em",
-                          textTransform: "uppercase",
-                          color: t.fg_(0.25),
-                          marginBottom: "0.1rem",
+                          fontFamily: "var(--font-body)",
+                          fontSize: "0.7rem",
+                          fontWeight: 550,
+                          color: t.fg_(0.4),
+                          marginBottom: "0.05rem",
                         }}
                       >
                         {link.label}
                       </div>
                       <div
-                        style={{
-                          fontFamily: "Space Mono, monospace",
-                          fontSize: "0.78rem",
-                          color: t.fg_(0.7),
-                        }}
+                        className="data-text"
+                        style={{ fontSize: "0.75rem", color: t.fg_(0.75) }}
                       >
                         {link.handle}
                       </div>
                     </div>
                   </div>
-                  <ArrowUpRight size={12} style={{ color: t.fg_(0.2) }} />
+                  <ArrowUpRight size={13} style={{ color: t.fg_(0.25) }} />
                 </a>
               ))}
             </div>
 
-            {/* Resume */}
-            <div style={{ marginTop: "2rem" }}>
-              <a
-                href="/resume.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-outline"
-              >
-                View Resume <ArrowUpRight size={12} />
-              </a>
+            <div style={{ marginTop: "1.75rem" }}>
+              <Magnetic strength={7}>
+                <a
+                  href="/resume.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline"
+                >
+                  View Resume <ArrowUpRight size={12} />
+                </a>
+              </Magnetic>
             </div>
-          </div>
+          </Reveal>
 
           {/* Right — form */}
-          <div
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateY(16px)",
-              transition: "all 0.7s ease 0.35s",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1px",
-                background: t.fg_(0.08),
-              }}
-            >
-              <input
-                type="text"
-                placeholder="Name"
-                style={{ background: t.bg }}
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                style={{ background: t.bg }}
-              />
-              <textarea
-                placeholder="Message"
-                rows={5}
-                style={{ background: t.bg }}
-              />
-              <button
-                type="button"
+          <Reveal delay={0.14}>
+            {sent ? (
+              <SuccessState accent={t.accent} fg={t.fg} fgDim={t.fg_(0.55)} />
+            ) : (
+              <form
+                onSubmit={submitMessage}
+                noValidate
                 style={{
-                  fontFamily: "Space Mono, monospace",
-                  fontSize: "0.7rem",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  padding: "1rem",
-                  background: t.accent,
-                  color: t.bg,
-                  border: "none",
-                  cursor: "crosshair",
-                  transition: "background 0.2s ease, color 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLButtonElement).style.opacity = "0.8";
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLButtonElement).style.opacity = "1";
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.8rem",
                 }}
               >
-                Send Message →
-              </button>
-            </div>
-          </div>
+                <Field
+                  id="contact-name"
+                  label="Name"
+                  value={form.name}
+                  error={errors.name}
+                  onChange={set("name")}
+                />
+                <Field
+                  id="contact-email"
+                  label="Email"
+                  type="email"
+                  value={form.email}
+                  error={errors.email}
+                  onChange={set("email")}
+                />
+                <Field
+                  id="contact-message"
+                  label="Message"
+                  value={form.message}
+                  error={errors.message}
+                  onChange={set("message")}
+                  rows={5}
+                />
+                <Magnetic strength={6} style={{ alignSelf: "flex-start" }}>
+                  <button type="submit" className="btn btn-primary">
+                    Send message <ArrowUpRight size={13} />
+                  </button>
+                </Magnetic>
+              </form>
+            )}
+          </Reveal>
         </div>
       </div>
 
-      <style>{`
-        .contact-link:hover { opacity: 1 !important; }
-        .contact-link:hover svg:last-child { color: var(--accent) !important; }
-        @media (max-width: 768px) {
-          .contact-grid { grid-template-columns: 1fr !important; gap: 3rem !important; }
-        }
-      `}</style>
+      <style>{`.contact-link:hover { background: var(--border-faint); }`}</style>
     </section>
   );
 };
+
+// ── Floating-label field ──────────────────────────────────────────────────────
+const Field = ({
+  id,
+  label,
+  value,
+  error,
+  onChange,
+  type = "text",
+  rows,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  error?: string;
+  onChange: (v: string) => void;
+  type?: string;
+  rows?: number;
+}) => (
+  <div>
+    <div
+      className={`field ${value ? "field-filled" : ""} ${error ? "field-error" : ""}`}
+    >
+      {rows ? (
+        <textarea
+          id={id}
+          rows={rows}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${id}-err` : undefined}
+        />
+      ) : (
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${id}-err` : undefined}
+        />
+      )}
+      <label htmlFor={id}>{label}</label>
+    </div>
+    {error && (
+      <div
+        id={`${id}-err`}
+        role="alert"
+        style={{
+          fontFamily: "var(--font-body)",
+          fontSize: "0.7rem",
+          color: "rgba(255,110,110,0.9)",
+          marginTop: "0.3rem",
+          paddingLeft: "0.25rem",
+          animation: "fadeIn 0.25s ease",
+        }}
+      >
+        {error}
+      </div>
+    )}
+  </div>
+);
+
+// ── Success animation — a check that draws itself ─────────────────────────────
+const SuccessState = ({
+  accent,
+  fg,
+  fgDim,
+}: {
+  accent: string;
+  fg: string;
+  fgDim: string;
+}) => (
+  <div
+    className="card"
+    role="status"
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "300px",
+      gap: "1.1rem",
+      animation: "fadeUp 0.5s cubic-bezier(0.16,1,0.3,1)",
+    }}
+  >
+    <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">
+      <circle
+        cx="28"
+        cy="28"
+        r="25"
+        fill="none"
+        stroke={accent}
+        strokeWidth="1.5"
+        opacity="0.35"
+      />
+      <path
+        d="M17 29 l8 8 l15 -17"
+        fill="none"
+        stroke={accent}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray="40"
+        strokeDashoffset="40"
+        style={{
+          animation: "drawCheck 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards",
+        }}
+      />
+    </svg>
+    <div
+      style={{
+        fontFamily: "var(--font-display)",
+        fontSize: "1.1rem",
+        fontWeight: 600,
+        letterSpacing: "-0.015em",
+        color: fg,
+      }}
+    >
+      Message ready
+    </div>
+    <div
+      style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "0.8rem",
+        color: fgDim,
+        textAlign: "center",
+        maxWidth: "32ch",
+      }}
+    >
+      Opening your mail client with everything pre-filled…
+    </div>
+  </div>
+);

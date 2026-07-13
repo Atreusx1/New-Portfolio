@@ -9,16 +9,14 @@ import {
 export type ThemeMode = "dark" | "light";
 
 // ── Raw RGB tuples ────────────────────────────────────────────────────────────
-const DARK_FG = "226,226,226";
-const DARK_AC = "151,252,228"; // Bright Neon Mint
+const DARK_FG = "232,234,233";
+const DARK_AC = "151,252,228"; // neon mint — the brand
 
-// Light mode: neutral "paper" surface so the teal reads as a signal color,
-// not a background tint. The old palette tinted bg + accent the same
-// green-mint hue, which killed the terminal/DEX contrast that makes the
-// dark theme work — everything read as one soft color instead of
-// "signal punching out of a neutral surface."
-const LIGHT_FG = "16,20,19"; // near-black, faint cool undertone for readability
-const LIGHT_AC = "0,140,102"; // deepened teal — same brand hue, more punch on white
+// Light mode is its own design system: warm paper + ink + deep teal.
+// Warm (not gray) whites read as "Notion / Linear light", and the teal
+// stays a signal color against them instead of dissolving.
+const LIGHT_FG = "27,26,22"; // warm near-black ink
+const LIGHT_AC = "0,132,99"; // deep teal — same hue family as the mint
 
 export interface Theme {
   mode: ThemeMode;
@@ -54,37 +52,33 @@ const buildTheme = (mode: ThemeMode, toggle: () => void): Theme => {
   const fg_ = (a: number) => `rgba(${fgRaw},${a})`;
   const ac_ = (a: number) => `rgba(${accentRaw},${a})`;
 
-  // ── Light surfaces — neutral cool paper, not mint-tinted ─────────────────
-  // Desaturating the surface is what lets the teal accent read as a signal
-  // color again instead of blending into a same-hue background.
-  const LIGHT_BG = "#f6f7f7";
-  const LIGHT_BG2 = "#ebeceb";
-  const LIGHT_BG3 = "#dfe1e0";
+  // Warm paper surfaces — synced with index.css light tokens.
+  const LIGHT_BG = "#faf9f6";
+  const LIGHT_BG2 = "#f2f0ea";
+  const LIGHT_BG3 = "#eae7df";
 
   return {
     mode,
     isDark,
     toggle,
-    bg: isDark ? "#080808" : LIGHT_BG,
-    bg2: isDark ? "#111111" : LIGHT_BG2,
-    fg: isDark ? "#e2e2e2" : `rgb(${LIGHT_FG})`,
+    bg: isDark ? "#070808" : LIGHT_BG,
+    bg2: isDark ? "#0e100f" : LIGHT_BG2,
+    fg: isDark ? "#e8eae9" : `rgb(${LIGHT_FG})`,
     fgRaw,
     accentRaw,
     accent: isDark ? `rgb(${DARK_AC})` : `rgb(${LIGHT_AC})`,
 
-    // Nav background — frosted effect
-    navBg: isDark ? "rgba(8,8,8,0.72)" : "rgba(246,247,247,0.82)",
+    navBg: isDark ? "rgba(10,13,12,0.66)" : "rgba(250,249,246,0.78)",
 
-    cardBg: isDark ? "#111111" : LIGHT_BG2,
-    cardBgDim: isDark ? "#0b0b0b" : LIGHT_BG3,
+    cardBg: isDark ? "#0e100f" : LIGHT_BG2,
+    cardBgDim: isDark ? "#0a0c0b" : LIGHT_BG3,
 
-    // Terminal: dark glass in dark mode, paper-white in light
-    terminalBg: isDark ? "rgba(8,8,8,0.72)" : "rgba(255,255,255,0.92)",
+    terminalBg: isDark ? "rgba(8,10,9,0.72)" : "rgba(255,255,255,0.92)",
     terminalHeaderBg: isDark
       ? "rgba(151,252,228,0.025)"
-      : "rgba(0,140,102,0.05)",
-    terminalStatsBg: isDark ? "rgba(0,0,0,0.30)" : "rgba(0,0,0,0.02)",
-    terminalRowBg: isDark ? "rgba(8,8,8,0.82)" : "rgba(255,255,255,0.65)",
+      : "rgba(0,132,99,0.05)",
+    terminalStatsBg: isDark ? "rgba(0,0,0,0.30)" : "rgba(31,27,16,0.025)",
+    terminalRowBg: isDark ? "rgba(8,10,9,0.82)" : "rgba(255,255,255,0.65)",
 
     fg_,
     ac_,
@@ -108,7 +102,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       const next = m === "dark" ? "light" : "dark";
       try {
         localStorage.setItem("theme", next);
-      } catch {}
+      } catch {
+        /* private mode */
+      }
       return next;
     });
 

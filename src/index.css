@@ -1,529 +1,433 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
 
-/* ─── DARK (default) TOKENS ───────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   DESIGN SYSTEM
+   Type roles:
+     --font-display  Space Grotesk — headlines only
+     --font-body     Inter         — all reading text
+     --font-mono     Space Mono    — data, labels, terminal ONLY
+   Mono is no longer the body face: it now *means* "live data".
+   ════════════════════════════════════════════════════════════ */
+
+/* ─── DARK (default) ─────────────────────────────────────── */
 :root {
-  --bg: #080808;
-  --bg-2: #111111;
-  --fg: #e2e2e2;
-  --fg-dim: rgba(226, 226, 226, 0.55); /* ↑ was 0.45 */
-  --fg-muted: rgba(226, 226, 226, 0.22); /* ↑ was 0.15 */
-  --border: #191919;
-  --border-mid: #171717;
-  --border-subtle: #151515;
-  --border-faint: #121212;
-  --border-active: rgba(226, 226, 226, 0.25);
+  --bg: #070808;
+  --bg-2: #0e100f;
+  --bg-3: #131614;
+  --fg: #e8eae9;
+  --fg-dim: rgba(232, 234, 233, 0.62);
+  --fg-muted: rgba(232, 234, 233, 0.34);
+
+  --border: rgba(232, 234, 233, 0.08);
+  --border-mid: rgba(232, 234, 233, 0.06);
+  --border-subtle: rgba(232, 234, 233, 0.05);
+  --border-faint: rgba(232, 234, 233, 0.035);
+  --border-active: rgba(232, 234, 233, 0.22);
+
   --accent: rgb(151, 252, 228);
-  --accent-dim: rgba(151, 252, 228, 0.45);
-  --accent-muted: rgba(151, 252, 228, 0.1);
-  --accent-border: rgba(151, 252, 228, 0.2);
+  --accent-dim: rgba(151, 252, 228, 0.5);
+  --accent-muted: rgba(151, 252, 228, 0.09);
+  --accent-border: rgba(151, 252, 228, 0.22);
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "Space Mono", monospace;
 
-  /* ── Fluid Glass tokens (dark) ─────────────────────────── */
-  --glass-bg: rgba(8, 14, 12, 0.55);
-  --glass-border: rgba(151, 252, 228, 0.18);
-  --glass-blur: 14px;
-  --glass-highlight: rgba(255, 255, 255, 0.04);
-}
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
 
-/* ─── LIGHT TOKENS ──────────────────────────────────────────
-   KEY FIX: Nearly every text visibility problem in light mode
-   comes from two sources:
-   1. --fg-dim and --fg-muted being too transparent on the
-      mint/seafoam background (#caf7ee is quite saturated)
-   2. CSS variable --bg not matching ThemeContext's t.bg
+  /* Depth — dark mode builds elevation with light, not shadow */
+  --shadow-sm: 0 0 0 1px rgba(232, 234, 233, 0.05);
+  --shadow-md: 0 0 0 1px rgba(232, 234, 233, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 0 0 1px rgba(232, 234, 233, 0.07), 0 24px 64px rgba(0, 0, 0, 0.55);
+  --card-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 42%);
 
-   Fix strategy:
-   · Darken all fg opacity values significantly
-   · Use a slightly less saturated bg that gives more contrast headroom
-   · Add explicit color for borders so they're visible without opacity tricks
-──────────────────────────────────────────────────────────── */
-html[data-theme="light"] {
-  /* Surface — neutral cool paper, not mint-tinted. Synced with ThemeContext's
-     LIGHT_BG/LIGHT_BG2. A same-hue bg + accent read as one flat color and
-     killed the terminal contrast; neutral gray lets the teal act as a signal
-     color again, matching how the dark theme uses near-black + neon mint. */
-  --bg: #f6f7f7;
-  --bg-2: #ebeceb;
-
-  /* Foreground — near-black, synced with LIGHT_FG */
-  --fg: #101413;
-  --fg-dim: rgba(16, 20, 19, 0.78);
-  --fg-muted: rgba(16, 20, 19, 0.52);
-
-  /* Borders — opaque/dark enough to see against the neutral bg */
-  --border: rgba(16, 20, 19, 0.14);
-  --border-mid: rgba(16, 20, 19, 0.11);
-  --border-subtle: rgba(16, 20, 19, 0.08);
-  --border-faint: rgba(16, 20, 19, 0.05);
-  --border-active: rgba(16, 20, 19, 0.42);
-
-  /* Accent — deepened teal, synced with LIGHT_AC, punchy against the paper bg */
-  --accent: rgb(0, 140, 102);
-  --accent-dim: rgba(0, 140, 102, 0.55);
-  --accent-muted: rgba(0, 140, 102, 0.12);
-  --accent-border: rgba(0, 140, 102, 0.3);
-
-  /* ── Fluid Glass tokens (light) ──────────────────────── */
-  --glass-bg: rgba(246, 247, 247, 0.72);
-  --glass-border: rgba(0, 140, 102, 0.22);
+  --glass-bg: rgba(10, 13, 12, 0.6);
+  --glass-border: rgba(151, 252, 228, 0.14);
   --glass-blur: 16px;
-  --glass-highlight: rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.045);
+
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ─── RESET ───────────────────────────────────────────────── */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ─── LIGHT — its own system: warm paper, real shadows ────── */
+html[data-theme="light"] {
+  /* Warm whites, not gray: paper with a faint sun-warmth */
+  --bg: #faf9f6;
+  --bg-2: #f2f0ea;
+  --bg-3: #eae7df;
+  --fg: #1b1a16;
+  --fg-dim: rgba(27, 26, 22, 0.72);
+  --fg-muted: rgba(27, 26, 22, 0.46);
+
+  --border: rgba(27, 26, 22, 0.1);
+  --border-mid: rgba(27, 26, 22, 0.08);
+  --border-subtle: rgba(27, 26, 22, 0.06);
+  --border-faint: rgba(27, 26, 22, 0.045);
+  --border-active: rgba(27, 26, 22, 0.32);
+
+  --accent: rgb(0, 132, 99);
+  --accent-dim: rgba(0, 132, 99, 0.6);
+  --accent-muted: rgba(0, 132, 99, 0.09);
+  --accent-border: rgba(0, 132, 99, 0.28);
+
+  /* Light mode elevation is shadow-driven — layered, warm-tinted */
+  --shadow-sm: 0 1px 2px rgba(31, 27, 16, 0.05), 0 0 0 1px rgba(27, 26, 22, 0.05);
+  --shadow-md: 0 1px 2px rgba(31, 27, 16, 0.05), 0 8px 24px rgba(31, 27, 16, 0.07), 0 0 0 1px rgba(27, 26, 22, 0.05);
+  --shadow-lg: 0 2px 4px rgba(31, 27, 16, 0.05), 0 20px 48px rgba(31, 27, 16, 0.11), 0 0 0 1px rgba(27, 26, 22, 0.05);
+  --card-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 46%);
+
+  --glass-bg: rgba(250, 249, 246, 0.72);
+  --glass-border: rgba(27, 26, 22, 0.08);
+  --glass-blur: 18px;
+  --glass-highlight: rgba(255, 255, 255, 0.6);
 }
 
-html {
-  scroll-behavior: smooth;
-  font-size: 16px;
-}
+/* ─── RESET ──────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
 
 body {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--fg);
   overflow-x: hidden;
-  line-height: 1.6;
+  line-height: 1.65;
   cursor: none;
   -webkit-font-smoothing: antialiased;
-  transition:
-    background 0.35s ease,
-    color 0.35s ease;
+  text-rendering: optimizeLegibility;
+  transition: background 0.35s ease, color 0.35s ease;
 }
 
-/* Custom cursor */
-*,
-*::before,
-*::after {
-  cursor: none;
-}
-a,
-button {
-  cursor: pointer;
+*, *::before, *::after { cursor: none; }
+a, button { cursor: pointer; }
+
+::selection { background: var(--accent-muted); color: var(--fg); }
+
+/* ─── SCROLLBAR ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 2px; }
+
+/* ─── TYPE ROLES ─────────────────────────────────────────── */
+.display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(2.9rem, 7.5vw, 6.2rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--fg);
 }
 
-/* ─── SCROLLBAR ───────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 2px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-active);
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--fg);
 }
 
-/* ─── GRAIN NOISE ─────────────────────────────────────────── */
+.body-text {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 450;
+  line-height: 1.75;
+  color: var(--fg-dim);
+  max-width: 62ch; /* no paragraph exceeds comfortable reading width */
+}
+
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.6563rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.data-text { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ─── LAYOUT ─────────────────────────────────────────────── */
+.container { max-width: 1140px; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 2rem); }
+
+.section {
+  position: relative;
+  padding: clamp(4rem, 8vh, 6.5rem) 0;
+}
+
+/* Section header: eyebrow + title on one baseline */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  margin-bottom: clamp(2rem, 5vh, 3.25rem);
+}
+
+/* ─── CARDS ──────────────────────────────────────────────── */
+.card {
+  position: relative;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.35s var(--ease-out), transform 0.35s var(--ease-out), background 0.35s ease;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--card-sheen);
+  pointer-events: none;
+  border-radius: inherit;
+}
+.card:hover { box-shadow: var(--shadow-md); }
+
+/* Glow-follow: components set --gx / --gy from pointer position */
+.card-glow::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(340px circle at var(--gx, 50%) var(--gy, 50%), var(--accent-muted), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.card-glow:hover::after { opacity: 1; }
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 55% 35% at 28% 12%, var(--glass-highlight), transparent 68%);
+  pointer-events: none;
+}
+.glass > * { position: relative; z-index: 1; }
+
+/* ─── BUTTONS ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.3s ease,
+    background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  will-change: transform;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 0 0 var(--accent-muted);
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 24px var(--accent-muted), 0 0 0 4px var(--accent-muted);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--fg-dim);
+  border-color: var(--border-active);
+}
+.btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-muted);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--fg-muted);
+  padding: 0.5rem 0.9rem;
+}
+.btn-ghost:hover { color: var(--fg); background: var(--border-faint); }
+
+/* ─── CHIPS ──────────────────────────────────────────────── */
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  color: var(--fg-dim);
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--border-faint);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--accent-border); color: var(--accent); }
+
+/* ─── FORMS ──────────────────────────────────────────────── */
+.field {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.field:focus-within {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-muted);
+}
+.field.field-error { border-color: rgba(255, 110, 110, 0.5); }
+.field input, .field textarea {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--fg);
+  padding: 1.35rem 1rem 0.55rem;
+  resize: none;
+}
+.field label {
+  position: absolute;
+  left: 1rem;
+  top: 0.95rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--fg-muted);
+  pointer-events: none;
+  transform-origin: left top;
+  transition: transform 0.22s var(--ease-out), color 0.22s ease;
+}
+.field:focus-within label,
+.field.field-filled label {
+  transform: translateY(-0.5rem) scale(0.72);
+  color: var(--fg-muted);
+}
+.field:focus-within label { color: var(--accent); }
+
+/* ─── NAV ────────────────────────────────────────────────── */
+.nav-pill {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.45s var(--ease-spring), padding 0.35s var(--ease-out),
+    background 0.35s ease, border-color 0.35s ease;
+}
+.nav-pill.nav-compact { padding: 0.3rem 0.45rem; }
+.nav-link {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--fg-muted);
+  background: none;
+  border: none;
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  transition: color 0.2s ease;
+  z-index: 1;
+}
+.nav-link:hover { color: var(--fg); }
+.nav-link.nav-active { color: var(--fg); }
+.nav-indicator {
+  position: absolute;
+  top: 0.45rem;
+  bottom: 0.45rem;
+  border-radius: 999px;
+  background: var(--border-faint);
+  border: 1px solid var(--border);
+  transition: left 0.4s var(--ease-spring), width 0.4s var(--ease-spring), opacity 0.25s ease;
+  pointer-events: none;
+}
+.nav-compact .nav-indicator { top: 0.3rem; bottom: 0.3rem; }
+
+/* ─── ANIMATIONS ─────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes drawCheck { to { stroke-dashoffset: 0; } }
+@keyframes scanline {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100vh); }
+}
+
+.animate-fade-up { animation: fadeUp 0.9s var(--ease-out) forwards; opacity: 0; }
+.animate-fade-in { animation: fadeIn 0.8s ease forwards; opacity: 0; }
+
+/* ─── GRAIN (kept — but calmer) ──────────────────────────── */
 body::after {
   content: "";
   position: fixed;
   inset: -10%;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.028;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
-  animation: grain 0.5s steps(1) infinite;
 }
+html[data-theme="light"] body::after { opacity: 0.02; mix-blend-mode: multiply; }
 
-html[data-theme="light"] body::after {
-  opacity: 0.03;
-  mix-blend-mode: multiply;
-}
-
-@keyframes grain {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  10% {
-    transform: translate(-2%, -3%);
-  }
-  20% {
-    transform: translate(3%, 1%);
-  }
-  30% {
-    transform: translate(-1%, 4%);
-  }
-  40% {
-    transform: translate(2%, -2%);
-  }
-  50% {
-    transform: translate(-3%, 2%);
-  }
-  60% {
-    transform: translate(1%, -4%);
-  }
-  70% {
-    transform: translate(-2%, 3%);
-  }
-  80% {
-    transform: translate(3%, -1%);
-  }
-  90% {
-    transform: translate(-1%, 2%);
-  }
-}
-
-/* ─── TYPOGRAPHY ──────────────────────────────────────────── */
-.display-xl {
-  font-family: var(--font-mono);
-  font-size: clamp(3rem, 8vw, 8rem);
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-  color: var(--fg);
-}
-
-.display-lg {
-  font-size: clamp(2rem, 5vw, 5rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-.mono-label {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--fg-dim);
-}
-
-.section-num {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  color: var(--fg-muted);
-}
-
-/* ─── LAYOUT ──────────────────────────────────────────────── */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.section-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 0;
-}
-
-/* ─── ANIMATIONS ──────────────────────────────────────────── */
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes lineGrow {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-}
-
-.animate-fade-up {
-  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.8s ease forwards;
-  opacity: 0;
-}
-
-/* ─── BUTTONS ─────────────────────────────────────────────── */
-.btn-outline {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: 1px solid var(--border-active);
-  color: var(--fg-dim);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-  background: transparent;
-  transition: all 0.2s ease;
-}
-
-.btn-outline:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-muted);
-}
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--accent);
-  color: var(--bg);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 1px solid var(--accent);
-  transition: all 0.2s ease;
-}
-
-.btn-primary:hover {
-  background: transparent;
-  color: var(--accent);
-}
-
-/* ─── FLUID GLASS UTILITY CLASS ───────────────────────────── */
-/*
-  Use .glass on any element to apply the standard glass surface.
-  Pairs with the FluidGlass React component but can also be used
-  standalone for simple cases (e.g., tooltips, overlays).
-*/
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
-  border: 1px solid var(--glass-border);
-  position: relative;
-  overflow: hidden;
-  transition:
-    background 0.35s ease,
-    border-color 0.35s ease;
-}
-
-/* Specular highlight on .glass elements */
-.glass::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 55% 35% at 28% 18%,
-    var(--glass-highlight),
-    transparent 68%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glass > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Hover state — slightly more opaque + brighter border */
-.glass:hover {
-  border-color: var(--accent-border);
-}
-
-/* ─── CARDS ───────────────────────────────────────────────── */
-.card {
-  border: 1px solid var(--border);
-  background: var(--bg-2);
-  transition: border-color 0.2s ease;
-}
-
-.card:hover {
-  border-color: var(--border-active);
-}
-
-/* ─── GRID BACKGROUND ─────────────────────────────────────── */
-.grid-bg {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 80px 80px;
-  pointer-events: none;
-}
-
-/* ─── HIGHLIGHT ───────────────────────────────────────────── */
-.text-accent {
-  color: var(--fg);
-}
-.text-dim {
-  color: var(--fg-dim);
-}
-.text-muted {
-  color: var(--fg-muted);
-}
-
-/* ─── FORMS ───────────────────────────────────────────────── */
-input,
-textarea {
-  font-family: var(--font-mono);
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--fg);
-  padding: 0.75rem 1rem;
-  font-size: 0.8rem;
-  width: 100%;
-  outline: none;
-  transition:
-    border-color 0.2s ease,
-    background 0.35s ease;
-  resize: none;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--fg-muted);
-}
-input:focus,
-textarea:focus {
-  border-color: var(--border-active);
-}
-
-/* Light mode: form inputs need explicit bg so the glass bg shows */
-html[data-theme="light"] input,
-html[data-theme="light"] textarea {
-  background: rgba(240, 250, 247, 0.7);
-}
-
-/* ─── THEME TOGGLE BUTTON ─────────────────────────────────── */
-.theme-toggle {
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--fg-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    border-color 0.2s ease,
-    color 0.2s ease;
-  flex-shrink: 0;
-}
-
-.theme-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-/* ─── SECTION CANVAS TRANSPARENCY ────────────────────────── */
-#about,
-#projects,
-#skills,
-#experience,
-#contact {
+/* ─── SECTION TRANSPARENCY (universe canvas shows through) ── */
+#about, #projects, #skills, #experience, #contact {
   background: transparent !important;
 }
-
-/* ─── SECTION TRANSITION ──────────────────────────────────── */
-section,
-header,
-footer,
-nav {
-  transition:
-    background 0.35s ease,
-    border-color 0.35s ease;
+section, header, footer, nav {
+  transition: background 0.35s ease, border-color 0.35s ease;
 }
 
-/* ─── LIGHT MODE TARGETED FIXES ───────────────────────────── */
-/*
-  These rules override the most common invisible-text culprits
-  that live in inline styles using rgba(fg, low-alpha).
-  Since we can't easily change every component's alpha call,
-  we nudge contrast using CSS where possible.
-*/
+/* ─── ACCESSIBILITY ──────────────────────────────────────── */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+/* The custom cursor hides the pointer — keyboard users get real focus rings */
 
-/* Ensure section number labels (01, 02 …) are visible */
-html[data-theme="light"] [style*="0.25"] {
-  /* This selector is intentionally broad — catches fg_(0.25) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  body { cursor: auto; }
+  *, *::before, *::after { cursor: auto; }
 }
 
-/* Project/skill/trait row numbers */
-html[data-theme="light"] .about-grid p,
-html[data-theme="light"] .contact-grid p {
-  color: rgba(16, 20, 19, 0.72) !important;
-}
+/* ─── RESPONSIVE HELPERS ─────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+.grid-projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
 
-/* Stats labels */
-html[data-theme="light"] [style*="0.3)"] {
-  /* Override applied below via more specific selectors */
-}
-
-/* Section index numbers (e.g. "01", "02") */
-html[data-theme="light"] span[style*="0.25"] {
-  color: rgba(16, 20, 19, 0.5) !important;
-}
-
-/* Skill item dots and faint labels */
-html[data-theme="light"] [style*="0.2)"] {
-  color: rgba(16, 20, 19, 0.4) !important;
-}
-
-/* Timeline period labels */
-html[data-theme="light"] [style*="0.2,"] {
-  color: rgba(16, 20, 19, 0.45) !important;
-}
-
-/* ─── EXPLICIT LIGHT MODE CONTRAST OVERRIDES ──────────────── */
-/*
-  These are the component-level selectors that reliably catch
-  the problem. Works alongside the ThemeContext fixes above.
-*/
-html[data-theme="light"] #about p,
-html[data-theme="light"] #projects p,
-html[data-theme="light"] #skills p,
-html[data-theme="light"] #experience p,
-html[data-theme="light"] #contact p {
-  /* Ensure paragraph text meets WCAG AA on mint bg */
-  color: rgba(16, 20, 19, 0.78);
-}
-
-html[data-theme="light"] #about h2,
-html[data-theme="light"] #projects h2,
-html[data-theme="light"] #skills h2,
-html[data-theme="light"] #experience h2,
-html[data-theme="light"] #contact h2,
-html[data-theme="light"] #about h3,
-html[data-theme="light"] #experience h3 {
-  color: #101413;
-}
-
-/* Footer text in light mode */
-html[data-theme="light"] footer span {
-  color: rgba(16, 20, 19, 0.55) !important;
-}
-
-/* Nav link text in light mode */
-html[data-theme="light"] nav button {
-  color: rgba(16, 20, 19, 0.72);
+@media (max-width: 880px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-projects { grid-template-columns: 1fr; }
 }
