@@ -9,34 +9,31 @@ import {
 export type ThemeMode = "dark" | "light";
 
 // ── Raw RGB tuples ────────────────────────────────────────────────────────────
-// Dark: classic light-on-dark with mint teal accent
 const DARK_FG = "226,226,226";
 const DARK_AC = "151,252,228"; // Bright Neon Mint
 
-// Light: High-contrast compliment to the dark theme
-// Deep, dark charcoal with a hint of teal to match the accent family
-const LIGHT_FG = "10, 24, 22";
-// A weighted "Deep Mint" - provides the same color energy as DARK_AC but visible on white
-const LIGHT_AC = "0, 102, 89";
+// Light mode: neutral "paper" surface so the teal reads as a signal color,
+// not a background tint. The old palette tinted bg + accent the same
+// green-mint hue, which killed the terminal/DEX contrast that makes the
+// dark theme work — everything read as one soft color instead of
+// "signal punching out of a neutral surface."
+const LIGHT_FG = "16,20,19"; // near-black, faint cool undertone for readability
+const LIGHT_AC = "0,140,102"; // deepened teal — same brand hue, more punch on white
 
 export interface Theme {
   mode: ThemeMode;
   isDark: boolean;
   toggle: () => void;
 
-  // Surface
   bg: string;
   bg2: string;
   fg: string;
 
-  // Raw strings for dynamic rgba()
   fgRaw: string;
   accentRaw: string;
 
-  // Accent
   accent: string;
 
-  // Specific surface tokens
   navBg: string;
   cardBg: string;
   cardBgDim: string;
@@ -45,7 +42,6 @@ export interface Theme {
   terminalStatsBg: string;
   terminalRowBg: string;
 
-  // Helper functions — generate rgba() at any opacity
   fg_: (alpha: number) => string;
   ac_: (alpha: number) => string;
 }
@@ -58,32 +54,38 @@ const buildTheme = (mode: ThemeMode, toggle: () => void): Theme => {
   const fg_ = (a: number) => `rgba(${fgRaw},${a})`;
   const ac_ = (a: number) => `rgba(${accentRaw},${a})`;
 
-  // Light surfaces: "Ice Flow" palette
-  // These compliment the #080808 dark background by using the opposite end of the luminance scale
-  const ICE_BG = "#f5f9f8"; // Crisp, slightly cool white
-  const ICE_BG2 = "#ebf2f1"; // Soft frost gray-green
-  const ICE_BG3 = "#dfece9"; // Depth layer
+  // ── Light surfaces — neutral cool paper, not mint-tinted ─────────────────
+  // Desaturating the surface is what lets the teal accent read as a signal
+  // color again instead of blending into a same-hue background.
+  const LIGHT_BG = "#f6f7f7";
+  const LIGHT_BG2 = "#ebeceb";
+  const LIGHT_BG3 = "#dfe1e0";
 
   return {
     mode,
     isDark,
     toggle,
-    bg: isDark ? "#080808" : ICE_BG,
-    bg2: isDark ? "#111111" : ICE_BG2,
+    bg: isDark ? "#080808" : LIGHT_BG,
+    bg2: isDark ? "#111111" : LIGHT_BG2,
     fg: isDark ? "#e2e2e2" : `rgb(${LIGHT_FG})`,
     fgRaw,
     accentRaw,
     accent: isDark ? `rgb(${DARK_AC})` : `rgb(${LIGHT_AC})`,
-    navBg: isDark ? "rgba(8,8,8,0.88)" : "rgba(245, 249, 248, 0.92)",
-    cardBg: isDark ? "#111111" : ICE_BG2,
-    cardBgDim: isDark ? "#0b0b0b" : ICE_BG3,
-    // Terminal adjustments: Pure white base in light mode for maximum "paper" feel
-    terminalBg: isDark ? "rgba(8,8,8,0.72)" : "rgba(255, 255, 255, 0.98)",
+
+    // Nav background — frosted effect
+    navBg: isDark ? "rgba(8,8,8,0.72)" : "rgba(246,247,247,0.82)",
+
+    cardBg: isDark ? "#111111" : LIGHT_BG2,
+    cardBgDim: isDark ? "#0b0b0b" : LIGHT_BG3,
+
+    // Terminal: dark glass in dark mode, paper-white in light
+    terminalBg: isDark ? "rgba(8,8,8,0.72)" : "rgba(255,255,255,0.92)",
     terminalHeaderBg: isDark
       ? "rgba(151,252,228,0.025)"
-      : "rgba(0, 102, 89, 0.04)",
-    terminalStatsBg: isDark ? "rgba(0,0,0,0.30)" : "rgba(0, 0, 0, 0.02)",
-    terminalRowBg: isDark ? "rgba(8,8,8,0.82)" : "rgba(255, 255, 255, 0.6)",
+      : "rgba(0,140,102,0.05)",
+    terminalStatsBg: isDark ? "rgba(0,0,0,0.30)" : "rgba(0,0,0,0.02)",
+    terminalRowBg: isDark ? "rgba(8,8,8,0.82)" : "rgba(255,255,255,0.65)",
+
     fg_,
     ac_,
   };

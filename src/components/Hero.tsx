@@ -774,6 +774,9 @@ export const Hero = () => {
           <div
             style={{
               position: "relative",
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
               boxShadow: `0 0 48px ${t.ac_(0.04)}, 0 0 1px ${t.ac_(0.12)} inset`,
               transition: "box-shadow 0.35s ease",
             }}
@@ -784,6 +787,9 @@ export const Hero = () => {
                 background: t.terminalBg,
                 backdropFilter: "blur(6px)",
                 position: "relative",
+                width: "100%",
+                maxWidth: "100%",
+                boxSizing: "border-box",
                 overflow: "hidden",
                 transition: "background 0.35s ease, border-color 0.35s ease",
               }}
@@ -915,6 +921,7 @@ export const Hero = () => {
 
               {/* ── Header row 2 — network stats ── */}
               <div
+                className="hero-network-stats"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -923,14 +930,19 @@ export const Hero = () => {
                   borderBottom: `1px solid ${t.ac_(0.05)}`,
                   background: t.terminalStatsBg,
                   gap: "1rem",
+                  flexWrap: "wrap",
+                  rowGap: "0.5rem",
                   transition: "background 0.35s ease",
                 }}
               >
                 <div
+                  className="hero-network-stats-inner"
                   style={{
                     display: "flex",
                     gap: "1.4rem",
                     alignItems: "center",
+                    flexWrap: "wrap",
+                    rowGap: "0.5rem",
                   }}
                 >
                   {[
@@ -1149,9 +1161,10 @@ export const Hero = () => {
                 }}
               >
                 <div
+                  className="hero-ticker-head"
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 88px 62px 54px",
+                    gridTemplateColumns: "minmax(0,1fr) 88px 62px 54px",
                     padding: "0.38rem 1rem",
                     background: t.ac_(0.02),
                   }}
@@ -1159,6 +1172,9 @@ export const Hero = () => {
                   {["Pair", "Price (USD)", "24h", "Vol"].map((h) => (
                     <span
                       key={h}
+                      className={
+                        h === "Vol" ? "hero-ticker-vol-col" : undefined
+                      }
                       style={{
                         fontFamily: "Space Mono, monospace",
                         fontSize: "0.48rem",
@@ -1182,9 +1198,10 @@ export const Hero = () => {
                   return (
                     <div key={tk.pair}>
                       <div
+                        className="hero-ticker-row"
                         style={{
                           display: "grid",
-                          gridTemplateColumns: "1fr 88px 62px 54px",
+                          gridTemplateColumns: "minmax(0,1fr) 88px 62px 54px",
                           alignItems: "center",
                           padding: "0.44rem 1rem",
                           background: isFlash ? t.ac_(0.045) : "transparent",
@@ -1264,6 +1281,7 @@ export const Hero = () => {
 
                         {/* Volume */}
                         <span
+                          className="hero-ticker-vol-col"
                           style={{
                             fontFamily: "Space Mono, monospace",
                             fontSize: "0.54rem",
@@ -1418,6 +1436,9 @@ export const Hero = () => {
           .hero-terminal-wrapper {
             transform: none !important;
             opacity: 1 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
           }
           /* Hide the heavy Three.js panel on mobile — keeps perf smooth */
           .hero-threejs-panel { display: none !important; }
@@ -1427,6 +1448,16 @@ export const Hero = () => {
             grid-template-columns: repeat(3, 1fr) !important;
             gap: 0.5rem 0.6rem !important;
           }
+          /* Network stats row: allow wrapping instead of overflowing */
+          .hero-network-stats { justify-content: flex-start !important; }
+          .hero-network-stats-inner { gap: 1rem !important; }
+          /* Ticker table: shrink the fixed-width columns to fit small screens */
+          .hero-ticker-head,
+          .hero-ticker-row {
+            grid-template-columns: minmax(0,1fr) 68px 46px 0 !important;
+            column-gap: 0.4rem;
+          }
+          .hero-ticker-vol-col { display: none !important; }
         }
 
         /* ── Very small screens ─────────────────────────── */
@@ -1434,6 +1465,21 @@ export const Hero = () => {
           .hero-grid { padding: 5rem 1rem 2rem !important; }
           .hero-terminal-footer {
             grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .hero-ticker-head,
+          .hero-ticker-row {
+            grid-template-columns: minmax(0,1fr) 60px 0 0 !important;
+          }
+          .hero-ticker-row [style*="0.58rem"] {
+            font-size: 0.5rem !important;
+          }
+        }
+
+        /* ── Hard safety net: nothing in the hero should ever
+           force horizontal scroll on the page ───────────── */
+        @media (max-width: 820px) {
+          #home, .hero-grid, .hero-terminal-wrapper {
+            overflow-x: hidden;
           }
         }
       `}</style>

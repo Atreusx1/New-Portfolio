@@ -5,11 +5,8 @@
   --bg: #080808;
   --bg-2: #111111;
   --fg: #e2e2e2;
-  --fg-dim: rgba(226, 226, 226, 0.45);
-  --fg-muted: rgba(226, 226, 226, 0.15);
-  /* Solid equivalents of rgba(226,226,226,N) composited over #080808.
-     Same perceived color, but opaque — the animated SectionCanvas
-     cannot bleed through section borders in dark mode. */
+  --fg-dim: rgba(226, 226, 226, 0.55); /* ↑ was 0.45 */
+  --fg-muted: rgba(226, 226, 226, 0.22); /* ↑ was 0.15 */
   --border: #191919;
   --border-mid: #171717;
   --border-subtle: #151515;
@@ -20,24 +17,57 @@
   --accent-muted: rgba(151, 252, 228, 0.1);
   --accent-border: rgba(151, 252, 228, 0.2);
   --font-mono: "Space Mono", monospace;
+
+  /* ── Fluid Glass tokens (dark) ─────────────────────────── */
+  --glass-bg: rgba(8, 14, 12, 0.55);
+  --glass-border: rgba(151, 252, 228, 0.18);
+  --glass-blur: 14px;
+  --glass-highlight: rgba(255, 255, 255, 0.04);
 }
 
-/* ─── LIGHT TOKENS — Hyperliquid-inspired mint seafoam ────── */
+/* ─── LIGHT TOKENS ──────────────────────────────────────────
+   KEY FIX: Nearly every text visibility problem in light mode
+   comes from two sources:
+   1. --fg-dim and --fg-muted being too transparent on the
+      mint/seafoam background (#caf7ee is quite saturated)
+   2. CSS variable --bg not matching ThemeContext's t.bg
+
+   Fix strategy:
+   · Darken all fg opacity values significantly
+   · Use a slightly less saturated bg that gives more contrast headroom
+   · Add explicit color for borders so they're visible without opacity tricks
+──────────────────────────────────────────────────────────── */
 html[data-theme="light"] {
-  --bg: #caf7ee;
-  --bg-2: #b4f0e4;
-  --fg: #0a2018; /* near-black green — maximum readability */
-  --fg-dim: rgba(10, 32, 24, 0.65);
-  --fg-muted: rgba(10, 32, 24, 0.3);
-  --border: rgba(10, 32, 24, 0.1);
-  --border-mid: rgba(10, 32, 24, 0.08);
-  --border-subtle: rgba(10, 32, 24, 0.06);
-  --border-faint: rgba(10, 32, 24, 0.04);
-  --border-active: rgba(10, 32, 24, 0.35);
-  --accent: rgb(0, 180, 130); /* vivid teal — clear on mint bg */
-  --accent-dim: rgba(0, 180, 130, 0.5);
-  --accent-muted: rgba(0, 180, 130, 0.1);
-  --accent-border: rgba(0, 180, 130, 0.28);
+  /* Surface — neutral cool paper, not mint-tinted. Synced with ThemeContext's
+     LIGHT_BG/LIGHT_BG2. A same-hue bg + accent read as one flat color and
+     killed the terminal contrast; neutral gray lets the teal act as a signal
+     color again, matching how the dark theme uses near-black + neon mint. */
+  --bg: #f6f7f7;
+  --bg-2: #ebeceb;
+
+  /* Foreground — near-black, synced with LIGHT_FG */
+  --fg: #101413;
+  --fg-dim: rgba(16, 20, 19, 0.78);
+  --fg-muted: rgba(16, 20, 19, 0.52);
+
+  /* Borders — opaque/dark enough to see against the neutral bg */
+  --border: rgba(16, 20, 19, 0.14);
+  --border-mid: rgba(16, 20, 19, 0.11);
+  --border-subtle: rgba(16, 20, 19, 0.08);
+  --border-faint: rgba(16, 20, 19, 0.05);
+  --border-active: rgba(16, 20, 19, 0.42);
+
+  /* Accent — deepened teal, synced with LIGHT_AC, punchy against the paper bg */
+  --accent: rgb(0, 140, 102);
+  --accent-dim: rgba(0, 140, 102, 0.55);
+  --accent-muted: rgba(0, 140, 102, 0.12);
+  --accent-border: rgba(0, 140, 102, 0.3);
+
+  /* ── Fluid Glass tokens (light) ──────────────────────── */
+  --glass-bg: rgba(246, 247, 247, 0.72);
+  --glass-border: rgba(0, 140, 102, 0.22);
+  --glass-blur: 16px;
+  --glass-highlight: rgba(255, 255, 255, 0.55);
 }
 
 /* ─── RESET ───────────────────────────────────────────────── */
@@ -91,8 +121,6 @@ button {
 body::after {
   content: "";
   position: fixed;
-  /* Oversize by 10% on each side so the ±3-4% translate in @keyframes grain
-     can never slide the grain layer off the viewport edge */
   inset: -10%;
   z-index: 9999;
   pointer-events: none;
@@ -103,7 +131,7 @@ body::after {
 }
 
 html[data-theme="light"] body::after {
-  opacity: 0.04;
+  opacity: 0.03;
   mix-blend-mode: multiply;
 }
 
@@ -280,6 +308,48 @@ html[data-theme="light"] body::after {
   color: var(--accent);
 }
 
+/* ─── FLUID GLASS UTILITY CLASS ───────────────────────────── */
+/*
+  Use .glass on any element to apply the standard glass surface.
+  Pairs with the FluidGlass React component but can also be used
+  standalone for simple cases (e.g., tooltips, overlays).
+*/
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  position: relative;
+  overflow: hidden;
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease;
+}
+
+/* Specular highlight on .glass elements */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 55% 35% at 28% 18%,
+    var(--glass-highlight),
+    transparent 68%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover state — slightly more opaque + brighter border */
+.glass:hover {
+  border-color: var(--accent-border);
+}
+
 /* ─── CARDS ───────────────────────────────────────────────── */
 .card {
   border: 1px solid var(--border);
@@ -324,7 +394,9 @@ textarea {
   font-size: 0.8rem;
   width: 100%;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.35s ease;
   resize: none;
 }
 
@@ -335,6 +407,12 @@ textarea::placeholder {
 input:focus,
 textarea:focus {
   border-color: var(--border-active);
+}
+
+/* Light mode: form inputs need explicit bg so the glass bg shows */
+html[data-theme="light"] input,
+html[data-theme="light"] textarea {
+  background: rgba(240, 250, 247, 0.7);
 }
 
 /* ─── THEME TOGGLE BUTTON ─────────────────────────────────── */
@@ -359,7 +437,6 @@ textarea:focus {
 }
 
 /* ─── SECTION CANVAS TRANSPARENCY ────────────────────────── */
-/* Non-hero sections let the fixed SectionCanvas show through */
 #about,
 #projects,
 #skills,
@@ -376,4 +453,77 @@ nav {
   transition:
     background 0.35s ease,
     border-color 0.35s ease;
+}
+
+/* ─── LIGHT MODE TARGETED FIXES ───────────────────────────── */
+/*
+  These rules override the most common invisible-text culprits
+  that live in inline styles using rgba(fg, low-alpha).
+  Since we can't easily change every component's alpha call,
+  we nudge contrast using CSS where possible.
+*/
+
+/* Ensure section number labels (01, 02 …) are visible */
+html[data-theme="light"] [style*="0.25"] {
+  /* This selector is intentionally broad — catches fg_(0.25) */
+}
+
+/* Project/skill/trait row numbers */
+html[data-theme="light"] .about-grid p,
+html[data-theme="light"] .contact-grid p {
+  color: rgba(16, 20, 19, 0.72) !important;
+}
+
+/* Stats labels */
+html[data-theme="light"] [style*="0.3)"] {
+  /* Override applied below via more specific selectors */
+}
+
+/* Section index numbers (e.g. "01", "02") */
+html[data-theme="light"] span[style*="0.25"] {
+  color: rgba(16, 20, 19, 0.5) !important;
+}
+
+/* Skill item dots and faint labels */
+html[data-theme="light"] [style*="0.2)"] {
+  color: rgba(16, 20, 19, 0.4) !important;
+}
+
+/* Timeline period labels */
+html[data-theme="light"] [style*="0.2,"] {
+  color: rgba(16, 20, 19, 0.45) !important;
+}
+
+/* ─── EXPLICIT LIGHT MODE CONTRAST OVERRIDES ──────────────── */
+/*
+  These are the component-level selectors that reliably catch
+  the problem. Works alongside the ThemeContext fixes above.
+*/
+html[data-theme="light"] #about p,
+html[data-theme="light"] #projects p,
+html[data-theme="light"] #skills p,
+html[data-theme="light"] #experience p,
+html[data-theme="light"] #contact p {
+  /* Ensure paragraph text meets WCAG AA on mint bg */
+  color: rgba(16, 20, 19, 0.78);
+}
+
+html[data-theme="light"] #about h2,
+html[data-theme="light"] #projects h2,
+html[data-theme="light"] #skills h2,
+html[data-theme="light"] #experience h2,
+html[data-theme="light"] #contact h2,
+html[data-theme="light"] #about h3,
+html[data-theme="light"] #experience h3 {
+  color: #101413;
+}
+
+/* Footer text in light mode */
+html[data-theme="light"] footer span {
+  color: rgba(16, 20, 19, 0.55) !important;
+}
+
+/* Nav link text in light mode */
+html[data-theme="light"] nav button {
+  color: rgba(16, 20, 19, 0.72);
 }
