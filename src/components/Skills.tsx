@@ -1,289 +1,5 @@
-// /**
-//  * Skills.tsx — redesigned as a code editor window.
-//  *
-//  * Skills are rendered as a TypeScript object literal inside a fake
-//  * "stack.config.ts" file — line numbers, syntax-highlighted keys/strings,
-//  * the first skill per category marked `// core`. Fully static text, so
-//  * it's readable at rest, accessible, and works with zero JS interaction.
-//  * Hovering a category only dims siblings for focus — never required.
-//  */
-// import { useState, type ReactNode } from "react";
-// import { SKILLS } from "../data/constants";
-// import { ScrambleText } from "./Scrambletext";
-// import { useTheme } from "../context/ThemeContext";
-// import { Reveal } from "./motion/Reveal";
-
-// const CATEGORIES = [
-//   { key: "blockchain", label: "blockchain" },
-//   { key: "backend", label: "backend" },
-//   { key: "frontend", label: "frontend" },
-//   { key: "tools", label: "tools" },
-// ] as const;
-
-// type CategoryKey = (typeof CATEGORIES)[number]["key"];
-
-// interface Line {
-//   cat: number; // -1 = not part of a category block
-//   indent: number;
-//   node: ReactNode;
-// }
-
-// export const Skills = () => {
-//   const t = useTheme();
-//   const [activeCat, setActiveCat] = useState<number>(-1);
-
-//   const kw = t.ac_(0.85); // export / const / as
-//   const keyColor = t.accent; // object keys
-//   const strColor = t.fg_(0.78); // plain strings
-//   const punct = t.fg_(0.32); // brackets / commas
-//   const comment = t.fg_(0.3);
-
-//   // ── Build the "file" as a flat line array (single source of truth
-//   // for both the gutter numbers and the code) ────────────────────────────
-//   const lines: Line[] = [
-//     {
-//       cat: -1,
-//       indent: 0,
-//       node: <span style={{ color: comment }}>// exported stack manifest</span>,
-//     },
-//     {
-//       cat: -1,
-//       indent: 0,
-//       node: (
-//         <>
-//           <span style={{ color: kw }}>export const</span> stack ={" "}
-//           <span style={{ color: punct }}>{"{"}</span>
-//         </>
-//       ),
-//     },
-//   ];
-
-//   CATEGORIES.forEach((cat, ci) => {
-//     const skills = SKILLS[cat.key as CategoryKey] as readonly string[];
-//     lines.push({
-//       cat: ci,
-//       indent: 1,
-//       node: (
-//         <>
-//           <span style={{ color: keyColor }}>{cat.label}</span>
-//           <span style={{ color: punct }}>: [</span>
-//         </>
-//       ),
-//     });
-//     skills.forEach((skill, si) => {
-//       lines.push({
-//         cat: ci,
-//         indent: 2,
-//         node:
-//           si === 0 ? (
-//             <>
-//               <span style={{ color: t.accent }}>&quot;{skill}&quot;</span>
-//               <span style={{ color: punct }}>,</span>{" "}
-//               <span style={{ color: comment }}>// core</span>
-//             </>
-//           ) : (
-//             <>
-//               <span style={{ color: strColor }}>&quot;{skill}&quot;</span>
-//               <span style={{ color: punct }}>,</span>
-//             </>
-//           ),
-//       });
-//     });
-//     lines.push({
-//       cat: ci,
-//       indent: 1,
-//       node: <span style={{ color: punct }}>],</span>,
-//     });
-//   });
-
-//   lines.push({
-//     cat: -1,
-//     indent: 0,
-//     node: (
-//       <>
-//         <span style={{ color: punct }}>{"}"}</span>{" "}
-//         <span style={{ color: kw }}>as const</span>
-//         <span style={{ color: punct }}>;</span>
-//       </>
-//     ),
-//   });
-
-//   const totalSkills = CATEGORIES.reduce(
-//     (sum, c) =>
-//       sum + (SKILLS[c.key as CategoryKey] as readonly string[]).length,
-//     0,
-//   );
-
-//   return (
-//     <section id="skills" className="section">
-//       <div className="container">
-//         <Reveal className="section-head">
-//           <span className="mono-label">Skills</span>
-//           <h2 className="section-title">
-//             <ScrambleText text="The stack, typed" active speed={20} />
-//           </h2>
-//         </Reveal>
-
-//         <Reveal delay={0.1}>
-//           <div
-//             className="card"
-//             style={{
-//               padding: 0,
-//               overflow: "hidden",
-//               background: t.terminalBg,
-//               backdropFilter: "blur(8px)",
-//             }}
-//           >
-//             {/* window chrome */}
-//             <div
-//               style={{
-//                 display: "flex",
-//                 alignItems: "center",
-//                 justifyContent: "space-between",
-//                 padding: "0.65rem 1rem",
-//                 background: t.terminalHeaderBg,
-//                 borderBottom: `1px solid ${t.fg_(0.08)}`,
-//               }}
-//             >
-//               <div
-//                 style={{
-//                   display: "flex",
-//                   alignItems: "center",
-//                   gap: "0.65rem",
-//                 }}
-//               >
-//                 <div style={{ display: "flex", gap: "0.35rem" }} aria-hidden>
-//                   {[0.5, 0.35, 0.22].map((a, i) => (
-//                     <span
-//                       key={i}
-//                       style={{
-//                         width: 9,
-//                         height: 9,
-//                         borderRadius: "50%",
-//                         background: t.fg_(a),
-//                       }}
-//                     />
-//                   ))}
-//                 </div>
-//                 <span className="mono-label" style={{ opacity: 0.75 }}>
-//                   stack.config.ts
-//                 </span>
-//               </div>
-//               <span
-//                 className="mono-label"
-//                 style={{
-//                   fontSize: "0.7rem",
-//                   color: t.accent,
-//                   background: t.ac_(0.1),
-//                   padding: "0.2rem 0.55rem",
-//                   borderRadius: "4px",
-//                 }}
-//               >
-//                 TypeScript
-//               </span>
-//             </div>
-
-//             {/* code body */}
-//             <div
-//               style={{ display: "flex", fontSize: "0.85rem", lineHeight: 1.9 }}
-//             >
-//               <div
-//                 aria-hidden
-//                 style={{
-//                   padding: "1.25rem 0.9rem",
-//                   textAlign: "right",
-//                   color: t.fg_(0.2),
-//                   userSelect: "none",
-//                   borderRight: `1px solid ${t.fg_(0.06)}`,
-//                   flexShrink: 0,
-//                 }}
-//               >
-//                 {lines.map((_, i) => (
-//                   <div key={i}>{i + 1}</div>
-//                 ))}
-//               </div>
-
-//               <div
-//                 style={{
-//                   padding: "1.25rem",
-//                   overflowX: "auto",
-//                   flex: 1,
-//                   minWidth: 0,
-//                 }}
-//               >
-//                 {lines.map((line, i) => (
-//                   <div
-//                     key={i}
-//                     onMouseEnter={() => line.cat >= 0 && setActiveCat(line.cat)}
-//                     onMouseLeave={() => setActiveCat(-1)}
-//                     style={{
-//                       whiteSpace: "pre",
-//                       paddingLeft: `${line.indent * 2}ch`,
-//                       opacity:
-//                         activeCat === -1 ||
-//                         line.cat === -1 ||
-//                         activeCat === line.cat
-//                           ? 1
-//                           : 0.4,
-//                       background:
-//                         line.cat >= 0 && activeCat === line.cat
-//                           ? t.ac_(0.05)
-//                           : "transparent",
-//                       transition: "opacity 0.2s ease, background 0.2s ease",
-//                     }}
-//                   >
-//                     {line.node}
-//                   </div>
-//                 ))}
-//                 <span
-//                   className="skills-cursor"
-//                   style={{ color: t.accent }}
-//                   aria-hidden
-//                 >
-//                   ▍
-//                 </span>
-//               </div>
-//             </div>
-
-//             {/* stats bar */}
-//             <div
-//               style={{
-//                 display: "flex",
-//                 gap: "1.25rem",
-//                 padding: "0.55rem 1.25rem",
-//                 background: t.terminalStatsBg,
-//                 borderTop: `1px solid ${t.fg_(0.06)}`,
-//                 fontSize: "0.72rem",
-//                 color: t.fg_(0.45),
-//               }}
-//               className="mono-label"
-//             >
-//               <span>{CATEGORIES.length} categories</span>
-//               <span>{totalSkills} skills</span>
-//               <span>UTF-8</span>
-//             </div>
-//           </div>
-//         </Reveal>
-//       </div>
-
-//       <style>{`
-//         .skills-cursor {
-//           animation: skills-blink 1.1s steps(1) infinite;
-//         }
-//         @media (prefers-reduced-motion: reduce) {
-//           .skills-cursor { animation: none; opacity: 0.6; }
-//         }
-//         @keyframes skills-blink {
-//           0%, 49% { opacity: 1; }
-//           50%, 100% { opacity: 0; }
-//         }
-//       `}</style>
-//     </section>
-//   );
-// };
-
 /**
- * Skills.tsx — split-editor code window.
+ * Skills.tsx — split-editor code window, styled as a macOS window.
  *
  * Two panes side by side, each its own pseudo-file with independent
  * line numbers — mirrors a real split editor. The two-column layout
@@ -291,16 +7,11 @@
  * no need for an internal scroll cap (which read as janky, nested
  * scrolling). Panes stack vertically on small screens. Fully static
  * text at rest — hover only dims sibling categories for focus.
- */
-/**
- * Skills.tsx — split-editor code window.
  *
- * Two panes side by side, each its own pseudo-file with independent
- * line numbers — mirrors a real split editor. The two-column layout
- * naturally halves total vertical height vs one long file, so there's
- * no need for an internal scroll cap (which read as janky, nested
- * scrolling). Panes stack vertically on small screens. Fully static
- * text at rest — hover only dims sibling categories for focus.
+ * The title bar now uses real macOS traffic-light colors (red/yellow/
+ * green, with the glyph-on-hover reveal), a centered title like a real
+ * window chrome, and the card gets a floating drop shadow + subtle
+ * hover lift instead of reading as a flat bordered box.
  */
 import { useState, type ReactNode } from "react";
 import { SKILLS } from "../data/constants";
@@ -350,9 +61,17 @@ interface Line {
   node: ReactNode;
 }
 
+// ── Real macOS traffic-light colors ────────────────────────────────────────
+const TRAFFIC = [
+  { fill: "#FF5F57", ring: "#E0443E", glyph: "×" }, // close
+  { fill: "#FEBC2E", ring: "#DEA123", glyph: "−" }, // minimize
+  { fill: "#28C840", ring: "#1AAB29", glyph: "+" }, // zoom
+];
+
 export const Skills = () => {
   const t = useTheme();
   const [activeCat, setActiveCat] = useState<string>("");
+  const [trafficHover, setTrafficHover] = useState(false);
 
   const kw = t.ac_(0.85); // export / const / as
   const keyColor = t.accent; // object keys
@@ -449,58 +168,100 @@ export const Skills = () => {
         </Reveal>
 
         <Reveal delay={0.1}>
+          {/* ── macOS-style floating window ─────────────────────────────
+              Real proportions: ~12px corner radius, layered soft shadow
+              for the "floating above the desktop" look, and a thin
+              top highlight to sell the glass/vibrancy edge. */}
           <div
-            className="card"
+            className="card macos-window"
             style={{
               padding: 0,
               overflow: "hidden",
+              borderRadius: "12px",
               background: t.terminalBg,
-              backdropFilter: "blur(8px)",
+              backdropFilter: "blur(20px) saturate(1.8)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.8)",
+              boxShadow: t.isDark
+                ? "0 30px 60px -12px rgba(0,0,0,0.55), 0 12px 24px -8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)"
+                : "0 30px 60px -12px rgba(20,30,28,0.22), 0 12px 24px -8px rgba(20,30,28,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+              border: `1px solid ${t.fg_(0.08)}`,
             }}
           >
-            {/* window chrome */}
+            {/* title bar — traffic lights left, centered title, accessory right */}
             <div
               style={{
+                position: "relative",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "0.65rem 1rem",
+                padding: "0.7rem 1rem",
                 background: t.terminalHeaderBg,
                 borderBottom: `1px solid ${t.fg_(0.08)}`,
               }}
             >
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.65rem",
-                }}
+                onMouseEnter={() => setTrafficHover(true)}
+                onMouseLeave={() => setTrafficHover(false)}
+                style={{ display: "flex", gap: "0.5rem", zIndex: 1 }}
+                aria-hidden
               >
-                <div style={{ display: "flex", gap: "0.35rem" }} aria-hidden>
-                  {[0.5, 0.35, 0.22].map((a, i) => (
+                {TRAFFIC.map((c, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      position: "relative",
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: `radial-gradient(circle at 35% 30%, ${c.fill}, ${c.ring})`,
+                      boxShadow: `0 0 0 0.5px ${c.ring}66`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     <span
-                      key={i}
                       style={{
-                        width: 9,
-                        height: 9,
-                        borderRadius: "50%",
-                        background: t.fg_(a),
+                        fontSize: "8px",
+                        lineHeight: 1,
+                        fontWeight: 700,
+                        color: "rgba(0,0,0,0.45)",
+                        opacity: trafficHover ? 1 : 0,
+                        transition: "opacity 0.12s ease",
+                        userSelect: "none",
                       }}
-                    />
-                  ))}
-                </div>
-                <span className="mono-label" style={{ opacity: 0.75 }}>
-                  src/stack/
-                </span>
+                    >
+                      {c.glyph}
+                    </span>
+                  </span>
+                ))}
               </div>
+
+              {/* centered title — absolutely positioned so it stays truly
+                  centered regardless of left/right content width */}
               <span
                 className="mono-label"
                 style={{
-                  fontSize: "0.7rem",
+                  position: "absolute",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  opacity: 0.6,
+                  fontSize: "0.72rem",
+                  pointerEvents: "none",
+                }}
+              >
+                src/stack/
+              </span>
+
+              <span
+                className="mono-label"
+                style={{
+                  fontSize: "0.68rem",
                   color: t.accent,
                   background: t.ac_(0.1),
                   padding: "0.2rem 0.55rem",
                   borderRadius: "4px",
+                  zIndex: 1,
                 }}
               >
                 TypeScript
@@ -643,6 +404,14 @@ export const Skills = () => {
         @keyframes skills-blink {
           0%, 49% { opacity: 1; }
           50%, 100% { opacity: 0; }
+        }
+        /* Subtle "window on a desktop" lift on hover — mirrors how
+           macOS nudges the active window's shadow */
+        .macos-window {
+          transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+        .macos-window:hover {
+          transform: translateY(-2px);
         }
         @media (max-width: 720px) {
           .skills-split {
