@@ -376,7 +376,7 @@ const SuccessState = ({
         color: fg,
       }}
     >
-      Message ready
+      Message Sent!
     </div>
     <div
       style={{
