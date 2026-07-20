@@ -2,8 +2,8 @@
  * Contact.tsx — redesigned.
  *
  * Inputs get floating labels + focus rings + inline validation; submit
- * plays a drawn-check success animation, then opens a pre-filled mailto
- * (no backend required — swap `submitMessage` for your API later).
+ * plays a drawn-check success animation, then POSTs to /api/send-email
+ * (a Vercel serverless function using nodemailer/Gmail SMTP).
  * Links keep their identity but read in Inter, not mono.
  */
 import { useState, FormEvent } from "react";
@@ -33,6 +33,8 @@ export const Contact = () => {
   });
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const links = [
     { icon: Github, label: "GitHub", url: RESUME.github, handle: "@Atreusx1" },
@@ -66,18 +68,38 @@ export const Contact = () => {
     return Object.keys(next).length === 0;
   };
 
-  const submitMessage = (e: FormEvent): void => {
+  const submitMessage = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     if (!validate()) return;
-    setSent(true);
-    const subject = encodeURIComponent(`Portfolio — ${form.name}`);
-    const body = encodeURIComponent(
-      `${form.message}\n\n— ${form.name} (${form.email})`,
-    );
-    // Open the visitor's mail client pre-filled; swap for an API call later.
-    window.setTimeout(() => {
-      window.location.href = `mailto:${RESUME.email}?subject=${subject}&body=${body}`;
-    }, 900);
+
+    setSending(true);
+    setServerError(null);
+
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          subject: `Portfolio — ${form.name}`,
+          message: form.message,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message ?? "Something went wrong");
+      }
+
+      setSent(true);
+    } catch (err) {
+      setServerError(
+        err instanceof Error ? err.message : "Couldn't send — try again",
+      );
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -203,10 +225,28 @@ export const Contact = () => {
                   rows={5}
                 />
                 <Magnetic strength={6} style={{ alignSelf: "flex-start" }}>
-                  <button type="submit" className="btn btn-primary">
-                    Send message <ArrowUpRight size={13} />
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={sending}
+                  >
+                    {sending ? "Sending…" : "Send message"}{" "}
+                    <ArrowUpRight size={13} />
                   </button>
                 </Magnetic>
+                {serverError && (
+                  <div
+                    role="alert"
+                    style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: "0.75rem",
+                      color: "rgba(255,110,110,0.9)",
+                      paddingLeft: "0.25rem",
+                    }}
+                  >
+                    {serverError}
+                  </div>
+                )}
               </form>
             )}
           </Reveal>
@@ -347,7 +387,7 @@ const SuccessState = ({
         maxWidth: "32ch",
       }}
     >
-      Opening your mail client with everything pre-filled…
+      Thanks for reaching out. I'll get back to you soon.
     </div>
   </div>
 );
