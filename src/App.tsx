@@ -20,6 +20,7 @@ import { Skills } from "./components/Skills";
 import { Experience } from "./components/Experience";
 import { Contact } from "./components/Contact";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const SECTION_IDS = [
   "home",
@@ -100,6 +101,7 @@ const App = () => {
           </footer>
         </div>
         <Analytics />
+        <SpeedInsights />
       </WalletProvider>
     </ThemeProvider>
   );
