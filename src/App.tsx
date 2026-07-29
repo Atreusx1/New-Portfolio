@@ -19,8 +19,16 @@ import { Projects } from "./components/Projects";
 import { Skills } from "./components/Skills";
 import { Experience } from "./components/Experience";
 import { Contact } from "./components/Contact";
+import { Analytics } from "@vercel/analytics/react";
 
-const SECTION_IDS = ["home", "about", "projects", "skills", "experience", "contact"] as const;
+const SECTION_IDS = [
+  "home",
+  "about",
+  "projects",
+  "skills",
+  "experience",
+  "contact",
+] as const;
 
 const App = () => {
   const [booted, setBooted] = useState(false);
@@ -91,6 +99,7 @@ const App = () => {
             </span>
           </footer>
         </div>
+        <Analytics />
       </WalletProvider>
     </ThemeProvider>
   );
