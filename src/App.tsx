@@ -11,7 +11,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { WalletProvider } from "./components/WalletContext";
 import { Boot } from "./components/Boot";
 import { SectionCanvas } from "./components/Sectioncanvas";
-import { FloatingParticles } from "./components/FloatingParticles";
+// import { FloatingParticles } from "./components/FloatingParticles";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./components/Hero";
 import { About } from "./components/About";
@@ -62,7 +62,6 @@ const App = () => {
         {!booted && <Boot onDone={() => setBooted(true)} />}
 
         <SectionCanvas />
-        <FloatingParticles />
 
         <div
           style={{
