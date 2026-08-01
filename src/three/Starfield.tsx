@@ -27,6 +27,7 @@ import { fibonacciSphere } from "./fibonacciSphere";
 import { createParticleMaterial, parseAccent } from "./particleMaterial";
 import { FLIGHT, MOTION, damp, range } from "./motion";
 import { cameraZAt } from "./CameraRig";
+import { handoffEnergy } from "./useMotif";
 import type { FlightState } from "./useFlightProgress";
 import type { MutableRefObject } from "react";
 
@@ -113,6 +114,9 @@ export const Starfield = ({
     const dt = Math.min(delta, 1 / 20);
 
     material.uniforms.uTime.value = state.clock.elapsedTime * MOTION.speed.twinkle * 0.6;
+    // The backdrop is present for the entire flight, which makes it the one
+    // surface that carries the shared seam energy from end to end.
+    material.uniforms.uEnergy.value = handoffEnergy(flight.current.t);
 
     const t = Math.max(0, flight.current.t);
     // Ramps in across leg 1, then holds for the rest of the flight.

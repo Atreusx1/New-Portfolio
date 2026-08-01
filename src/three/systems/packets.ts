@@ -19,22 +19,30 @@
 import { createRandom, randRange } from "./noise";
 import type { NetworkTopology } from "./graph";
 
+/**
+ * Stage 4 raised the traffic: more concurrent packets, spawning sooner, with
+ * longer trails. The cost is entirely in the shared packet buffer, which is
+ * `poolSize * (1 + trailLength)` points — 630 here, against 360 before — and
+ * every one of them is a point the vertex shader may skip via aScale 0. Routing
+ * cost is unchanged, because it is per *spawn* rather than per frame, and the
+ * pool still allocates nothing after construction.
+ */
 export const PACKET_CONFIG = {
-  poolSize: 24,
-  maxActive: 10,
+  poolSize: 30,
+  maxActive: 13,
   /** Spawn cadence range (seconds). */
-  spawnMin: 0.45,
-  spawnMax: 1.1,
+  spawnMin: 0.34,
+  spawnMax: 0.85,
   /** Travel speed range, world units/second (was 110–190 px/s). */
   speedMin: 3.4,
   speedMax: 5.8,
   sizeMin: 1.6,
   sizeMax: 2.6,
-  trailLength: 14,
+  trailLength: 20,
   maxRouteHops: 8,
-  trailAlpha: 0.35,
+  trailAlpha: 0.42,
   /** Seconds an edge stays lit after a packet crosses it. */
-  edgeLitDuration: 0.15,
+  edgeLitDuration: 0.18,
 } as const;
 
 export class Packet {

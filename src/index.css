@@ -74,10 +74,17 @@ html[data-theme="light"] {
   --border-faint: rgba(27, 26, 22, 0.045);
   --border-active: rgba(27, 26, 22, 0.32);
 
-  --accent: rgb(0, 132, 99);
-  --accent-dim: rgba(0, 132, 99, 0.6);
-  --accent-muted: rgba(0, 132, 99, 0.09);
-  --accent-border: rgba(0, 132, 99, 0.28);
+  /* Blueprint cobalt — 6.87:1 on --bg, 5.85:1 on --bg-3, both clear of AA.
+     The previous deep teal measured 4.45:1 and did not.
+
+     These are the pre-hydration fallback. ThemeContext's LIGHT_ACCENT is the
+     source of truth and overwrites them on mount, so if you change the accent,
+     change it there and mirror it here — a mismatch shows as a one-frame
+     colour flip on first paint, not as a permanent wrong colour. */
+  --accent: rgb(27, 76, 199);
+  --accent-dim: rgba(27, 76, 199, 0.6);
+  --accent-muted: rgba(27, 76, 199, 0.09);
+  --accent-border: rgba(27, 76, 199, 0.28);
 
   /* Light mode elevation is shadow-driven — layered, warm-tinted */
   --shadow-sm: 0 1px 2px rgba(31, 27, 16, 0.05), 0 0 0 1px rgba(27, 26, 22, 0.05);
