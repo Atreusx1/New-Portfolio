@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 import { ThemeProvider } from "./context/ThemeContext";
 import { WalletProvider } from "./components/WalletContext";
 import { Boot } from "./components/Boot";
-import { SectionCanvas } from "./components/Sectioncanvas";
-// import { FloatingParticles } from "./components/FloatingParticles";
+import { UniverseBackground } from "./components/UniverseBackground";
+import { FloatingParticles } from "./components/FloatingParticles";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./components/Hero";
 import { About } from "./components/About";
@@ -19,17 +19,9 @@ import { Projects } from "./components/Projects";
 import { Skills } from "./components/Skills";
 import { Experience } from "./components/Experience";
 import { Contact } from "./components/Contact";
+import { SECTION_IDS } from "./data/sections";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-
-const SECTION_IDS = [
-  "home",
-  "about",
-  "projects",
-  "skills",
-  "experience",
-  "contact",
-] as const;
 
 const App = () => {
   const [booted, setBooted] = useState(false);
@@ -61,7 +53,8 @@ const App = () => {
       <WalletProvider>
         {!booted && <Boot onDone={() => setBooted(true)} />}
 
-        <SectionCanvas />
+        <UniverseBackground />
+        <FloatingParticles />
 
         <div
           style={{

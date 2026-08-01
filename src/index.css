@@ -16,7 +16,11 @@
   --bg-3: #131614;
   --fg: #e8eae9;
   --fg-dim: rgba(232, 234, 233, 0.62);
-  --fg-muted: rgba(232, 234, 233, 0.34);
+  /* 0.34 measured 2.68:1 against --bg — below AA for text this small.
+     0.50 is the minimum that clears 4.5:1. See STAGE_4_NOTES.md. */
+  --fg-muted: rgba(232, 234, 233, 0.5);
+  /* Non-text uses only: rules, dots, decorative marks. Never a text color. */
+  --fg-faint: rgba(232, 234, 233, 0.34);
 
   --border: rgba(232, 234, 233, 0.08);
   --border-mid: rgba(232, 234, 233, 0.06);
@@ -60,7 +64,9 @@ html[data-theme="light"] {
   --bg-3: #eae7df;
   --fg: #1b1a16;
   --fg-dim: rgba(27, 26, 22, 0.72);
-  --fg-muted: rgba(27, 26, 22, 0.46);
+  /* 0.46 measured 2.96:1 against paper. 0.60 clears 4.5:1. */
+  --fg-muted: rgba(27, 26, 22, 0.6);
+  --fg-faint: rgba(27, 26, 22, 0.46);
 
   --border: rgba(27, 26, 22, 0.1);
   --border-mid: rgba(27, 26, 22, 0.08);
@@ -113,13 +119,37 @@ a, button { cursor: pointer; }
 ::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 2px; }
 
 /* ─── TYPE ROLES ─────────────────────────────────────────── */
+/* ── Tier 1: headline ──────────────────────────────────────
+   Pushed up in size and weight. The three tiers previously sat
+   at 600 / 600 / 450 with only size separating them, which is
+   why the hierarchy read as flat: weight was doing no work. */
 .display-xl {
   font-family: var(--font-display);
-  font-size: clamp(2.9rem, 7.5vw, 6.2rem);
-  font-weight: 600;
-  line-height: 1.02;
-  letter-spacing: -0.035em;
+  font-size: clamp(3.2rem, 8.4vw, 7.1rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.042em;
   color: var(--fg);
+  text-wrap: balance;
+}
+
+/* The one focal phrase. Accent measures 16.58:1 on --bg and 4.45:1
+   on paper — it is a *stronger* signal than the dim tier it replaces,
+   which measured 2.32:1 and failed AA outright. */
+.display-xl .focal {
+  color: var(--accent);
+}
+
+/* Tier 1b: the second headline line. Same face, dropped a weight and
+   held at --fg-dim rather than the old 0.30 alpha. */
+.display-sub {
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 5.6vw, 4.6rem);
+  font-weight: 500;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--fg-dim);
+  text-wrap: balance;
 }
 
 .section-title {
@@ -140,12 +170,73 @@ a, button { cursor: pointer; }
   max-width: 62ch; /* no paragraph exceeds comfortable reading width */
 }
 
+/* ── Tier 3: eyebrow ───────────────────────────────────────
+   Smaller and wider-tracked than before, so it reads as a label
+   rather than as competing copy. It can afford to shrink now that
+   its color actually passes contrast. */
 .mono-label {
   font-family: var(--font-mono);
-  font-size: 0.6563rem;
-  letter-spacing: 0.16em;
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--fg-muted);
+}
+
+/* ── Eyebrow, when it sits over the particle field ─────────
+   `.mono-label` at --fg-muted measures 3.37:1 over a scrimmed particle —
+   the only tier that still fails inside the text well. Clearing it with
+   the scrim alone would need a 0.99 plateau, i.e. an opaque disc punched
+   through the globe. Promoting this one tier to --fg-dim costs nothing
+   visually and lands at 4.84:1. Hierarchy separation here comes from size
+   and tracking (10px vs a 7rem headline), not from being nearly invisible. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+/* ── Text well ─────────────────────────────────────────────
+   The globe now sits directly behind the hero copy. Over the centre
+   of a full-brightness particle, --fg measures 1.03:1 — invisible.
+   An elliptical scrim of --bg restores the contrast budget without
+   flattening the field: 0.86 at the centre clears AA for every tier,
+   and it reaches zero well before the globe's silhouette, so the
+   framing survives.
+
+   Sized in ch/em so it tracks the type it protects rather than the
+   viewport, and it is behind the text in the same stacking context —
+   no extra element, no layout impact. */
+.text-well {
+  position: relative;
+  isolation: isolate;
+}
+.text-well::before {
+  content: "";
+  position: absolute;
+  inset: -12% -8%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 62% 58% at 50% 50%,
+    var(--bg) 0%,
+    color-mix(in srgb, var(--bg) 86%, transparent) 42%,
+    color-mix(in srgb, var(--bg) 55%, transparent) 68%,
+    transparent 100%
+  );
+}
+/* color-mix has good support in 2026, but a hard fallback costs one rule
+   and prevents an unreadable hero on anything older. */
+@supports not (background: color-mix(in srgb, red 50%, transparent)) {
+  .text-well::before {
+    background: radial-gradient(
+      ellipse 62% 58% at 50% 50%,
+      var(--bg) 0%,
+      var(--bg) 42%,
+      transparent 100%
+    );
+  }
 }
 
 .data-text { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
