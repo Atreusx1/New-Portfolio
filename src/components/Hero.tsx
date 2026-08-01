@@ -195,78 +195,78 @@ export const Hero = () => {
         textAlign: "center",
       }}
     >
-      <div className="text-well">
-        {/* Eyebrow */}
-        <div
-          className="mono-label"
-          style={{ ...reveal(1), marginBottom: "1.5rem" }}
-        >
-          <span
-            style={{
-              display: "inline-block",
-              width: 5,
-              height: 5,
-              borderRadius: "50%",
-              background: t.accent,
-              marginRight: "0.6rem",
-              animation: "blink 2.4s ease-in-out infinite",
-              verticalAlign: "middle",
-            }}
-          />
-          Full-stack · Blockchain · Pune, IN
-        </div>
-
-        {/* Headline */}
-        <h1 className="display-xl" style={{ ...reveal(2), maxWidth: "14ch" }}>
-          {stage >= 2 ? (
-            <ScrambleText text="Anish Kadam" active speed={26} />
-          ) : (
-            "Anish Kadam"
-          )}
-        </h1>
-        <h1
-          className="display-xl"
-          style={{ ...reveal(2), color: t.fg_(0.3), maxWidth: "16ch" }}
-        >
-          builds on-chain.
-        </h1>
-
-        {/* Subtitle — one sentence, readable width */}
-        <p
-          className="body-text"
+      {/* <div className="text-well"> */}
+      {/* Eyebrow */}
+      <div
+        className="mono-label"
+        style={{ ...reveal(1), marginBottom: "1.5rem" }}
+      >
+        <span
           style={{
-            ...reveal(3),
-            margin: "1.75rem auto 2.5rem",
-            maxWidth: "46ch",
-            fontSize: "1.0313rem",
+            display: "inline-block",
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: t.accent,
+            marginRight: "0.6rem",
+            animation: "blink 2.4s ease-in-out infinite",
+            verticalAlign: "middle",
           }}
-        >
-          Engineer of Web3 systems — building secure backends, smart contracts,
-          and intuitive user experiences.
-        </p>
-
-        {/* CTAs */}
-        <div
-          style={{
-            ...reveal(4),
-            display: "flex",
-            gap: "0.9rem",
-            flexWrap: "wrap",
-            justifyContent: "center",
-          }}
-        >
-          <Magnetic strength={8}>
-            <a href="#projects" className="btn btn-primary">
-              View projects <ArrowUpRight size={14} />
-            </a>
-          </Magnetic>
-          <Magnetic strength={8}>
-            <a href="#contact" className="btn btn-outline">
-              Get in touch
-            </a>
-          </Magnetic>
-        </div>
+        />
+        Full-stack · Blockchain · Pune, IN
       </div>
+
+      {/* Headline */}
+      <h1 className="display-xl" style={{ ...reveal(2), maxWidth: "14ch" }}>
+        {stage >= 2 ? (
+          <ScrambleText text="Anish Kadam" active speed={26} />
+        ) : (
+          "Anish Kadam"
+        )}
+      </h1>
+      <h1
+        className="display-xl"
+        style={{ ...reveal(2), color: t.fg_(0.3), maxWidth: "16ch" }}
+      >
+        builds on-chain.
+      </h1>
+
+      {/* Subtitle — one sentence, readable width */}
+      <p
+        className="body-text"
+        style={{
+          ...reveal(3),
+          margin: "1.75rem auto 2.5rem",
+          maxWidth: "46ch",
+          fontSize: "1.0313rem",
+        }}
+      >
+        Engineer of Web3 systems — building secure backends, smart contracts,
+        and intuitive user experiences.
+      </p>
+
+      {/* CTAs */}
+      <div
+        style={{
+          ...reveal(4),
+          display: "flex",
+          gap: "0.9rem",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <Magnetic strength={8}>
+          <a href="#projects" className="btn btn-primary">
+            View projects <ArrowUpRight size={14} />
+          </a>
+        </Magnetic>
+        <Magnetic strength={8}>
+          <a href="#contact" className="btn btn-outline">
+            Get in touch
+          </a>
+        </Magnetic>
+      </div>
+      {/* </div> */}
 
       {/* Live market strip — the proof the wires are real */}
       <div

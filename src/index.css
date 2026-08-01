@@ -43,9 +43,15 @@
 
   /* Depth — dark mode builds elevation with light, not shadow */
   --shadow-sm: 0 0 0 1px rgba(232, 234, 233, 0.05);
-  --shadow-md: 0 0 0 1px rgba(232, 234, 233, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 0 0 1px rgba(232, 234, 233, 0.07), 0 24px 64px rgba(0, 0, 0, 0.55);
-  --card-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 42%);
+  --shadow-md:
+    0 0 0 1px rgba(232, 234, 233, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-lg:
+    0 0 0 1px rgba(232, 234, 233, 0.07), 0 24px 64px rgba(0, 0, 0, 0.55);
+  --card-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.035),
+    rgba(255, 255, 255, 0) 42%
+  );
 
   --glass-bg: rgba(10, 13, 12, 0.6);
   --glass-border: rgba(151, 252, 228, 0.14);
@@ -87,10 +93,19 @@ html[data-theme="light"] {
   --accent-border: rgba(27, 76, 199, 0.28);
 
   /* Light mode elevation is shadow-driven — layered, warm-tinted */
-  --shadow-sm: 0 1px 2px rgba(31, 27, 16, 0.05), 0 0 0 1px rgba(27, 26, 22, 0.05);
-  --shadow-md: 0 1px 2px rgba(31, 27, 16, 0.05), 0 8px 24px rgba(31, 27, 16, 0.07), 0 0 0 1px rgba(27, 26, 22, 0.05);
-  --shadow-lg: 0 2px 4px rgba(31, 27, 16, 0.05), 0 20px 48px rgba(31, 27, 16, 0.11), 0 0 0 1px rgba(27, 26, 22, 0.05);
-  --card-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 46%);
+  --shadow-sm:
+    0 1px 2px rgba(31, 27, 16, 0.05), 0 0 0 1px rgba(27, 26, 22, 0.05);
+  --shadow-md:
+    0 1px 2px rgba(31, 27, 16, 0.05), 0 8px 24px rgba(31, 27, 16, 0.07),
+    0 0 0 1px rgba(27, 26, 22, 0.05);
+  --shadow-lg:
+    0 2px 4px rgba(31, 27, 16, 0.05), 0 20px 48px rgba(31, 27, 16, 0.11),
+    0 0 0 1px rgba(27, 26, 22, 0.05);
+  --card-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0) 46%
+  );
 
   --glass-bg: rgba(250, 249, 246, 0.72);
   --glass-border: rgba(27, 26, 22, 0.08);
@@ -99,9 +114,17 @@ html[data-theme="light"] {
 }
 
 /* ─── RESET ──────────────────────────────────────────────── */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  overflow-x: hidden;
+}
 
 body {
   font-family: var(--font-body);
@@ -112,18 +135,37 @@ body {
   cursor: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  transition: background 0.35s ease, color 0.35s ease;
+  transition:
+    background 0.35s ease,
+    color 0.35s ease;
 }
 
-*, *::before, *::after { cursor: none; }
-a, button { cursor: pointer; }
+*,
+*::before,
+*::after {
+  cursor: none;
+}
+a,
+button {
+  cursor: pointer;
+}
 
-::selection { background: var(--accent-muted); color: var(--fg); }
+::selection {
+  background: var(--accent-muted);
+  color: var(--fg);
+}
 
 /* ─── SCROLLBAR ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 2px; }
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 2px;
+}
 
 /* ─── TYPE ROLES ─────────────────────────────────────────── */
 /* ── Tier 1: headline ──────────────────────────────────────
@@ -153,7 +195,7 @@ a, button { cursor: pointer; }
   font-family: var(--font-display);
   font-size: clamp(2.3rem, 5.6vw, 4.6rem);
   font-weight: 500;
-  line-height: 1.0;
+  line-height: 1;
   letter-spacing: -0.03em;
   color: var(--fg-dim);
   text-wrap: balance;
@@ -246,10 +288,17 @@ a, button { cursor: pointer; }
   }
 }
 
-.data-text { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.data-text {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ─── LAYOUT ─────────────────────────────────────────────── */
-.container { max-width: 1140px; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 2rem); }
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 2rem);
+}
 
 .section {
   position: relative;
@@ -271,7 +320,10 @@ a, button { cursor: pointer; }
   background: var(--bg-2);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  transition: box-shadow 0.35s var(--ease-out), transform 0.35s var(--ease-out), background 0.35s ease;
+  transition:
+    box-shadow 0.35s var(--ease-out),
+    transform 0.35s var(--ease-out),
+    background 0.35s ease;
 }
 .card::before {
   content: "";
@@ -281,7 +333,9 @@ a, button { cursor: pointer; }
   pointer-events: none;
   border-radius: inherit;
 }
-.card:hover { box-shadow: var(--shadow-md); }
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
 
 /* Glow-follow: components set --gx / --gy from pointer position */
 .card-glow::after {
@@ -289,12 +343,18 @@ a, button { cursor: pointer; }
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: radial-gradient(340px circle at var(--gx, 50%) var(--gy, 50%), var(--accent-muted), transparent 65%);
+  background: radial-gradient(
+    340px circle at var(--gx, 50%) var(--gy, 50%),
+    var(--accent-muted),
+    transparent 65%
+  );
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
 }
-.card-glow:hover::after { opacity: 1; }
+.card-glow:hover::after {
+  opacity: 1;
+}
 
 .glass {
   background: var(--glass-bg);
@@ -304,16 +364,25 @@ a, button { cursor: pointer; }
   border-radius: var(--radius);
   position: relative;
   overflow: hidden;
-  transition: background 0.35s ease, border-color 0.35s ease;
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease;
 }
 .glass::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 55% 35% at 28% 12%, var(--glass-highlight), transparent 68%);
+  background: radial-gradient(
+    ellipse 55% 35% at 28% 12%,
+    var(--glass-highlight),
+    transparent 68%
+  );
   pointer-events: none;
 }
-.glass > * { position: relative; z-index: 1; }
+.glass > * {
+  position: relative;
+  z-index: 1;
+}
 
 /* ─── BUTTONS ────────────────────────────────────────────── */
 .btn {
@@ -328,11 +397,17 @@ a, button { cursor: pointer; }
   border-radius: 999px;
   text-decoration: none;
   border: 1px solid transparent;
-  transition: transform 0.25s var(--ease-spring), box-shadow 0.3s ease,
-    background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  transition:
+    transform 0.25s var(--ease-spring),
+    box-shadow 0.3s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
   will-change: transform;
 }
-.btn:active { transform: scale(0.97); }
+.btn:active {
+  transform: scale(0.97);
+}
 
 .btn-primary {
   background: var(--accent);
@@ -340,7 +415,9 @@ a, button { cursor: pointer; }
   box-shadow: 0 0 0 0 var(--accent-muted);
 }
 .btn-primary:hover {
-  box-shadow: 0 6px 24px var(--accent-muted), 0 0 0 4px var(--accent-muted);
+  box-shadow:
+    0 6px 24px var(--accent-muted),
+    0 0 0 4px var(--accent-muted);
   transform: translateY(-1px);
 }
 
@@ -361,7 +438,10 @@ a, button { cursor: pointer; }
   color: var(--fg-muted);
   padding: 0.5rem 0.9rem;
 }
-.btn-ghost:hover { color: var(--fg); background: var(--border-faint); }
+.btn-ghost:hover {
+  color: var(--fg);
+  background: var(--border-faint);
+}
 
 /* ─── CHIPS ──────────────────────────────────────────────── */
 .chip {
@@ -376,7 +456,10 @@ a, button { cursor: pointer; }
   transition: all 0.2s ease;
   white-space: nowrap;
 }
-.chip:hover { border-color: var(--accent-border); color: var(--accent); }
+.chip:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
 
 /* ─── FORMS ──────────────────────────────────────────────── */
 .field {
@@ -384,14 +467,19 @@ a, button { cursor: pointer; }
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-2);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 .field:focus-within {
   border-color: var(--accent-border);
   box-shadow: 0 0 0 3px var(--accent-muted);
 }
-.field.field-error { border-color: rgba(255, 110, 110, 0.5); }
-.field input, .field textarea {
+.field.field-error {
+  border-color: rgba(255, 110, 110, 0.5);
+}
+.field input,
+.field textarea {
   width: 100%;
   font-family: var(--font-body);
   font-size: 0.875rem;
@@ -411,14 +499,18 @@ a, button { cursor: pointer; }
   color: var(--fg-muted);
   pointer-events: none;
   transform-origin: left top;
-  transition: transform 0.22s var(--ease-out), color 0.22s ease;
+  transition:
+    transform 0.22s var(--ease-out),
+    color 0.22s ease;
 }
 .field:focus-within label,
 .field.field-filled label {
   transform: translateY(-0.5rem) scale(0.72);
   color: var(--fg-muted);
 }
-.field:focus-within label { color: var(--accent); }
+.field:focus-within label {
+  color: var(--accent);
+}
 
 /* ─── NAV ────────────────────────────────────────────────── */
 .nav-pill {
@@ -433,10 +525,15 @@ a, button { cursor: pointer; }
   border-radius: 999px;
   box-shadow: var(--shadow-md);
   max-width: calc(100vw - 1.5rem);
-  transition: transform 0.45s var(--ease-spring), padding 0.35s var(--ease-out),
-    background 0.35s ease, border-color 0.35s ease;
+  transition:
+    transform 0.45s var(--ease-spring),
+    padding 0.35s var(--ease-out),
+    background 0.35s ease,
+    border-color 0.35s ease;
 }
-.nav-pill.nav-compact { padding: 0.3rem 0.45rem; }
+.nav-pill.nav-compact {
+  padding: 0.3rem 0.45rem;
+}
 .nav-link {
   position: relative;
   font-family: var(--font-body);
@@ -451,8 +548,12 @@ a, button { cursor: pointer; }
   transition: color 0.2s ease;
   z-index: 1;
 }
-.nav-link:hover { color: var(--fg); }
-.nav-link.nav-active { color: var(--fg); }
+.nav-link:hover {
+  color: var(--fg);
+}
+.nav-link.nav-active {
+  color: var(--fg);
+}
 .nav-indicator {
   position: absolute;
   top: 0.45rem;
@@ -460,26 +561,69 @@ a, button { cursor: pointer; }
   border-radius: 999px;
   background: var(--border-faint);
   border: 1px solid var(--border);
-  transition: left 0.4s var(--ease-spring), width 0.4s var(--ease-spring), opacity 0.25s ease;
+  transition:
+    left 0.4s var(--ease-spring),
+    width 0.4s var(--ease-spring),
+    opacity 0.25s ease;
   pointer-events: none;
 }
-.nav-compact .nav-indicator { top: 0.3rem; bottom: 0.3rem; }
+.nav-compact .nav-indicator {
+  top: 0.3rem;
+  bottom: 0.3rem;
+}
 
 /* ─── ANIMATIONS ─────────────────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px); filter: blur(6px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-@keyframes drawCheck { to { stroke-dashoffset: 0; } }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes drawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
 @keyframes scanline {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(100vh); }
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100vh);
+  }
 }
 
-.animate-fade-up { animation: fadeUp 0.9s var(--ease-out) forwards; opacity: 0; }
-.animate-fade-in { animation: fadeIn 0.8s ease forwards; opacity: 0; }
+.animate-fade-up {
+  animation: fadeUp 0.9s var(--ease-out) forwards;
+  opacity: 0;
+}
+.animate-fade-in {
+  animation: fadeIn 0.8s ease forwards;
+  opacity: 0;
+}
 
 /* ─── GRAIN (kept — but calmer) ──────────────────────────── */
 body::after {
@@ -492,18 +636,32 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
 }
-html[data-theme="light"] body::after { opacity: 0.02; mix-blend-mode: multiply; }
+html[data-theme="light"] body::after {
+  opacity: 0.02;
+  mix-blend-mode: multiply;
+}
 
 /* ─── SECTION TRANSPARENCY (universe canvas shows through) ── */
-#about, #projects, #skills, #experience, #contact {
+#about,
+#projects,
+#skills,
+#experience,
+#contact {
   background: transparent !important;
 }
-section, header, footer, nav {
-  transition: background 0.35s ease, border-color 0.35s ease;
+section,
+header,
+footer,
+nav {
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease;
 }
 
 /* ─── ACCESSIBILITY ──────────────────────────────────────── */
-:focus { outline: none; }
+:focus {
+  outline: none;
+}
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
@@ -512,21 +670,42 @@ section, header, footer, nav {
 /* The custom cursor hides the pointer — keyboard users get real focus rings */
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  body { cursor: auto; }
-  *, *::before, *::after { cursor: auto; }
+  body {
+    cursor: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    cursor: auto;
+  }
 }
 
 /* ─── RESPONSIVE HELPERS ─────────────────────────────────── */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
-.grid-projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+.grid-projects {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
 
 @media (max-width: 880px) {
-  .grid-2 { grid-template-columns: 1fr; }
-  .grid-projects { grid-template-columns: 1fr; }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .grid-projects {
+    grid-template-columns: 1fr;
+  }
 }
