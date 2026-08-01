@@ -4,16 +4,12 @@
  * · Centered, blurred, rounded; shrinks slightly past 60px of scroll.
  * · The active-section indicator is a real element that springs between
  *   links (measured via refs) instead of an underline color swap.
- * · Wallet connect is preserved and now opens the WalletBadge panel —
- *   a reason to connect beyond seeing your own address.
+ * · Wallet connect swapped for a direct "View Resume" link, so the nav
+ *   always offers a low-friction way to see the resume.
  */
 import { useEffect, useRef, useState } from "react";
-import { Sun, Moon, Wallet, Menu, X } from "lucide-react";
+import { Sun, Moon, Menu, X, Wallet } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { useWallet, chainLabel } from "./WalletContext";
-import { WalletBadge } from "./WalletBadge";
-
-const shortAddr = (addr: string) => `${addr.slice(0, 6)}···${addr.slice(-4)}`;
 
 interface NavProps {
   onNavigate: (section: string) => void;
@@ -32,16 +28,11 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
   const t = useTheme();
   const [compact, setCompact] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [walletOpen, setWalletOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [noMetaMask, setNoMetaMask] = useState(false);
   const [indicator, setIndicator] = useState({ left: 0, width: 0, on: false });
 
   const linkRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const pillRef = useRef<HTMLElement>(null);
-
-  const { address, chainId, connecting, error, connect, disconnect } =
-    useWallet();
 
   useEffect(() => {
     setMounted(true);
@@ -67,17 +58,6 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
     window.addEventListener("resize", measure, { passive: true });
     return () => window.removeEventListener("resize", measure);
   }, [activeSection, compact]);
-
-  useEffect(() => {
-    if (error === "NO_METAMASK") {
-      setNoMetaMask(true);
-      const id = setTimeout(() => setNoMetaMask(false), 3500);
-      return () => clearTimeout(id);
-    }
-  }, [error]);
-
-  const chain = chainLabel(chainId);
-  const wrongNet = chainId !== null && chainId !== 1;
 
   return (
     <>
@@ -145,82 +125,38 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
             paddingLeft: "0.35rem",
           }}
         >
-          {/* Wallet */}
-          <div style={{ position: "relative" }}>
-            <button
-              onClick={() =>
-                address ? setWalletOpen((o) => !o) : void connect()
-              }
-              disabled={connecting}
-              aria-expanded={walletOpen}
-              aria-label={address ? "Wallet menu" : "Connect wallet"}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.45rem",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.58rem",
-                letterSpacing: "0.06em",
-                padding: "0.42rem 0.8rem",
-                background: t.ac_(0.09),
-                color: connecting ? t.fg_(0.35) : t.accent,
-                border: `1px solid ${wrongNet ? "rgba(255,160,80,0.4)" : t.ac_(0.22)}`,
-                borderRadius: 999,
-                transition: "all 0.2s ease",
-              }}
-            >
-              {address ? (
-                <>
-                  <span
-                    style={{
-                      width: 5,
-                      height: 5,
-                      borderRadius: "50%",
-                      background: wrongNet ? "rgba(255,160,80,0.9)" : t.accent,
-                    }}
-                  />
-                  {chain && (
-                    <span
-                      style={{
-                        color: wrongNet ? "rgba(255,160,80,0.8)" : t.fg_(0.35),
-                        fontSize: "0.5rem",
-                      }}
-                    >
-                      {chain}
-                    </span>
-                  )}
-                  {shortAddr(address)}
-                </>
-              ) : (
-                <>
-                  <Wallet size={11} />
-                  {connecting ? "Connecting…" : "Connect"}
-                </>
-              )}
-            </button>
-
-            {walletOpen && address && (
-              <>
-                <div
-                  style={{ position: "fixed", inset: 0, zIndex: 98 }}
-                  onClick={() => setWalletOpen(false)}
-                />
-                <WalletBadge
-                  address={address}
-                  chainId={chainId}
-                  onDisconnect={() => {
-                    disconnect();
-                    setWalletOpen(false);
-                  }}
-                />
-              </>
-            )}
-          </div>
+          {/* View Resume */}
+          <a
+            href="/resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View resume"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.45rem",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.58rem",
+              letterSpacing: "0.06em",
+              padding: "0.42rem 0.8rem",
+              background: t.ac_(0.09),
+              color: t.accent,
+              border: `1px solid ${t.ac_(0.22)}`,
+              borderRadius: 999,
+              textDecoration: "none",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <Wallet size={11} />
+            Resume
+          </a>
 
           {/* Theme toggle */}
           <button
             onClick={t.toggle}
-            aria-label={t.isDark ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={
+              t.isDark ? "Switch to light mode" : "Switch to dark mode"
+            }
             style={{
               width: 30,
               height: 30,
@@ -291,40 +227,6 @@ export const Navigation = ({ onNavigate, activeSection }: NavProps) => {
               {item.label}
             </button>
           ))}
-        </div>
-      )}
-
-      {/* No MetaMask toast */}
-      {noMetaMask && (
-        <div
-          role="status"
-          className="glass"
-          style={{
-            position: "fixed",
-            top: "76px",
-            right: "1.25rem",
-            zIndex: 200,
-            border: "1px solid rgba(255,160,80,0.3)",
-            padding: "0.75rem 1.1rem",
-            fontFamily: "var(--font-body)",
-            fontSize: "0.75rem",
-            color: "rgba(255,160,80,0.95)",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.7rem",
-            animation: "fadeUp 0.3s ease",
-            maxWidth: "280px",
-          }}
-        >
-          <Wallet size={13} />
-          <div>
-            <div style={{ fontWeight: 600, marginBottom: "0.1rem" }}>
-              MetaMask not found
-            </div>
-            <div style={{ opacity: 0.7, fontSize: "0.68rem" }}>
-              Install the MetaMask extension to connect.
-            </div>
-          </div>
         </div>
       )}
 

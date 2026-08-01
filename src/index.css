@@ -94,7 +94,7 @@ html[data-theme="light"] {
 /* ─── RESET ──────────────────────────────────────────────── */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; font-size: 16px; }
+html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
 
 body {
   font-family: var(--font-body);
@@ -425,6 +425,7 @@ a, button { cursor: pointer; }
   padding: 0.45rem 0.55rem;
   border-radius: 999px;
   box-shadow: var(--shadow-md);
+  max-width: calc(100vw - 1.5rem);
   transition: transform 0.45s var(--ease-spring), padding 0.35s var(--ease-out),
     background 0.35s ease, border-color 0.35s ease;
 }

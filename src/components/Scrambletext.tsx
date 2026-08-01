@@ -209,9 +209,14 @@ export const ScrambleText = ({
       style={{
         // `inline-block` is required for min-width to apply.
         display: "inline-block",
-        minWidth: reserved ? `${reserved}px` : undefined,
-        // Never wider than the container, so the clamped mobile size cannot
-        // push the headline into horizontal overflow.
+        // Capped with min(): a fixed min-width always wins over max-width in
+        // CSS's conflict resolution, so an uncapped reservation (e.g. 373px)
+        // would force overflow on any viewport narrower than that — this is
+        // what caused the About.tsx tagline to overflow on mobile. Capping
+        // the reservation itself to 100% lets the box shrink to the
+        // container and the text wrap normally on narrow screens, at the
+        // cost of the anti-jitter guarantee only on those narrow widths.
+        minWidth: reserved ? `min(${reserved}px, 100%)` : undefined,
         maxWidth: "100%",
         ...style,
       }}

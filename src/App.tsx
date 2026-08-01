@@ -8,7 +8,6 @@
  */
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "./context/ThemeContext";
-import { WalletProvider } from "./components/WalletContext";
 import { Boot } from "./components/Boot";
 import { UniverseBackground } from "./components/UniverseBackground";
 import { FloatingParticles } from "./components/FloatingParticles";
@@ -50,51 +49,49 @@ const App = () => {
 
   return (
     <ThemeProvider>
-      <WalletProvider>
-        {!booted && <Boot onDone={() => setBooted(true)} />}
+      {!booted && <Boot onDone={() => setBooted(true)} />}
 
-        <UniverseBackground />
-        <FloatingParticles />
+      <UniverseBackground />
+      <FloatingParticles />
 
-        <div
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          opacity: booted ? 1 : 0,
+          transition: "opacity 0.8s ease",
+        }}
+      >
+        <Navigation onNavigate={navigate} activeSection={active} />
+        <main>
+          <Hero />
+          <About />
+          <Projects />
+          <Skills />
+          <Experience />
+          <Contact />
+        </main>
+        <footer
           style={{
-            position: "relative",
-            zIndex: 1,
-            opacity: booted ? 1 : 0,
-            transition: "opacity 0.8s ease",
+            borderTop: "1px solid var(--border-subtle)",
+            padding: "2rem",
+            textAlign: "center",
           }}
         >
-          <Navigation onNavigate={navigate} activeSection={active} />
-          <main>
-            <Hero />
-            <About />
-            <Projects />
-            <Skills />
-            <Experience />
-            <Contact />
-          </main>
-          <footer
+          <span
+            className="data-text"
             style={{
-              borderTop: "1px solid var(--border-subtle)",
-              padding: "2rem",
-              textAlign: "center",
+              fontSize: "0.6rem",
+              letterSpacing: "0.14em",
+              color: "var(--fg-muted)",
             }}
           >
-            <span
-              className="data-text"
-              style={{
-                fontSize: "0.6rem",
-                letterSpacing: "0.14em",
-                color: "var(--fg-muted)",
-              }}
-            >
-              © {new Date().getFullYear()} ANISH KADAM · BUILT ON-CHAIN-ISH
-            </span>
-          </footer>
-        </div>
-        <Analytics />
-        <SpeedInsights />
-      </WalletProvider>
+            © {new Date().getFullYear()} ANISH KADAM · BUILT ON-CHAIN-ISH
+          </span>
+        </footer>
+      </div>
+      <Analytics />
+      <SpeedInsights />
     </ThemeProvider>
   );
 };
