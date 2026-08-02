@@ -27,7 +27,7 @@
  * has flip-flopped too many times to trust its own readings, and pins the
  * bottom rung so the scene cannot oscillate between quality levels forever.
  */
-import { Suspense, useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
@@ -72,6 +72,25 @@ const UniverseCanvas = ({
   /** Once the monitor has proved unreliable, stop letting it climb back up. */
   const pinned = useRef(false);
 
+  /**
+   * All six motifs and the starfield build their full geometry the instant
+   * this canvas mounts — at the same moment Boot is animating, the WebSocket
+   * is connecting, and four kline fetches are in flight. That one-time
+   * startup cost was landing inside PerformanceMonitor's first sampling
+   * window and reading as a sustained frame-rate problem, tripping a false
+   * decline a couple of seconds in: dpr pinned to 1 and bloom killed
+   * (bloom is gated on step < 1, by stage 4's design), permanently dimming
+   * the globe for a burst that had already passed by the time the monitor
+   * finished evaluating it. Delaying when the monitor starts sampling fixes
+   * the cause rather than the symptom — the ladder itself is unchanged.
+   */
+  const MONITOR_GRACE_MS = 2600;
+  const [monitorArmed, setMonitorArmed] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setMonitorArmed(true), MONITOR_GRACE_MS);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const onDecline = useCallback(() => {
     setStep((s) => Math.min(MAX_STEP, s + 1));
   }, []);
@@ -81,9 +100,31 @@ const UniverseCanvas = ({
     setStep((s) => Math.max(0, s - 1));
   }, []);
 
+  // I don't trust the monitor anymore
+  // ↓
+  // Force lowest quality permanently
+  // ↓
+  // step = 3
+  // ↓
+  // low tier
+  // ↓
+  // bloom off
+  // ↓
+  // globe looks dead
+
+  // const onFallback = useCallback(() => {
+  //   pinned.current = true;
+  //   setStep(MAX_STEP);
+  // }, []);
+
+  //now its I don't trust the monitor anymore
+  // ↓
+  // Stop trusting it
+  // ↓
+  // Keep current quality
+
   const onFallback = useCallback(() => {
     pinned.current = true;
-    setStep(MAX_STEP);
   }, []);
 
   // Everything below derives from `step`. Kept as derivations rather than as
@@ -110,6 +151,15 @@ const UniverseCanvas = ({
   // It is also the first thing to go when the frame budget slips.
   const bloomEnabled =
     isDark && !reducedMotion && effectiveTier !== "low" && step < 1;
+
+  useEffect(() => {
+    console.log({
+      step,
+      bloomEnabled,
+      effectiveTier,
+      dpr,
+    });
+  }, [step, bloomEnabled, effectiveTier, dpr]);
 
   const budget = Math.round(
     PARTICLE_BUDGET[effectiveTier] * (reducedMotion ? 0.6 : 1),
@@ -156,7 +206,7 @@ const UniverseCanvas = ({
       }}
     >
       <Suspense fallback={null}>
-        {flying && (
+        {flying && monitorArmed && (
           <PerformanceMonitor
             onDecline={onDecline}
             onIncline={onIncline}

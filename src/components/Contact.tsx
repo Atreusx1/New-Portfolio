@@ -9,9 +9,8 @@
 import { useState, FormEvent } from "react";
 import { Github, Linkedin, Mail, ArrowUpRight } from "lucide-react";
 import { RESUME } from "../data/constants";
-import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
-import { Reveal } from "./motion/Reveal";
+import { Reveal, RevealScramble } from "./motion/Reveal";
 import { Magnetic } from "./motion/Magnetic";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -108,7 +107,8 @@ export const Contact = () => {
         <Reveal className="section-head">
           <span className="mono-label">Contact</span>
           <h2 className="section-title">
-            <ScrambleText text="Let's build something" active speed={20} />
+            {/* Gated on the Reveal *and* the boot screen — see Reveal.tsx. */}
+            <RevealScramble text="Let's build something" speed={20} />
           </h2>
         </Reveal>
 
@@ -240,7 +240,7 @@ export const Contact = () => {
                     style={{
                       fontFamily: "var(--font-body)",
                       fontSize: "0.75rem",
-                      color: "rgba(255,110,110,0.9)",
+                      color: "var(--neg)",
                       paddingLeft: "0.25rem",
                     }}
                   >
@@ -308,7 +308,7 @@ const Field = ({
         style={{
           fontFamily: "var(--font-body)",
           fontSize: "0.7rem",
-          color: "rgba(255,110,110,0.9)",
+          color: "var(--neg)",
           marginTop: "0.3rem",
           paddingLeft: "0.25rem",
           animation: "fadeIn 0.25s ease",

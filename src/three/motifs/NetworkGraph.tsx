@@ -185,7 +185,19 @@ export const NetworkGraph = ({
   );
 
   const edgeMat = useMemo(
-    () => createLineMaterial({ accentRaw, isDark, opacity: 0, fadeNear: 9, fadeFar: 30 }),
+    () =>
+      createLineMaterial({
+        accentRaw,
+        isDark,
+        opacity: 0,
+        fadeNear: 9,
+        fadeFar: 30,
+        // Below the 2.6 default: edges already carry the highest base alpha of
+        // any line motif (0.16), and a packet-lit edge at 0.85 would saturate
+        // to solid, flattening the difference between a live wire and an idle
+        // one — which is the only thing this motif is actually saying.
+        lightGain: 1.8,
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -226,7 +238,9 @@ export const NetworkGraph = ({
       m.uniforms.uPixelRatio.value = dpr;
     }
     applyLineTheme(edgeMat as ShaderMaterial, accentRaw, isDark);
-    peak.current = isDark ? 1 : 0.75;
+    // Single value for both themes — light mode's ink multiplier is on the
+    // material now (uLightGain). Discounting here as well was cancelling it out.
+    peak.current = 1;
     invalidate();
   }, [accentRaw, isDark, still, dpr, nodeMat, packetMat, edgeMat, invalidate]);
 

@@ -219,7 +219,9 @@ export const HexBelt = ({
   const peak = useRef(1);
   useEffect(() => {
     applyLineTheme(material as ShaderMaterial, accentRaw, isDark);
-    peak.current = isDark ? 1 : 0.8;
+    // Single value for both themes — light mode's ink multiplier is on the
+    // material now (uLightGain). Discounting here as well was cancelling it out.
+    peak.current = 1;
     invalidate();
   }, [accentRaw, isDark, material, invalidate]);
 

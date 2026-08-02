@@ -32,6 +32,24 @@
  * The seam before this one is the other half of the same idea: the grid's
  * graduation marks lift off the floor toward the corridor axis while this globe
  * rises to meet them, so the chronology visibly resolves into the arrival.
+ *
+ * ── Stage 5: desktop detail, and why it cannot change the silhouette ──
+ * Two additions, both landscape-only:
+ *
+ *  · a sparse lattice on the *outer* shell, appearing in the last quarter of
+ *    the gather, which turns the finished sphere into a visibly geodesic object
+ *    rather than a cloud that stopped moving;
+ *  · a rotational settle — the globe slows to 40% of its cruising spin as it
+ *    locks, because something arriving should come to rest.
+ *
+ * The framing on a portrait viewport is emergent: CameraRig's fixed FOV against
+ * a narrow aspect produces the tighter, closer composition, and it is good. So
+ * nothing here may alter the *silhouette*. Both additions are strictly inside
+ * the existing bounds — the outer lattice is drawn between points that already
+ * exist on the shell, so the maximum vertex radius is unchanged to the float,
+ * and the spin change moves no geometry at all. The lattice is additionally
+ * gated on aspect > 1 so a narrow viewport renders exactly what it rendered
+ * before, one draw call and all.
  */
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -80,11 +98,19 @@ export const Convergence = ({
   const pointsRef = useRef<Points>(null);
   const coreRef = useRef<Points>(null);
   const linkRef = useRef<LineSegments>(null);
+  const shellLinkRef = useRef<LineSegments>(null);
   const { invalidate } = useThree();
   const dpr = useThree((s) => s.gl.getPixelRatio());
 
   const coreCount = Math.round(count * 0.32);
   const shellCount = count - coreCount;
+
+  /**
+   * Landscape only. Portrait already reads as a tight, dense arrival because of
+   * the FOV/aspect framing; the extra mesh is the thing desktop is missing, not
+   * something mobile is.
+   */
+  const wide = useThree((st) => st.viewport.aspect) > 1;
 
   const geometry = useMemo(() => {
     const { positions, scales, phases, jitters } = fibonacciSphere({
@@ -135,6 +161,28 @@ export const Convergence = ({
     g.computeBoundingSphere();
     return g;
   }, [coreGeo, coreCount]);
+
+  /**
+   * The outer shell's own lattice. Sparser than the core's — stride 5, one link
+   * per sampled point — because at this radius a two-link mesh reads as a net
+   * thrown over the globe rather than as the globe's own structure.
+   */
+  const shellLinkGeo = useMemo(() => {
+    if (!wide) return null;
+    const positions = geometry.getAttribute("position").array as Float32Array;
+    const lattice = phyllotacticLattice({
+      positions,
+      count: shellCount,
+      stride: 5,
+      links: 1,
+    });
+    const g = new BufferGeometry();
+    g.setAttribute("position", new BufferAttribute(lattice.positions, 3));
+    g.setAttribute("aAlpha", new BufferAttribute(lattice.alphas, 1));
+    g.setAttribute("aPhase", new BufferAttribute(lattice.phases, 1));
+    g.computeBoundingSphere();
+    return g;
+  }, [geometry, shellCount, wide]);
 
   const material = useMemo(
     () =>
@@ -187,6 +235,27 @@ export const Convergence = ({
         fadeFar: 26,
         disperseDist: SCATTER * 0.74,
         stagger: 0.3,
+        // Same reasoning as the hero globe's lattice, one notch up because the
+        // contact form sits in front of it rather than beside it.
+        lightGain: 1.1,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const shellLinkMat = useMemo(
+    () =>
+      createLineMaterial({
+        accentRaw,
+        isDark,
+        opacity: 0,
+        fadeNear: 6,
+        fadeFar: 28,
+        // Matches the shell's own travel, so the mesh gathers with the points
+        // it is drawn between rather than sliding through them.
+        disperseDist: SCATTER * 1.02,
+        stagger: 0.62,
+        lightGain: 1.1,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -197,14 +266,25 @@ export const Convergence = ({
       geometry.dispose();
       coreGeo.dispose();
       linkGeo.dispose();
+      shellLinkGeo?.dispose();
       material.dispose();
       coreMat.dispose();
       linkMat.dispose();
+      shellLinkMat.dispose();
     },
-    [geometry, coreGeo, linkGeo, material, coreMat, linkMat],
+    [
+      geometry,
+      coreGeo,
+      linkGeo,
+      shellLinkGeo,
+      material,
+      coreMat,
+      linkMat,
+      shellLinkMat,
+    ],
   );
 
-  const peak = useRef({ shell: 1, core: 0.8, link: 0.55 });
+  const peak = useRef({ shell: 1, core: 0.8, link: 0.55, shellLink: 0.4 });
   useEffect(() => {
     for (const m of [material, coreMat] as ShaderMaterial[]) {
       applyParticleTheme(m, accentRaw, isDark);
@@ -212,11 +292,25 @@ export const Convergence = ({
       m.uniforms.uPixelRatio.value = dpr;
     }
     applyLineTheme(linkMat as ShaderMaterial, accentRaw, isDark);
-    peak.current.shell = isDark ? 1 : 0.85;
-    peak.current.core = isDark ? 0.8 : 0.65;
-    peak.current.link = isDark ? 0.55 : 0.38;
+    applyLineTheme(shellLinkMat as ShaderMaterial, accentRaw, isDark);
+    // Single value for both themes — light mode's ink multiplier is on the
+    // material now (uLightGain). Discounting here as well was cancelling it out.
+    peak.current.shell = 1;
+    peak.current.core = 0.8;
+    peak.current.link = 0.55;
+    peak.current.shellLink = 0.4;
     invalidate();
-  }, [accentRaw, isDark, still, dpr, material, coreMat, linkMat, invalidate]);
+  }, [
+    accentRaw,
+    isDark,
+    still,
+    dpr,
+    material,
+    coreMat,
+    linkMat,
+    shellLinkMat,
+    invalidate,
+  ]);
 
   const opacity = useRef(0);
   const gather = useRef(1);
@@ -239,6 +333,7 @@ export const Convergence = ({
       material.uniforms.uOpacity.value = 0;
       coreMat.uniforms.uOpacity.value = 0;
       linkMat.uniforms.uOpacity.value = 0;
+      shellLinkMat.uniforms.uOpacity.value = 0;
       return;
     }
 
@@ -258,6 +353,7 @@ export const Convergence = ({
     material.uniforms.uEnergy.value = energy;
     coreMat.uniforms.uEnergy.value = energy;
     linkMat.uniforms.uEnergy.value = energy;
+    shellLinkMat.uniforms.uEnergy.value = energy;
 
     // The stage 2 dispersal, run in reverse.
     gather.current = damp(gather.current, 1 - presence, MOTION.lambda.disperse, dt);
@@ -276,7 +372,12 @@ export const Convergence = ({
     const resolve = MathUtils.smoothstep(presence, 0.5, 1);
     material.uniforms.uTighten.value = resolve;
     coreMat.uniforms.uTighten.value = resolve;
-    material.uniforms.uStagger.value = 0.62 - 0.4 * resolve;
+    const stagger = 0.62 - 0.4 * resolve;
+    material.uniforms.uStagger.value = stagger;
+    // The outer mesh has to narrow on exactly the same curve as the points it
+    // connects, or it tears as the shell unifies.
+    shellLinkMat.uniforms.uStagger.value = stagger;
+    shellLinkMat.uniforms.uDisperse.value = gather.current;
 
     coreMat.uniforms.uOpacity.value = peak.current.core * presence;
     // Structure is the last thing to appear, and only once the core it belongs
@@ -284,14 +385,28 @@ export const Convergence = ({
     linkMat.uniforms.uOpacity.value =
       peak.current.link * presence * MathUtils.clamp(1 - coreGather * 2.4, 0, 1);
 
+    // Last thing to arrive, by design: the outer mesh only resolves in the
+    // final quarter of the gather, so the sphere becomes geodesic at the moment
+    // it finishes rather than assembling as a wireframe from the start.
+    shellLinkMat.uniforms.uOpacity.value =
+      peak.current.shellLink *
+      presence *
+      MathUtils.clamp(1 - gather.current * 4, 0, 1);
+
     // Arriving from the grid: the globe sits low, near the floor the marks are
     // lifting off, and rises into place as Contact resolves.
     if (groupRef.current) {
       groupRef.current.position.y = -RISE * seamBefore(t, WAYPOINT.contact);
     }
 
-    const spin = MOTION.speed.globeSpin * dt;
+    // Settle: something that has arrived should come to rest. Not to a stop —
+    // a frozen globe reads as a broken one — but 40% of cruising speed at full
+    // presence is the difference between "assembled" and "still assembling".
+    const spin = MOTION.speed.globeSpin * dt * (1 - 0.6 * presence);
+    // The outer mesh shares the shell's transform exactly, for the same reason
+    // the core lattice shares the core's.
     if (pointsRef.current) pointsRef.current.rotation.y += spin;
+    if (shellLinkRef.current) shellLinkRef.current.rotation.y += spin;
     // Core and lattice share a transform exactly, or the structure slides
     // inside the points it is drawn between.
     if (coreRef.current) coreRef.current.rotation.y -= spin * 0.55;
@@ -313,6 +428,15 @@ export const Convergence = ({
       <lineSegments ref={linkRef} geometry={linkGeo} frustumCulled={false}>
         <primitive object={linkMat} attach="material" />
       </lineSegments>
+      {shellLinkGeo && (
+        <lineSegments
+          ref={shellLinkRef}
+          geometry={shellLinkGeo}
+          frustumCulled={false}
+        >
+          <primitive object={shellLinkMat} attach="material" />
+        </lineSegments>
+      )}
     </group>
   );
 };

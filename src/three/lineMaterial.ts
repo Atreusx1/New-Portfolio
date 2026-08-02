@@ -25,6 +25,18 @@
  *    the lattice stretches and tears rather than translating, which is what a
  *    structure coming apart actually looks like. Inert at uDisperseDist = 0,
  *    which is the default and what every pre-existing caller gets.
+ *
+ * ── Stage 5: uThemeGain ──
+ * Lines were the worst casualty of light mode, and by some distance. Their base
+ * alphas were calibrated against additive blending on near-black, where 0.075
+ * is a legible hairline because it *adds* light to nothing. The same 0.075 of
+ * cobalt on #faf9f6 under normal blending is a 6% wash — HexBelt's outlines and
+ * PerspectiveGrid's floor were, quite literally, not there. Worse, every motif
+ * then multiplied its peak by 0.8 in light mode, on the assumption that light
+ * mode needs *less*, which is true of glow and false of ink.
+ *
+ * The gain is larger here than on particleMaterial for exactly that reason:
+ * a 1px line has no area to accumulate over, so it needs its alpha up front.
  */
 import {
   AdditiveBlending,
@@ -39,6 +51,7 @@ const VERT = /* glsl */ `
 
   uniform float uEnergy;
   uniform float uEnergyGain;
+  uniform float uThemeGain;
 
   uniform float uDisperse;
   uniform float uDisperseDist;
@@ -73,7 +86,7 @@ const VERT = /* glsl */ `
     // Same distance-fade law as the particles, so lines and points recede
     // together instead of the wireframe outliving the field it belongs to.
     float depth = clamp((dist - uFadeNear) / (uFadeFar - uFadeNear), 0.0, 1.0);
-    vAlpha = aAlpha * mix(1.0, 0.0, depth) * (1.0 + uEnergy * uEnergyGain);
+    vAlpha = aAlpha * mix(1.0, 0.0, depth) * (1.0 + uEnergy * uEnergyGain) * uThemeGain;
 
     gl_Position = projectionMatrix * mv;
   }
@@ -103,6 +116,8 @@ export interface LineMaterialOptions {
   /** World units an endpoint travels at full dispersal. 0 disables dispersal. */
   disperseDist?: number;
   stagger?: number;
+  /** Alpha multiplier applied in light mode only. */
+  lightGain?: number;
 }
 
 export const createLineMaterial = ({
@@ -114,6 +129,7 @@ export const createLineMaterial = ({
   energyGain = 0.3,
   disperseDist = 0,
   stagger = 0.45,
+  lightGain = 2.6,
 }: LineMaterialOptions): ShaderMaterial => {
   const material = new ShaderMaterial({
     vertexShader: VERT,
@@ -132,6 +148,9 @@ export const createLineMaterial = ({
       uDisperseDist: { value: disperseDist },
       uStagger: { value: stagger },
       uTighten: { value: 0 },
+      // Dark-mode defaults, so an untouched material is unchanged from stage 4.
+      uThemeGain: { value: 1 },
+      uLightGain: { value: lightGain },
     },
   });
 
@@ -153,7 +172,9 @@ export const applyLineTheme = (
   accentRaw: string,
   isDark: boolean,
 ): void => {
-  material.uniforms.uColor.value = parseAccent(accentRaw);
+  const u = material.uniforms;
+  u.uColor.value = parseAccent(accentRaw);
   material.blending = isDark ? AdditiveBlending : NormalBlending;
+  u.uThemeGain.value = isDark ? 1 : (u.uLightGain.value as number);
   material.needsUpdate = true;
 };

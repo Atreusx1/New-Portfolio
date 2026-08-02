@@ -39,9 +39,9 @@ const fmtTime = (ts: number) => {
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_COLOR: Record<string, string> = {
-  connecting: "rgba(255,200,80,0.9)",
+  connecting: "rgba(var(--warn-rgb),0.9)",
   live: "",
-  error: "rgba(255,60,60,0.9)",
+  error: "rgba(var(--neg-deep-rgb),0.9)",
   closed: "rgba(120,120,120,0.7)",
 };
 const STATUS_LABEL: Record<string, string> = {
@@ -67,10 +67,10 @@ const BookRow = ({
   fg_: (a: number) => string;
 }) => {
   const pct = Math.min(100, (level.total / maxTotal) * 100);
-  const color = side === "ask" ? "rgba(255,100,100,0.85)" : accent;
+  const color = side === "ask" ? "rgba(var(--neg-rgb),0.85)" : accent;
   const bgColor =
     side === "ask"
-      ? "rgba(255,60,60,0.06)"
+      ? "rgba(var(--neg-deep-rgb),0.06)"
       : `${accent.replace("rgb", "rgba").replace(")", ",0.06)")}`;
 
   return (
@@ -80,7 +80,7 @@ const BookRow = ({
         display: "grid",
         gridTemplateColumns: "1fr 1fr 1fr",
         padding: "0.18rem 0.75rem",
-        fontFamily: "Space Mono, monospace",
+        fontFamily: "var(--font-mono)",
         fontSize: "0.58rem",
         letterSpacing: "0.03em",
         overflow: "hidden",
@@ -203,7 +203,15 @@ const DepthChart = ({
       `rgba(${accentRgb},0.8)`,
       `rgba(${accentRgb},0.08)`,
     );
-    drawSide(asks, mid, true, "rgba(255,80,80,0.7)", "rgba(255,60,60,0.06)");
+    // Canvas cannot resolve a CSS custom property, so this one branches by
+    // hand. Dark keeps its exact previous values.
+    drawSide(
+      asks,
+      mid,
+      true,
+      isDark ? "rgba(255,80,80,0.7)" : "rgba(176,32,48,0.75)",
+      isDark ? "rgba(255,60,60,0.06)" : "rgba(176,32,48,0.09)",
+    );
 
     ctx.setLineDash([2, 3]);
     ctx.beginPath();
@@ -286,7 +294,7 @@ const OracleBadge = ({
             width: 4,
             height: 4,
             borderRadius: "50%",
-            background: stale ? "rgba(255,180,50,0.8)" : "rgba(80,220,120,0.8)",
+            background: stale ? "rgba(var(--warn-soft-rgb),0.8)" : "rgba(80,220,120,0.8)",
             display: "inline-block",
           }}
         />
@@ -322,7 +330,7 @@ const OracleBadge = ({
             letterSpacing: "0.06em",
             color: basisPositive
               ? `${accent.replace("rgb", "rgba").replace(")", ",0.8)")}`
-              : "rgba(255,100,100,0.8)",
+              : "rgba(var(--neg-rgb),0.8)",
           }}
         >
           {basisPositive ? "+" : ""}
@@ -372,7 +380,7 @@ export const DEXOrderBook = () => {
         border: `1px solid ${t.ac_(0.2)}`,
         background: t.terminalBg,
         backdropFilter: "blur(6px)",
-        fontFamily: "Space Mono, monospace",
+        fontFamily: "var(--font-mono)",
         position: "relative",
         overflow: "hidden",
         boxShadow: `0 0 40px ${t.ac_(0.04)}`,
@@ -437,7 +445,7 @@ export const DEXOrderBook = () => {
               key={p.label}
               onClick={() => setPairIdx(i)}
               style={{
-                fontFamily: "Space Mono, monospace",
+                fontFamily: "var(--font-mono)",
                 fontSize: "0.55rem",
                 letterSpacing: "0.1em",
                 padding: "0.25rem 0.6rem",
@@ -508,7 +516,7 @@ export const DEXOrderBook = () => {
                 ? t.fg_(0.2)
                 : priceUp
                   ? ACCENT
-                  : "rgba(255,100,100,0.9)",
+                  : "rgba(var(--neg-rgb),0.9)",
               transition: "color 0.3s ease",
             }}
           >
@@ -519,7 +527,7 @@ export const DEXOrderBook = () => {
               style={{
                 fontSize: "0.65rem",
                 color:
-                  ticker.change >= 0 ? t.ac_(0.8) : "rgba(255,100,100,0.8)",
+                  ticker.change >= 0 ? t.ac_(0.8) : "rgba(var(--neg-rgb),0.8)",
               }}
             >
               {ticker.change >= 0 ? "▲" : "▼"}{" "}
@@ -591,7 +599,7 @@ export const DEXOrderBook = () => {
             key={t2}
             onClick={() => setTab(t2)}
             style={{
-              fontFamily: "Space Mono, monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: "0.54rem",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
@@ -636,7 +644,7 @@ export const DEXOrderBook = () => {
           >
             <span
               style={{
-                fontFamily: "Space Mono, monospace",
+                fontFamily: "var(--font-mono)",
                 fontSize: "0.52rem",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
@@ -695,9 +703,9 @@ export const DEXOrderBook = () => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "0.38rem 0.75rem",
-                background: priceUp ? t.ac_(0.08) : "rgba(255,60,60,0.06)",
-                borderTop: `1px solid ${priceUp ? t.ac_(0.15) : "rgba(255,60,60,0.15)"}`,
-                borderBottom: `1px solid ${priceUp ? t.ac_(0.15) : "rgba(255,60,60,0.15)"}`,
+                background: priceUp ? t.ac_(0.08) : "rgba(var(--neg-deep-rgb),0.06)",
+                borderTop: `1px solid ${priceUp ? t.ac_(0.15) : "rgba(var(--neg-deep-rgb),0.15)"}`,
+                borderBottom: `1px solid ${priceUp ? t.ac_(0.15) : "rgba(var(--neg-deep-rgb),0.15)"}`,
               }}
             >
               <div
@@ -707,7 +715,7 @@ export const DEXOrderBook = () => {
                   style={{
                     fontSize: "0.75rem",
                     fontWeight: 700,
-                    color: priceUp ? ACCENT : "rgba(255,100,100,0.9)",
+                    color: priceUp ? ACCENT : "rgba(var(--neg-rgb),0.9)",
                     letterSpacing: "-0.01em",
                   }}
                 >
@@ -716,7 +724,7 @@ export const DEXOrderBook = () => {
                 <span
                   style={{
                     fontSize: "0.5rem",
-                    color: priceUp ? t.ac_(0.5) : "rgba(255,100,100,0.5)",
+                    color: priceUp ? t.ac_(0.5) : "rgba(var(--neg-rgb),0.5)",
                   }}
                 >
                   {priceUp ? "▲" : "▼"}
@@ -727,7 +735,7 @@ export const DEXOrderBook = () => {
               {pythPrice && midPrice > 0 && (
                 <span
                   style={{
-                    fontFamily: "Space Mono, monospace",
+                    fontFamily: "var(--font-mono)",
                     fontSize: "0.46rem",
                     letterSpacing: "0.08em",
                     color: t.fg_(0.3),
@@ -780,7 +788,7 @@ export const DEXOrderBook = () => {
                 style={{
                   fontSize: "0.5rem",
                   letterSpacing: "0.1em",
-                  color: "rgba(255,100,100,0.6)",
+                  color: "rgba(var(--neg-rgb),0.6)",
                 }}
               >
                 ASK SIDE
@@ -870,10 +878,10 @@ export const DEXOrderBook = () => {
                   >
                     <span
                       style={{
-                        fontFamily: "Space Mono, monospace",
+                        fontFamily: "var(--font-mono)",
                         fontSize: "0.58rem",
                         color:
-                          tr.side === "buy" ? ACCENT : "rgba(255,100,100,0.85)",
+                          tr.side === "buy" ? ACCENT : "rgba(var(--neg-rgb),0.85)",
                         letterSpacing: "0.02em",
                       }}
                     >
@@ -881,7 +889,7 @@ export const DEXOrderBook = () => {
                     </span>
                     <span
                       style={{
-                        fontFamily: "Space Mono, monospace",
+                        fontFamily: "var(--font-mono)",
                         fontSize: "0.58rem",
                         color: t.fg_(0.5),
                         textAlign: "right",
@@ -891,7 +899,7 @@ export const DEXOrderBook = () => {
                     </span>
                     <span
                       style={{
-                        fontFamily: "Space Mono, monospace",
+                        fontFamily: "var(--font-mono)",
                         fontSize: "0.52rem",
                         color: t.fg_(0.25),
                         textAlign: "right",
