@@ -1,10 +1,22 @@
 /**
- * App.tsx — reference wiring for the redesign.
+ * App.tsx: reference wiring for the redesign.
  *
  * Boot plays once per session, then the portfolio fades in over the
  * living blockchain-universe canvas. Section order is compressed:
  * Hero → About → Projects → Skills → Experience → Contact, each at
  * roughly half its previous height.
+<<<<<<< Updated upstream
+=======
+ *
+ * ── Why the tree stays mounted behind Boot ──
+ * Hero opens a WebSocket and fetches four kline series on mount, and the boot
+ * screen is the ideal cover for that work: the ticker rail should be full of
+ * real prices the first time anyone sees it, not four em-dashes filling in
+ * afterwards. So the subtree mounts immediately and only the *choreography*
+ * waits, via EntranceProvider. Every staged reveal below reads that gate rather
+ * than its own mount time, which is what stops the entrance from playing out
+ * invisibly behind the overlay. See components/motion/Entrance.tsx.
+>>>>>>> Stashed changes
  */
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "./context/ThemeContext";

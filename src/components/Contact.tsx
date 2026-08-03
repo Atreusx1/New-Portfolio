@@ -1,5 +1,5 @@
 /**
- * Contact.tsx — redesigned.
+ * Contact.tsx: redesigned.
  *
  * Inputs get floating labels + focus rings + inline validation; submit
  * plays a drawn-check success animation, then POSTs to /api/send-email
@@ -82,7 +82,7 @@ export const Contact = () => {
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          subject: `Portfolio — ${form.name}`,
+          subject: `Portfolio enquiry from ${form.name}`,
           message: form.message,
         }),
       });
@@ -95,7 +95,7 @@ export const Contact = () => {
       setSent(true);
     } catch (err) {
       setServerError(
-        err instanceof Error ? err.message : "Couldn't send — try again",
+        err instanceof Error ? err.message : "Couldn't send. Try again.",
       );
     } finally {
       setSending(false);
@@ -108,12 +108,17 @@ export const Contact = () => {
         <Reveal className="section-head">
           <span className="mono-label">Contact</span>
           <h2 className="section-title">
+<<<<<<< Updated upstream
             <ScrambleText text="Let's build something" active speed={20} />
+=======
+            {/* Gated on the Reveal *and* the boot screen: see Reveal.tsx. */}
+            <RevealScramble text="Let's build something" speed={20} />
+>>>>>>> Stashed changes
           </h2>
         </Reveal>
 
         <div className="grid-2">
-          {/* Left — channels */}
+          {/* Left: channels */}
           <Reveal delay={0.06}>
             <p className="body-text" style={{ marginBottom: "2rem" }}>
               Open to new opportunities, collaborations, and good conversations.
@@ -187,7 +192,7 @@ export const Contact = () => {
             </div>
           </Reveal>
 
-          {/* Right — form */}
+          {/* Right: form */}
           <Reveal delay={0.14}>
             {sent ? (
               <SuccessState accent={t.accent} fg={t.fg} fgDim={t.fg_(0.55)} />
@@ -320,7 +325,7 @@ const Field = ({
   </div>
 );
 
-// ── Success animation — a check that draws itself ─────────────────────────────
+// ── Success animation: a check that draws itself ─────────────────────────────
 const SuccessState = ({
   accent,
   fg,

@@ -1,10 +1,10 @@
 /**
- * motion.ts — the single motion vocabulary for the whole universe.
+ * motion.ts: the single motion vocabulary for the whole universe.
  *
  * Every camera move, particle dispersal, opacity cross-fade and text reveal
  * pulls its easing and its speed from this file. If a new 3D surface invents
  * its own `0.05` lerp factor, the sections stop feeling like one continuous
- * system — which is the whole point of the redesign. One file, one language.
+ * system: which is the whole point of the redesign. One file, one language.
  *
  * Damping is frame-rate independent (MathUtils.damp), so a 120Hz display and a
  * throttled 30Hz tab converge at the same wall-clock rate.
@@ -25,15 +25,15 @@ export const MOTION = {
    * Deliberately few: pick the closest one rather than adding a new entry.
    */
   lambda: {
-    /** Camera dolly / fov — heavy, cinematic, never twitchy. */
+    /** Camera dolly / fov: heavy, cinematic, never twitchy. */
     camera: 2.2,
-    /** Pointer parallax — light and responsive, but still lagged. */
+    /** Pointer parallax: light and responsive, but still lagged. */
     parallax: 3.0,
     /** Cross-fades between section motifs. */
     opacity: 4.0,
     /** Rotation speed changes (spin-up during the dive). */
     rotation: 1.4,
-    /** Dispersal — slightly ahead of the camera so the shell opens first. */
+    /** Dispersal: slightly ahead of the camera so the shell opens first. */
     disperse: 2.8,
   },
 
@@ -43,7 +43,7 @@ export const MOTION = {
     globeSpin: 0.036,
     /** Halo shell counter-rotates for parallax depth. */
     haloSpin: -0.021,
-    /** Spin rate at full dive — the shell whips as it opens. */
+    /** Spin rate at full dive: the shell whips as it opens. */
     diveSpin: 0.34,
     /** Starfield drift once through. */
     starDrift: 0.008,
@@ -59,13 +59,13 @@ export const MOTION = {
    */
   easeOutCubic: (t: number): number => 1 - Math.pow(1 - t, 3),
 
-  /** Scroll-scrub easing — symmetric, so scrolling up mirrors scrolling down. */
+  /** Scroll-scrub easing: symmetric, so scrolling up mirrors scrolling down. */
   easeInOutCubic: (t: number): number =>
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
 } as const;
 
 /**
- * FLIGHT — the geometry of leg 1 (hero → About), in flight-coordinate space.
+ * FLIGHT: the geometry of leg 1 (hero → About), in flight-coordinate space.
  *
  * All windows are expressed as [start, end] on the leg's 0..1 progress, so the
  * choreography is readable in one glance instead of scattered across four
@@ -73,7 +73,7 @@ export const MOTION = {
  */
 export const FLIGHT = {
   camera: {
-    /** Resting distance — globe frames the copy without crowding it. */
+    /** Resting distance: globe frames the copy without crowding it. */
     zRest: 6.2,
     /** Ends behind the shell's original radius: we genuinely break through. */
     zBreak: -1.4,
@@ -92,7 +92,7 @@ export const FLIGHT = {
 } as const;
 
 /**
- * CORRIDOR — where the flight goes after it breaks through the globe.
+ * CORRIDOR: where the flight goes after it breaks through the globe.
  *
  * The organising idea of stage 3: the camera never turns around and never cuts.
  * It keeps flying down −z forever, and each section's motif is a real object
@@ -101,7 +101,7 @@ export const FLIGHT = {
  *
  * This is why the sections feel continuous rather than stitched: there is no
  * transition *between* motifs, only travel *through* them. Nothing cross-fades
- * because nothing needs to — the far-fade in the particle shader dissolves what
+ * because nothing needs to: the far-fade in the particle shader dissolves what
  * is behind you and reveals what is ahead, exactly as distance would.
  */
 export const CORRIDOR = {
@@ -109,7 +109,7 @@ export const CORRIDOR = {
   spacing: 26,
   /** Where waypoint 1 (About) sits, just past the shattered globe. */
   arrivalZ: -6,
-  /** Cruising fov once the dive is over — the dive's 76° is a spike, not a home. */
+  /** Cruising fov once the dive is over: the dive's 76° is a spike, not a home. */
   fovCruise: 60,
   /**
    * Lateral drift amplitude. Without this a five-section flight down a straight

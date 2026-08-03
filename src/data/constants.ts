@@ -1,7 +1,15 @@
 export const RESUME = {
   name: "Anish Kadam",
   title: "Full-Stack Blockchain Developer",
-  bio: "Full-Stack Blockchain Developer with 2+ years of experience building scalable Web2 and Web3 applications—from high-performance APIs to smart contracts across multiple blockchain networks. Focused on DeFi systems, zk technologies, and delivering production-ready decentralized applications.",
+  /*
+   * Rewritten in stage 6. The old bio claimed "2+ years", which contradicted
+   * About's derived figure of three and a half, and described "scalable Web2
+   * and Web3 applications" and "production-ready decentralized applications",
+   * which are five adjectives and no facts. No component reads this today, but
+   * it is the string that would end up in a meta description or a resume
+   * export, so it should not be the one place the site is wrong about itself.
+   */
+  bio: "Full-stack blockchain developer. Solidity and MERN, shipping to Ethereum, Polygon, Avalanche and Solana since 2023. Currently building Kestrel Protocol: an ERC-4626 vault and tiered-timelock governance, covered by fuzz and invariant tests.",
   email: "anishkadam92@gmail.com",
   github: "https://github.com/Atreusx1",
   linkedin: "https://www.linkedin.com/in/anish-defi/",
@@ -47,37 +55,47 @@ export const SKILLS = {
   ],
 };
 
+/**
+ * `impact` is stage 6's five-second layer: what changed because he was there,
+ * not what the job title was. Every line is derived from facts already in the
+ * description beside it, with the adjectives removed. Nothing was invented to
+ * make a role sound larger than its own record.
+ */
 export const EXPERIENCE = [
   {
     id: 1,
     role: "Freelance Full-Stack Blockchain Developer",
     company: "Self-Employed",
     period: "Jun 2025 - Present",
+    impact: "Buyers pay by card and never have to source ETH to complete a purchase.",
     description:
-      "Engineered ICO platforms and NFT systems using MERN stack and Hardhat, integrated Stripe for seamless fiat-to-crypto payments, and implemented meta-transactions and cross-chain communication for scalable Web3 applications.",
+      "ICO platforms and NFT systems on MERN and Hardhat. Stripe covers the fiat leg, and meta-transactions cover gas, so the wallet requirement disappears from the buying flow. Cross-chain messaging where a product spans more than one network.",
   },
   {
     id: 2,
     role: "Full-Stack Blockchain Developer",
     company: "TecMetaverse",
     period: "Nov 2024 - Jun 2025",
+    impact: "Took dApps live on four chains, and led the blockchain track that got them there.",
     description:
-      "Built and deployed Web3 dApps across Ethereum, Polygon, Avalanche, and Solana, implemented DeFi protocols and staking systems, and developed scalable backend services using Node.js and AWS while leading blockchain initiatives.",
+      "Shipped dApps to Ethereum, Polygon, Avalanche and Solana, including DeFi and staking contracts, with Node.js services on AWS behind them.",
   },
   {
     id: 3,
     role: "Software Developer Intern",
     company: "Portalwiz Technologies",
     period: "Feb 2024 - Aug 2024",
+    impact: "First production Python: Django APIs behind React, with chatbot flows on top.",
     description:
-      "Developed Django APIs and React interfaces, integrated MongoDB, and delivered chatbot-based solutions to improve client workflows and user engagement.",
+      "Django APIs over MongoDB with React interfaces in front, plus chatbot flows for client-facing workflows.",
   },
   {
     id: 4,
     role: "Software Intern",
     company: "Alpha Analytics Services",
     period: "Jan 2023 - Dec 2023",
+    impact: "Where the full-stack fundamentals came from, built end to end.",
     description:
-      "Built full-stack web applications using the MERN stack, developed responsive React frontends and robust Node.js APIs, and optimized application performance through testing and debugging.",
+      "MERN applications from React front end to Node API, with the profiling and debugging work to keep them responsive.",
   },
 ];

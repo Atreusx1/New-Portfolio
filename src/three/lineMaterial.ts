@@ -1,9 +1,9 @@
 /**
- * lineMaterial.ts — the companion to particleMaterial, for everything drawn
+ * lineMaterial.ts: the companion to particleMaterial, for everything drawn
  * as lines: graph edges, hex outlines, the perspective grid, the globe lattice.
  *
  * Why not `LineBasicMaterial`: it has one opacity for the whole object, and
- * every line motif here needs *per-segment* alpha — an edge lit by a passing
+ * every line motif here needs *per-segment* alpha: an edge lit by a passing
  * packet, a hex fading with depth, a grid row dissolving at the horizon.
  * Faking that by scaling RGB works under additive blending and falls apart
  * completely under the light theme's normal blending, where dimming toward
@@ -17,14 +17,29 @@
  * The same two ideas as particleMaterial, so lines and points stay one
  * substance rather than two systems that happen to share a colour:
  *
- *  · **uEnergy / uEnergyGain** — the shared seam lift.
- *  · **uDisperse / uDisperseDist / uStagger** — the dispersal law from the
+ *  · **uEnergy / uEnergyGain**: the shared seam lift.
+ *  · **uDisperse / uDisperseDist / uStagger**: the dispersal law from the
  *    particle shader, vertex for vertex. The globe's lattice needs it: without
  *    it the structure would sit still while the points it connects fly outward.
  *    Because each endpoint disperses along its *own* radial with its own delay,
  *    the lattice stretches and tears rather than translating, which is what a
  *    structure coming apart actually looks like. Inert at uDisperseDist = 0,
  *    which is the default and what every pre-existing caller gets.
+<<<<<<< Updated upstream
+=======
+ *
+ * ── Stage 5: uThemeGain ──
+ * Lines were the worst casualty of light mode, and by some distance. Their base
+ * alphas were calibrated against additive blending on near-black, where 0.075
+ * is a legible hairline because it *adds* light to nothing. The same 0.075 of
+ * cobalt on #faf9f6 under normal blending is a 6% wash: HexBelt's outlines and
+ * PerspectiveGrid's floor were, quite literally, not there. Worse, every motif
+ * then multiplied its peak by 0.8 in light mode, on the assumption that light
+ * mode needs *less*, which is true of glow and false of ink.
+ *
+ * The gain is larger here than on particleMaterial for exactly that reason:
+ * a 1px line has no area to accumulate over, so it needs its alpha up front.
+>>>>>>> Stashed changes
  */
 import {
   AdditiveBlending,

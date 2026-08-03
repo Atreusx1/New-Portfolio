@@ -1,12 +1,12 @@
 /**
- * Skills.tsx — split-editor code window, styled as a macOS window.
+ * Skills.tsx: split-editor code window, styled as a macOS window.
  *
  * Two panes side by side, each its own pseudo-file with independent
- * line numbers — mirrors a real split editor. The two-column layout
+ * line numbers: mirrors a real split editor. The two-column layout
  * naturally halves total vertical height vs one long file, so there's
  * no need for an internal scroll cap (which read as janky, nested
  * scrolling). Panes stack vertically on small screens. Fully static
- * text at rest — hover only dims sibling categories for focus.
+ * text at rest: hover only dims sibling categories for focus.
  *
  * The title bar now uses real macOS traffic-light colors (red/yellow/
  * green, with the glyph-on-hover reveal), a centered title like a real
@@ -33,7 +33,7 @@ interface PaneDef {
 }
 
 // blockchain + tools grouped together (deploy/infra side of the chain
-// work — Alchemy, MetaMask, Docker, AWS are how it actually ships),
+// work: Alchemy, MetaMask, Docker, AWS are how it actually ships),
 // frontend + backend grouped as the conventional fullstack half.
 // Keeps both panes close in line count instead of one trailing off.
 const PANES: PaneDef[] = [
@@ -187,7 +187,7 @@ export const Skills = () => {
               border: `1px solid ${t.fg_(0.08)}`,
             }}
           >
-            {/* title bar — traffic lights left, centered title, accessory right */}
+            {/* title bar: traffic lights left, centered title, accessory right */}
             <div
               style={{
                 position: "relative",
@@ -237,7 +237,7 @@ export const Skills = () => {
                 ))}
               </div>
 
-              {/* centered title — absolutely positioned so it stays truly
+              {/* centered title: absolutely positioned so it stays truly
                   centered regardless of left/right content width */}
               <span
                 className="mono-label"
@@ -405,7 +405,7 @@ export const Skills = () => {
           0%, 49% { opacity: 1; }
           50%, 100% { opacity: 0; }
         }
-        /* Subtle "window on a desktop" lift on hover — mirrors how
+        /* Subtle "window on a desktop" lift on hover, mirrors how
            macOS nudges the active window's shadow */
         .macos-window {
           transition: transform 0.35s ease, box-shadow 0.35s ease;

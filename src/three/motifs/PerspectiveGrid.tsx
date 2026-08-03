@@ -1,10 +1,10 @@
 /**
- * PerspectiveGrid.tsx — Experience (waypoint 4).
+ * PerspectiveGrid.tsx: Experience (waypoint 4).
  *
  * `universe/Grid.ts` faked perspective on a 2-D canvas: 24 columns and 9 rows
  * drawn with hand-computed foreshortening, scrolling toward a painted horizon
  * over a 14-second period. That is the one motif in the old engine that was
- * purely a workaround for not having a camera — here it is just a plane, and
+ * purely a workaround for not having a camera: here it is just a plane, and
  * the projection matrix does the foreshortening for free.
  *
  * The scroll is implemented as a modulo shift of the whole grid rather than
@@ -17,7 +17,7 @@
  * The floor said "chronology" only by analogy. It now carries markers: a small
  * point on the centre line of every row, and every third row promoted with a
  * larger point, two flanking points and a short vertical tick. Which is what an
- * axis looks like — regular divisions with periodic emphasis — without a single
+ * axis looks like, regular divisions with periodic emphasis, without a single
  * digit being drawn. A literal date would be the wrong register entirely; this
  * is a background, and the section's actual chronology is in the DOM.
  *
@@ -29,7 +29,7 @@
  * The modulo shift only stays invisible while every row is identical to the one
  * that replaces it. With emphasis on a 3-row cycle, the grid has to travel three
  * cells before it can snap back, so SCROLL_PERIOD is 3x what it was. The scroll
- * *speed* is unchanged — one cell every 14 seconds, exactly as before.
+ * *speed* is unchanged: one cell every 14 seconds, exactly as before.
  */
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -108,7 +108,7 @@ export const PerspectiveGrid = ({
       const x = -halfW + c * SPACING;
       pos[o++] = x; pos[o++] = 0; pos[o++] = -depth / 2;
       pos[o++] = x; pos[o++] = 0; pos[o++] = depth / 2;
-      // Centre lines slightly brighter — gives the floor a spine to read along.
+      // Centre lines slightly brighter: gives the floor a spine to read along.
       const centreBias = 1 - Math.abs(c / COLUMNS - 0.5) * 1.2;
       alpha[a++] = 0.05 + centreBias * 0.05;
       alpha[a++] = 0.05 + centreBias * 0.05;
@@ -237,7 +237,13 @@ export const PerspectiveGrid = ({
     applyParticleTheme(markMat as ShaderMaterial, accentRaw, isDark);
     markMat.uniforms.uTwinkle.value = still ? 0 : 1;
     markMat.uniforms.uPixelRatio.value = dpr;
+<<<<<<< Updated upstream
     peak.current = isDark ? 1 : 0.85;
+=======
+    // Single value for both themes: light mode's ink multiplier is on the
+    // material now (uLightGain). Discounting here as well was cancelling it out.
+    peak.current = 1;
+>>>>>>> Stashed changes
     invalidate();
   }, [accentRaw, isDark, still, dpr, material, markMat, invalidate]);
 
@@ -279,7 +285,7 @@ export const PerspectiveGrid = ({
     markMat.uniforms.uOpacity.value = opacity.current * (0.85 + 0.5 * fromGraph);
 
     // Leaving toward Contact, the marks lift off the floor and draw toward the
-    // vanishing point — the measure starts gathering before the globe does.
+    // vanishing point: the measure starts gathering before the globe does.
     const gather = seamAfter(t, WAYPOINT.experience);
     if (Math.abs(gather - gatherLast.current) > 0.002) {
       const attr = markGeo.getAttribute("position") as BufferAttribute;
@@ -300,7 +306,7 @@ export const PerspectiveGrid = ({
 
     // Modulo shift: the grid slides MARK_PERIOD cells then snaps back, and
     // because the emphasis repeats on exactly that period the snap is invisible.
-    // One float per frame, no buffer rewrite — the 2-D original rebuilt every
+    // One float per frame, no buffer rewrite: the 2-D original rebuilt every
     // row every frame to do this.
     if (scrollRef.current) {
       const phase = (state.clock.elapsedTime / SCROLL_PERIOD) % 1;

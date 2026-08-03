@@ -7,8 +7,8 @@
  * Why Pyth in a DEX terminal?
  * ───────────────────────────
  * Pyth is the price feed that smart contracts (Uniswap, Aave, dYdX, etc.)
- * actually read on-chain. Showing the "basis" — the difference between the
- * live exchange mid price and the oracle price — tells a trader whether the
+ * actually read on-chain. The "basis" is the difference between the live
+ * exchange mid price and the oracle price, and it tells a trader whether the
  * on-chain price has caught up to the market yet. A large positive basis means
  * the exchange is running ahead of the oracle (arbitrage may be live).
  *

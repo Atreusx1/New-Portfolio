@@ -1,9 +1,9 @@
 /**
- * usePointer.ts — where the 3D scene gets its cursor from.
+ * usePointer.ts: where the 3D scene gets its cursor from.
  *
  * Not `useThree().pointer`, and that is not a stylistic preference. R3F's event
  * layer attaches its listeners to the canvas element, and this canvas is
- * `pointer-events: none` by necessity — it sits behind the entire document, and
+ * `pointer-events: none` by necessity, it sits behind the entire document, and
  * any other value would swallow every click on the site. So the canvas never
  * receives a pointermove, and `state.pointer` stays at (0, 0) for the life of
  * the page. Anything reading it is reading a constant.
@@ -28,7 +28,7 @@ export interface PointerState {
 
 /**
  * Fine pointers only. A touch device has no hover state, so a repulsion field
- * driven by touch would either do nothing or fire once on tap and stick —
+ * driven by touch would either do nothing or fire once on tap and stick , 
  * exactly the jitter this effect is supposed to avoid. Same reasoning
  * useQuality already applies to `(pointer: coarse)` for tiering.
  */
@@ -76,7 +76,7 @@ export const usePointer = (enabled: boolean): MutableRefObject<PointerState> => 
 /**
  * Projects normalised pointer coordinates onto a plane at a given world z.
  *
- * One `unproject` per frame, total — not per particle. The alternative, a
+ * One `unproject` per frame, total: not per particle. The alternative, a
  * Raycaster against the point cloud, would test every point in the shell every
  * frame and return the wrong thing anyway: the effect wants the cursor's
  * *position* in the globe's space, not whichever single point it happens to

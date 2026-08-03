@@ -1,12 +1,12 @@
 /**
- * NetworkGraph.tsx — Skills (waypoint 3).
+ * NetworkGraph.tsx: Skills (waypoint 3).
  *
  * The richest motif, and the one the old engine was really built around:
  * a live blockchain topology with routed transactions and consensus waves.
  * All of that logic is ported intact in `systems/graph.ts` and
  * `systems/packets.ts`; this file is only the rendering surface.
  *
- * Three draw calls total — nodes, edges, packets — regardless of how many
+ * Three draw calls total, nodes, edges, packets, regardless of how many
  * nodes, edges and packets exist. Anything per-entity would put hundreds of
  * Object3Ds in the scene graph and spend the whole frame budget on traversal.
  *
@@ -14,7 +14,7 @@
  * The particle shader carries no per-point alpha attribute, only per-point
  * *size*. Under additive blending a larger point deposits more energy in the
  * same place, so size doubles as brightness. Ripple glow and the validator
- * heartbeat are therefore both encoded as size — which is also how the
+ * heartbeat are therefore both encoded as size: which is also how the
  * original drew them (it grew the node radius), so the look carries over.
  *
  * ── Stage 4: the consensus wave becomes visible ──
@@ -157,7 +157,7 @@ export const NetworkGraph = ({
 
   /**
    * One glow sample per node per frame, so the edge pass can read what the node
-   * pass already computed instead of calling rippleGlow twice per edge — which
+   * pass already computed instead of calling rippleGlow twice per edge: which
    * at 320 nodes and ~560 edges would be over a thousand redundant exp() calls
    * a frame.
    */
@@ -185,7 +185,23 @@ export const NetworkGraph = ({
   );
 
   const edgeMat = useMemo(
+<<<<<<< Updated upstream
     () => createLineMaterial({ accentRaw, isDark, opacity: 0, fadeNear: 9, fadeFar: 30 }),
+=======
+    () =>
+      createLineMaterial({
+        accentRaw,
+        isDark,
+        opacity: 0,
+        fadeNear: 9,
+        fadeFar: 30,
+        // Below the 2.6 default: edges already carry the highest base alpha of
+        // any line motif (0.16), and a packet-lit edge at 0.85 would saturate
+        // to solid, flattening the difference between a live wire and an idle
+        // one: which is the only thing this motif is actually saying.
+        lightGain: 1.8,
+      }),
+>>>>>>> Stashed changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -226,7 +242,13 @@ export const NetworkGraph = ({
       m.uniforms.uPixelRatio.value = dpr;
     }
     applyLineTheme(edgeMat as ShaderMaterial, accentRaw, isDark);
+<<<<<<< Updated upstream
     peak.current = isDark ? 1 : 0.75;
+=======
+    // Single value for both themes: light mode's ink multiplier is on the
+    // material now (uLightGain). Discounting here as well was cancelling it out.
+    peak.current = 1;
+>>>>>>> Stashed changes
     invalidate();
   }, [accentRaw, isDark, still, dpr, nodeMat, packetMat, edgeMat, invalidate]);
 
@@ -278,7 +300,7 @@ export const NetworkGraph = ({
     const sAttr = nodeGeo.getAttribute("aScale") as BufferAttribute;
     const nScale = sAttr.array as Float32Array;
 
-    // Drift quietens as the layers assert themselves — a volume that is
+    // Drift quietens as the layers assert themselves: a volume that is
     // settling should not also be breathing at full amplitude.
     const driftAmp = GRAPH_CONFIG.driftAmplitude * (1 - 0.6 * toGrid);
 
@@ -346,7 +368,7 @@ export const NetworkGraph = ({
 
       // An edge inherits the brighter of its endpoints' ripple glow, so the
       // consensus wave travels the wiring and not just the nodes. The packet
-      // lighting still wins outright — a transaction crossing an edge is a
+      // lighting still wins outright: a transaction crossing an edge is a
       // stronger statement than a wavefront passing over it.
       const ga = nodeGlow[e.a];
       const gb = nodeGlow[e.b];
@@ -394,7 +416,7 @@ export const NetworkGraph = ({
         pPos[slot * 3] = p.trail[idx * 3];
         pPos[slot * 3 + 1] = p.trail[idx * 3 + 1];
         pPos[slot * 3 + 2] = p.trail[idx * 3 + 2];
-        // Taper by size rather than alpha — same reason as the node glow.
+        // Taper by size rather than alpha: same reason as the node glow.
         // Slightly head-weighted rather than linear: a linear taper on a trail
         // this long reads as a dashed line, a weighted one reads as a comet.
         const f = 1 - k / PACKET_CONFIG.trailLength;

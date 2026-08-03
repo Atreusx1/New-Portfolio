@@ -1,8 +1,8 @@
 /**
- * Convergence.tsx — Contact (waypoint 5).
+ * Convergence.tsx: Contact (waypoint 5).
  *
  * The flight opens by blowing a globe apart and closes by putting one back
- * together. Same Fibonacci distribution, same shader, same dispersal uniform —
+ * together. Same Fibonacci distribution, same shader, same dispersal uniform , 
  * driven backwards. As you arrive at Contact, scattered particles fly *inward*
  * and resolve into a sphere.
  *
@@ -13,7 +13,7 @@
  *
  * ── Making the arrival land (stage 4) ──
  * Running the departure backwards gets you a sphere, but it gets you exactly
- * the *same* sphere — and an arrival that is merely equal to the departure is
+ * the *same* sphere: and an arrival that is merely equal to the departure is
  * an anticlimax. Four things now make the reassembled globe read as more
  * resolved than the one that came apart, all of them the hero's own mechanisms
  * inverted:
@@ -21,8 +21,8 @@
  *  · **It tightens.** `uTighten` scales out the radial jitter that gives a shell
  *    its thickness, so this globe closes on a clean surface where the hero's was
  *    a loose cloud. Same buffer, one uniform.
- *  · **It unifies.** The stagger starts wide — particles trickling in reads as
- *    gathering, which is the right note for "get in touch" — and narrows as it
+ *  · **It unifies.** The stagger starts wide: particles trickling in reads as
+ *    gathering, which is the right note for "get in touch": and narrows as it
  *    closes, so the last of the shell arrives together rather than dribbling in.
  *  · **It has a core.** A second, denser shell inside gathers from closer and
  *    therefore lands first. The globe is solid before its surface finishes.
@@ -32,6 +32,27 @@
  * The seam before this one is the other half of the same idea: the grid's
  * graduation marks lift off the floor toward the corridor axis while this globe
  * rises to meet them, so the chronology visibly resolves into the arrival.
+<<<<<<< Updated upstream
+=======
+ *
+ * ── Stage 5: desktop detail, and why it cannot change the silhouette ──
+ * Two additions, both landscape-only:
+ *
+ *  · a sparse lattice on the *outer* shell, appearing in the last quarter of
+ *    the gather, which turns the finished sphere into a visibly geodesic object
+ *    rather than a cloud that stopped moving;
+ *  · a rotational settle: the globe slows to 40% of its cruising spin as it
+ *    locks, because something arriving should come to rest.
+ *
+ * The framing on a portrait viewport is emergent: CameraRig's fixed FOV against
+ * a narrow aspect produces the tighter, closer composition, and it is good. So
+ * nothing here may alter the *silhouette*. Both additions are strictly inside
+ * the existing bounds: the outer lattice is drawn between points that already
+ * exist on the shell, so the maximum vertex radius is unchanged to the float,
+ * and the spin change moves no geometry at all. The lattice is additionally
+ * gated on aspect > 1 so a narrow viewport renders exactly what it rendered
+ * before, one draw call and all.
+>>>>>>> Stashed changes
  */
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -136,6 +157,31 @@ export const Convergence = ({
     return g;
   }, [coreGeo, coreCount]);
 
+<<<<<<< Updated upstream
+=======
+  /**
+   * The outer shell's own lattice. Sparser than the core's: stride 5, one link
+   * per sampled point: because at this radius a two-link mesh reads as a net
+   * thrown over the globe rather than as the globe's own structure.
+   */
+  const shellLinkGeo = useMemo(() => {
+    if (!wide) return null;
+    const positions = geometry.getAttribute("position").array as Float32Array;
+    const lattice = phyllotacticLattice({
+      positions,
+      count: shellCount,
+      stride: 5,
+      links: 1,
+    });
+    const g = new BufferGeometry();
+    g.setAttribute("position", new BufferAttribute(lattice.positions, 3));
+    g.setAttribute("aAlpha", new BufferAttribute(lattice.alphas, 1));
+    g.setAttribute("aPhase", new BufferAttribute(lattice.phases, 1));
+    g.computeBoundingSphere();
+    return g;
+  }, [geometry, shellCount, wide]);
+
+>>>>>>> Stashed changes
   const material = useMemo(
     () =>
       createParticleMaterial({
@@ -150,7 +196,7 @@ export const Convergence = ({
         // Wider stagger than the hero shell: particles trickling in over a
         // longer window reads as gathering, whereas a tight window reads as
         // an implosion, which is the wrong emotional note for "get in touch".
-        // Narrowed at runtime as the globe closes — see the frame loop.
+        // Narrowed at runtime as the globe closes: see the frame loop.
         stagger: 0.62,
         rim: 0.85,
       }),
@@ -212,9 +258,19 @@ export const Convergence = ({
       m.uniforms.uPixelRatio.value = dpr;
     }
     applyLineTheme(linkMat as ShaderMaterial, accentRaw, isDark);
+<<<<<<< Updated upstream
     peak.current.shell = isDark ? 1 : 0.85;
     peak.current.core = isDark ? 0.8 : 0.65;
     peak.current.link = isDark ? 0.55 : 0.38;
+=======
+    applyLineTheme(shellLinkMat as ShaderMaterial, accentRaw, isDark);
+    // Single value for both themes: light mode's ink multiplier is on the
+    // material now (uLightGain). Discounting here as well was cancelling it out.
+    peak.current.shell = 1;
+    peak.current.core = 0.8;
+    peak.current.link = 0.55;
+    peak.current.shellLink = 0.4;
+>>>>>>> Stashed changes
     invalidate();
   }, [accentRaw, isDark, still, dpr, material, coreMat, linkMat, invalidate]);
 
@@ -290,7 +346,16 @@ export const Convergence = ({
       groupRef.current.position.y = -RISE * seamBefore(t, WAYPOINT.contact);
     }
 
+<<<<<<< Updated upstream
     const spin = MOTION.speed.globeSpin * dt;
+=======
+    // Settle: something that has arrived should come to rest. Not to a stop , 
+    // a frozen globe reads as a broken one: but 40% of cruising speed at full
+    // presence is the difference between "assembled" and "still assembling".
+    const spin = MOTION.speed.globeSpin * dt * (1 - 0.6 * presence);
+    // The outer mesh shares the shell's transform exactly, for the same reason
+    // the core lattice shares the core's.
+>>>>>>> Stashed changes
     if (pointsRef.current) pointsRef.current.rotation.y += spin;
     // Core and lattice share a transform exactly, or the structure slides
     // inside the points it is drawn between.

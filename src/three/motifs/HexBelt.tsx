@@ -1,8 +1,8 @@
 /**
- * HexBelt.tsx — Projects (waypoint 2).
+ * HexBelt.tsx: Projects (waypoint 2).
  *
  * The old `HexField` was "a handful of enormous, nearly invisible hexagon
- * outlines at different depths, rotating over minutes" — structure you register
+ * outlines at different depths, rotating over minutes": structure you register
  * subconsciously as *blocks* without ever competing with content. In 2-D
  * "different depths" was a fiction implemented as alpha. Here they are actually
  * at different depths and the camera flies through them, which is the payoff
@@ -28,7 +28,7 @@
  *    so the blocks condense out of the drift rather than switching on.
  *  · **leaving toward NetworkGraph**, chords fade in across each hexagon.
  *    A hexagon with its diagonals drawn is a graph, which is exactly the claim
- *    Skills is about to make — the blocks become a topology.
+ *    Skills is about to make: the blocks become a topology.
  */
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -62,7 +62,7 @@ interface Hex {
   y: number;
   z: number;
   radius: number;
-  /** Seconds per full rotation — the original's 90–200s, unchanged. */
+  /** Seconds per full rotation: the original's 90–200s, unchanged. */
   spinPeriod: number;
   direction: 1 | -1;
   phase: number;
@@ -76,7 +76,7 @@ interface Hex {
   /** Which of the six vertices carry a spoke to the inner ring. */
   spokes: boolean[];
   spokeAlpha: number;
-  /** Small tilt out of the belt plane. cos/sin cached — this runs per frame. */
+  /** Small tilt out of the belt plane. cos/sin cached: this runs per frame. */
   cosTiltX: number;
   sinTiltX: number;
   cosTiltY: number;
@@ -219,7 +219,13 @@ export const HexBelt = ({
   const peak = useRef(1);
   useEffect(() => {
     applyLineTheme(material as ShaderMaterial, accentRaw, isDark);
+<<<<<<< Updated upstream
     peak.current = isDark ? 1 : 0.8;
+=======
+    // Single value for both themes: light mode's ink multiplier is on the
+    // material now (uLightGain). Discounting here as well was cancelling it out.
+    peak.current = 1;
+>>>>>>> Stashed changes
     invalidate();
   }, [accentRaw, isDark, material, invalidate]);
 
@@ -275,7 +281,7 @@ export const HexBelt = ({
     const chord = seamAfter(t, WAYPOINT.projects) * CHORD_ALPHA;
 
     // Rebuild the ring vertices. Spin periods are in minutes, so this is a
-    // near-static buffer — but it is cheap enough not to warrant a cache.
+    // near-static buffer: but it is cheap enough not to warrant a cache.
     const attr = geometry.getAttribute("position") as BufferAttribute;
     const pos = attr.array as Float32Array;
 
@@ -292,7 +298,7 @@ export const HexBelt = ({
 
       for (let v = 0; v < 6; v++) {
         // While condensing, each vertex breathes off its true radius on its own
-        // phase — the outline is still finding its shape.
+        // phase: the outline is still finding its shape.
         const wob =
           condense > 0
             ? 1 + condense * Math.sin(hex.phase + v * 2.7 + time * 0.6)
@@ -330,7 +336,7 @@ export const HexBelt = ({
         pos[o++] = ix[v]; pos[o++] = iy[v]; pos[o++] = iz[v];
         pos[o++] = ix[w]; pos[o++] = iy[w]; pos[o++] = iz[w];
       }
-      // Spokes — unused slots collapse to a point and carry zero alpha.
+      // Spokes: unused slots collapse to a point and carry zero alpha.
       for (let v = 0; v < 6; v++) {
         if (hex.spokes[v]) {
           pos[o++] = ox[v]; pos[o++] = oy[v]; pos[o++] = oz[v];

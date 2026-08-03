@@ -1,10 +1,10 @@
 /**
- * particleMaterial.ts — one material for every particle surface in the app.
+ * particleMaterial.ts: one material for every particle surface in the app.
  *
  * Why a raw ShaderMaterial instead of PointsMaterial:
  *  · per-point size *and* per-point alpha (PointsMaterial gives neither cheaply)
  *  · distance fade, so the far side of the globe recedes instead of reading as
- *    a flat disc of dots — this is what sells the sphere without any lighting
+ *    a flat disc of dots: this is what sells the sphere without any lighting
  *  · a soft circular falloff instead of a texture lookup, so there is no sprite
  *    PNG to load, decode, or get wrong on a DPR change
  *  · dispersal happens on the GPU (stage 2). Moving 7,200 points on the CPU and
@@ -19,17 +19,48 @@
  * Three uniforms, all inert at their defaults, so every existing call site
  * behaves exactly as it did before:
  *
- *  · **uEnergy / uEnergyGain** — the connective thread. `uEnergy` is the same
+ *  · **uEnergy / uEnergyGain**: the connective thread. `uEnergy` is the same
  *    number for every material in the scene (useMotif.handoffEnergy), and
  *    `uEnergyGain` is how much this particular surface cares. Six motifs
  *    brightening off one shared value is what makes a seam read as one
  *    substance changing shape rather than two unrelated effects crossing over.
- *  · **uRim** — a Fresnel-style rim term. A point cloud has no normals, but on
+ *  · **uRim**: a Fresnel-style rim term. A point cloud has no normals, but on
  *    a *shell* the surface normal is the radial, so it comes for free. Enabled
  *    only for spherical fields, where that identity actually holds.
- *  · **uTighten** — collapses the per-point radial jitter that gives a shell its
+ *  · **uTighten**: collapses the per-point radial jitter that gives a shell its
  *    thickness, letting an object resolve from a loose cloud into a clean
  *    surface without a second buffer or a second material.
+<<<<<<< Updated upstream
+=======
+ *
+ * ── Stage 5: light mode is a different medium, not a different palette ──
+ * Swapping AdditiveBlending for NormalBlending was necessary and nowhere near
+ * sufficient. Additive light on near-black *accumulates*: overlapping points
+ * build bright cores, and the soft quadratic falloff reads as glow because glow
+ * is what stacking translucent light looks like. None of that survives the
+ * inversion. On paper a point can only ever subtract toward its own colour, so
+ * the same geometry rendered the same way gives you a faint blue smudge with no
+ * core, no accumulation, and no glow to stand in for structure.
+ *
+ * Paper has its own vocabulary for the same job, and it is the one engravers
+ * used: smaller marks, harder edges, more of them, and *aerial perspective* , 
+ * distance reads as things getting lighter, not as things fading out. Four
+ * uniforms, all set from `isDark` in one place:
+ *
+ *  · **uEdge**: blends the falloff between quadratic (1.0, the dark-mode glow
+ *    curve, bit-identical to before) and linear (0.0, a crisp stippled dot).
+ *    A lerp rather than a pow() because this runs per fragment on every point
+ *    in the scene and pow is not free at that volume.
+ *  · **uAlphaFloor**: how much alpha a point retains at maximum distance.
+ *    Dark wants 0.14: the far hemisphere should recede into black. Paper wants
+ *    much more, because a mark that fades to nothing on white has not receded,
+ *    it has been erased.
+ *  · **uThemeGain**: ink is not additive, so light mode simply needs more of
+ *    it. Per-surface via uLightGain, since the starfield and the globe want
+ *    very different amounts.
+ *  · **uSizeScale**: smaller points in light mode. Density carries structure
+ *    on paper; size carries it under additive blending.
+>>>>>>> Stashed changes
  */
 import {
   AdditiveBlending,
@@ -82,7 +113,7 @@ const VERT = /* glsl */ `
     // Per-point delay so the shell peels rather than popping as one object.
     float delay = aPhase * uStagger;
     float d = clamp((uDisperse - delay) / max(1.0 - delay, 0.001), 0.0, 1.0);
-    d = d * d * (3.0 - 2.0 * d); // smoothstep — same in/out feel as easeInOutCubic
+    d = d * d * (3.0 - 2.0 * d); // smoothstep, same in/out feel as easeInOutCubic
 
     // Outward along the point's own radial. Uniform per-point direction keeps
     // the silhouette recognisable as an exploding sphere, not a puff of noise.
@@ -102,7 +133,7 @@ const VERT = /* glsl */ `
     float tw = mix(1.0, 0.72 + 0.28 * sin(uTime + aPhase * 6.2831853), uTwinkle);
 
     // The connective thread. Size carries more of it than alpha because under
-    // additive blending a bigger point deposits more energy in the same place —
+    // additive blending a bigger point deposits more energy in the same place,
     // the same encoding the graph already uses for node glow.
     float energy = uEnergy * uEnergyGain;
 
@@ -126,10 +157,10 @@ const VERT = /* glsl */ `
       uMaxSize
     );
 
-    // Far fade — the back hemisphere dims rather than z-fighting for attention.
+    // Far fade: the back hemisphere dims rather than z-fighting for attention.
     float depth = clamp((dist - uFadeNear) / (uFadeFar - uFadeNear), 0.0, 1.0);
 
-    // Near fade — a point passing through the camera dissolves instead of
+    // Near fade: a point passing through the camera dissolves instead of
     // smearing across the viewport as a giant translucent quad.
     float near = smoothstep(0.0, uNearFade, dist);
 
@@ -150,7 +181,15 @@ const FRAG = /* glsl */ `
     if (d2 > 0.25) discard;
 
     float falloff = smoothstep(0.25, 0.0, d2);
+<<<<<<< Updated upstream
     gl_FragColor = vec4(uColor, falloff * falloff * vAlpha);
+=======
+    // uEdge 1.0 is falloff*falloff, the original curve exactly. 0.0 is linear,
+    // which on paper reads as a drawn dot instead of a haze. A mix rather than
+    // pow(falloff, n): this is the hottest fragment path in the app.
+    float shape = falloff * mix(1.0, falloff, uEdge);
+    gl_FragColor = vec4(uColor, shape * vAlpha);
+>>>>>>> Stashed changes
 
     // Raw ShaderMaterial output is linear; this converts to the renderer's
     // output color space. Without it the mint reads noticeably dull.
@@ -159,7 +198,7 @@ const FRAG = /* glsl */ `
 `;
 
 export interface ParticleMaterialOptions {
-  /** "151,252,228" — the raw tuple ThemeContext already exposes. */
+  /** "151,252,228": the raw tuple ThemeContext already exposes. */
   accentRaw: string;
   isDark: boolean;
   pixelRatio: number;
@@ -174,7 +213,7 @@ export interface ParticleMaterialOptions {
   maxSize?: number;
   /** How strongly this surface responds to shared seam energy. 0 opts out. */
   energyGain?: number;
-  /** Radial-normal Fresnel strength. Spherical shells only — 0 elsewhere. */
+  /** Radial-normal Fresnel strength. Spherical shells only: 0 elsewhere. */
   rim?: number;
 }
 
@@ -230,7 +269,7 @@ export const createParticleMaterial = ({
    * Only the shells supply aJitter; the drift field, the graph and the grid
    * marks do not. Left unspecified, a declared-but-unbound attribute reads
    * WebGL's *generic* vertex attribute, which is global state shared across
-   * draw calls — so its value would be whatever the previous draw happened to
+   * draw calls: so its value would be whatever the previous draw happened to
    * leave there. Naming the default makes it zero by contract rather than by
    * luck.
    *
@@ -247,7 +286,7 @@ export const createParticleMaterial = ({
 };
 
 /**
- * Theme forwarding without rebuilding the material — the counterpart to
+ * Theme forwarding without rebuilding the material: the counterpart to
  * `applyLineTheme`, which several motifs were open-coding identically.
  */
 export const applyParticleTheme = (

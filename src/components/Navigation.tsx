@@ -1,5 +1,5 @@
 /**
- * Navigation.tsx — floating glass pill.
+ * Navigation.tsx: floating glass pill.
  *
  * · Centered, blurred, rounded; shrinks slightly past 60px of scroll.
  * · The active-section indicator is a real element that springs between

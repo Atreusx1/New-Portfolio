@@ -1,11 +1,11 @@
 /**
- * flowField.ts — the 2-D FlowField, one axis richer.
+ * flowField.ts: the 2-D FlowField, one axis richer.
  *
  * The original's key insight is preserved exactly, because it is the reason the
  * old background looked calm instead of chaotic: **nodes do not integrate
  * velocity from this field.** Integration drifts, needs containment hacks, and
  * produces the "random bouncing" look. Instead the field is sampled as a
- * *displacement* — a node's position is `home + field(home, t) * amplitude`.
+ * *displacement*: a node's position is `home + field(home, t) * amplitude`.
  *
  * Because simplex noise is continuous in space and time, motion stays smooth
  * and deterministic, and every node eventually returns near its anchor. The
@@ -14,7 +14,7 @@
  * The only change from the original is a third output axis and a third noise
  * instance. `noise3` was already 3-D; the old code just fed it (x, y, time).
  * Here it gets (x, y, z) offset per axis, with time folded in as a slow drift
- * along the sample coordinates — a true 4-D field would need a noise4 the old
+ * along the sample coordinates: a true 4-D field would need a noise4 the old
  * engine never had, and the difference is not visible at these speeds.
  */
 import { SimplexNoise } from "./noise";
@@ -26,7 +26,7 @@ export interface Vec3 {
 }
 
 export interface FlowFieldOptions {
-  /** Spatial scale — bigger = broader, calmer currents. Old default: 340px. */
+  /** Spatial scale: bigger = broader, calmer currents. Old default: 340px. */
   cellSize?: number;
   /** Seconds for the field to evolve one full noise unit. */
   timeScale?: number;
@@ -41,7 +41,7 @@ export class FlowField3 {
   private readonly timeScale: number;
   private readonly strength: number;
 
-  /** Reused output — sample() never allocates. Read it immediately. */
+  /** Reused output: sample() never allocates. Read it immediately. */
   private readonly out: Vec3 = { x: 0, y: 0, z: 0 };
 
   constructor(seed: number, opts: FlowFieldOptions = {}) {
@@ -62,7 +62,7 @@ export class FlowField3 {
     const sz = z * this.invCell;
     const t = time * this.timeScale;
 
-    // Offsets keep the three axes decorrelated — sampling the same noise at the
+    // Offsets keep the three axes decorrelated: sampling the same noise at the
     // same point for all three would give a purely radial field.
     this.out.x = this.nx.noise3(sx, sy, sz + t) * this.strength;
     this.out.y = this.ny.noise3(sx + 31.7, sy - 17.3, sz + t) * this.strength;

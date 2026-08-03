@@ -1,5 +1,5 @@
 /**
- * UniverseCanvas.tsx — the only <Canvas> in the app.
+ * UniverseCanvas.tsx: the only <Canvas> in the app.
  *
  * Default-exported because this is the React.lazy() split point: the entire
  * three.js + R3F + postprocessing graph hangs off this module and must not
@@ -8,7 +8,7 @@
  * Stage 3 composes the full flight. Note what is *not* here: no per-section
  * mounting, no route awareness, no transition orchestration. Every motif is a
  * static object at a fixed z, and the camera flies past it. The continuity is
- * a consequence of the geometry, not of code coordinating between sections —
+ * a consequence of the geometry, not of code coordinating between sections ,
  * which is why there is no place for the sections to fall out of sync.
  *
  * ── The degradation ladder (stage 4) ──
@@ -17,8 +17,8 @@
  * it, and it now does so in graded steps rather than by dropping dpr and hoping:
  *
  *   step 0  everything on
- *   step 1  dpr pinned to 1, bloom off        — free, no GPU buffers touched
- *   step 2  effective tier down one notch     — every budget below re-derives
+ *   step 1  dpr pinned to 1, bloom off       : free, no GPU buffers touched
+ *   step 2  effective tier down one notch    : every budget below re-derives
  *   step 3  effective tier down two notches
  *
  * Steps 2 and 3 rebuild geometry, including the graph topology, so they are
@@ -98,7 +98,7 @@ const UniverseCanvas = ({
 
   /**
    * Pointer repulsion is a hover effect, so it is fine-pointer only, and it is
-   * motion, so prefers-reduced-motion turns it off outright — the same two
+   * motion, so prefers-reduced-motion turns it off outright: the same two
    * gates useQuality already applies everywhere else. Probed once: neither
    * answer can change without a reload.
    */
@@ -125,7 +125,7 @@ const UniverseCanvas = ({
       aria-hidden="true"
       dpr={dpr}
       // 'demand' means a reduced-motion visitor renders a handful of frames and
-      // then the GPU goes idle — a genuine battery win, not a token gesture.
+      // then the GPU goes idle: a genuine battery win, not a token gesture.
       frameloop={reducedMotion ? "demand" : "always"}
       gl={{
         antialias: false,

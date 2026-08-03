@@ -1,7 +1,7 @@
 /**
- * Magnetic.tsx — the element leans toward the cursor while hovered
+ * Magnetic.tsx: the element leans toward the cursor while hovered
  * and springs back on leave. Pure transform, driven by rAF, zero
- * React state — no re-renders, no layout work.
+ * React state: no re-renders, no layout work.
  */
 import { useEffect, useRef, ReactNode, CSSProperties } from "react";
 import { prefersReducedMotion } from "./Reveal";

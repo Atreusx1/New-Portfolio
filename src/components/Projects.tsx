@@ -1,23 +1,37 @@
 /**
- * Projects.tsx — redesigned.
+ * Projects.tsx
  *
- * The one-visible-at-a-time carousel becomes a responsive grid of tilt
- * cards — every project visible at once (less scrolling, more scanning),
- * each with a pointer-following glow, and links/full tech stack that
- * rise into view on hover. Keyboard/touch users see the links always
- * (hover reveal is progressive enhancement, not gatekeeping).
+ * ── Stage 7: the section stopped growing ──
+ * Eleven projects in a two-column grid was six rows of scroll, and eleven on a
+ * phone. The fix is structural rather than cosmetic:
  *
- * The DEX / Order Book tab — the portfolio's centerpiece demo — is
- * preserved exactly, wired to the untouched <DEXOrderBook />.
+ *  · Cards live in a paged horizontal rail (ProjectDeck), so the section has a
+ *    fixed height no matter how many projects the filter matched.
+ *  · Everything a card cannot hold moved into a drawer that opens below the
+ *    rail on demand: the Kestrel and ChronoShield boards, the build toolkit's
+ *    before/after table. Default state shows none of it, so the page is as
+ *    short as it was before any of this existed.
+ *  · The order book brief collapses to a single row.
+ *
+ * One drawer at a time, deliberately. Two open boards is the vertical sprawl
+ * this was meant to remove, and a reader comparing two projects is better
+ * served by closing one than by scrolling past both.
+ *
+ * DEXOrderBook itself remains untouched.
  */
-import { useState } from "react";
-import { Github, ArrowUpRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { Github, ArrowUpRight, X } from "lucide-react";
 import { projectsData, type Project } from "../data/projects";
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
 import { DEXOrderBook } from "./Dexorderbook";
 import { Reveal } from "./motion/Reveal";
 import { TiltCard } from "./motion/TiltCard";
+import { Takeaway } from "./patterns/Takeaway";
+import { BeforeAfter } from "./patterns/BeforeAfter";
+import { ProjectBoard } from "./patterns/ProjectBoard";
+import { OrderBookBrief } from "./patterns/OrderBookBrief";
+import { ProjectDeck } from "./patterns/ProjectDeck";
 
 const CATEGORIES = ["all", "web", "blockchain", "fullstack", "build-tools"] as const;
 const ALL_TABS = [...CATEGORIES, "dex"] as const;
@@ -26,9 +40,12 @@ type Tab = (typeof ALL_TABS)[number];
 const tabLabel = (tab: Tab): string =>
   tab === "dex" ? "DEX / Order Book" : tab === "build-tools" ? "Build tools" : tab;
 
+const hasDetail = (p: Project): boolean => !!p.board || !!p.comparison;
+
 export const Projects = () => {
   const t = useTheme();
   const [filter, setFilter] = useState<Tab>("dex");
+  const [openId, setOpenId] = useState<number | null>(null);
   const isDexTab = filter === "dex";
 
   const filtered = isDexTab
@@ -36,6 +53,18 @@ export const Projects = () => {
     : filter === "all"
       ? projectsData
       : projectsData.filter((p) => p.category === filter);
+
+  /**
+   * The drawer collapses to zero height rather than unmounting, so its content
+   * has to survive the close in order to animate out. This holds the last
+   * project that was open purely so there is something to collapse.
+   */
+  const shown = useRef<Project | null>(null);
+  const open = filtered.find((p) => p.id === openId) ?? null;
+  if (open) shown.current = open;
+
+  const toggle = (p: Project): void =>
+    setOpenId((cur) => (cur === p.id ? null : p.id));
 
   return (
     <section id="projects" className="section">
@@ -52,12 +81,7 @@ export const Projects = () => {
           <div
             role="tablist"
             aria-label="Project categories"
-            style={{
-              display: "flex",
-              gap: "0.35rem",
-              flexWrap: "wrap",
-              marginBottom: "2rem",
-            }}
+            className="proj-tabs"
           >
             {ALL_TABS.map((tab) => {
               const active = filter === tab;
@@ -67,34 +91,20 @@ export const Projects = () => {
                   key={tab}
                   role="tab"
                   aria-selected={active}
-                  onClick={() => setFilter(tab)}
+                  onClick={() => {
+                    setFilter(tab);
+                    // A different list makes an open drawer meaningless.
+                    setOpenId(null);
+                  }}
+                  className="proj-tab"
                   style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.75rem",
-                    fontWeight: 550,
-                    textTransform: "capitalize",
-                    padding: "0.5rem 1rem",
-                    borderRadius: 999,
                     border: `1px solid ${active ? "transparent" : "var(--border)"}`,
                     background: active ? t.accent : "transparent",
                     color: active ? t.bg : isDex ? t.ac_(0.8) : t.fg_(0.5),
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.45rem",
-                    transition: "all 0.25s cubic-bezier(0.16,1,0.3,1)",
                   }}
                 >
                   {isDex && !active && (
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        width: 5,
-                        height: 5,
-                        borderRadius: "50%",
-                        background: t.accent,
-                        animation: "blink 2s ease-in-out infinite",
-                      }}
-                    />
+                    <span className="proj-tab-dot" aria-hidden="true" />
                   )}
                   {tabLabel(tab)}
                 </button>
@@ -106,29 +116,80 @@ export const Projects = () => {
         {/* DEX centerpiece */}
         {isDexTab && (
           <Reveal delay={0.1}>
-            <div className="mono-label" style={{ marginBottom: "0.9rem" }}>
-              Decentralized order book · live price feed · simulated CLOB depth
+            <Takeaway>
+              The gap between an exchange price and the oracle price a contract
+              actually reads is the number that matters. This shows both.
+            </Takeaway>
+            <div className="dex-wrap">
+              <DEXOrderBook />
             </div>
-            <DEXOrderBook />
+            <OrderBookBrief />
           </Reveal>
         )}
 
-        {/* Grid */}
+        {/* Deck + drawer */}
         {!isDexTab && (
-          <div className="grid-projects">
-            {filtered.map((project, i) => (
-              <Reveal key={project.title} delay={0.05 * (i % 4)}>
-                <ProjectCard project={project} index={i} />
-              </Reveal>
-            ))}
-          </div>
+          <Reveal delay={0.1}>
+            <ProjectDeck resetKey={filter} label={`${tabLabel(filter)} projects`}>
+              {filtered.map((project, i) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  index={i}
+                  open={openId === project.id}
+                  onToggle={() => toggle(project)}
+                />
+              ))}
+            </ProjectDeck>
+
+            <div className="drawer" data-open={open ? "true" : "false"}>
+              <div className="drawer-inner">
+                {shown.current && (
+                  <div className="drawer-body">
+                    <div className="drawer-head">
+                      <span className="mono-label">{shown.current.title}</span>
+                      <button
+                        className="drawer-close"
+                        onClick={() => setOpenId(null)}
+                        aria-label="Close details"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                    {shown.current.board && (
+                      <ProjectBoard
+                        data={shown.current.board}
+                        active={!!open}
+                      />
+                    )}
+                    {shown.current.comparison && (
+                      <BeforeAfter
+                        data={shown.current.comparison}
+                        active={!!open}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Reveal>
         )}
       </div>
     </section>
   );
 };
 
-const ProjectCard = ({ project, index }: { project: Project; index: number }) => {
+const ProjectCard = ({
+  project,
+  index,
+  open,
+  onToggle,
+}: {
+  project: Project;
+  index: number;
+  open: boolean;
+  onToggle: () => void;
+}) => {
   const t = useTheme();
   const [hovered, setHovered] = useState(false);
 
@@ -136,140 +197,102 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
   const hasLive = project.live && project.live !== "Not Live Yet";
 
   return (
-    <TiltCard
-      style={{ padding: "1.75rem", minHeight: "250px", display: "flex", flexDirection: "column" }}
-    >
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{ display: "flex", flexDirection: "column", flex: 1 }}
-      >
-        {/* Meta row */}
+    <div className="deck-card" data-open={open ? "true" : "false"}>
+      <TiltCard style={{ height: "100%" }}>
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "1rem",
-          }}
+          className="pcard"
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
         >
-          <span
-            className="data-text"
-            style={{ fontSize: "0.6rem", letterSpacing: "0.18em", color: t.fg_(0.28) }}
-          >
-            {String(index + 1).padStart(2, "0")}
-          </span>
-          <span className="chip">{project.category}</span>
-        </div>
-
-        {/* Title + description */}
-        <h3
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "1.125rem",
-            fontWeight: 600,
-            letterSpacing: "-0.015em",
-            lineHeight: 1.25,
-            color: hovered ? t.accent : t.fg,
-            transition: "color 0.25s ease",
-            marginBottom: "0.6rem",
-          }}
-        >
-          {project.title}
-        </h3>
-        <p
-          className="body-text"
-          style={{ fontSize: "0.84rem", flex: 1, marginBottom: "1.25rem" }}
-        >
-          {project.description}
-        </p>
-
-        {/* Tech chips — full stack unfolds on hover */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0.35rem",
-            flexWrap: "wrap",
-            marginBottom: "1.1rem",
-          }}
-        >
-          {(hovered ? project.technologies : project.technologies.slice(0, 4)).map(
-            (tech) => (
-              <span
-                key={tech}
-                className="chip"
-                style={{ animation: hovered ? "fadeIn 0.3s ease" : undefined }}
-              >
-                {tech}
-              </span>
-            ),
-          )}
-          {!hovered && project.technologies.length > 4 && (
-            <span className="chip" style={{ borderStyle: "dashed" }}>
-              +{project.technologies.length - 4}
-            </span>
-          )}
-        </div>
-
-        {/* Links */}
-        <div
-          style={{
-            display: "flex",
-            gap: "1.2rem",
-            paddingTop: "0.9rem",
-            borderTop: "1px solid var(--border-subtle)",
-          }}
-        >
-          {hasGithub && (
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                fontFamily: "var(--font-body)",
-                fontSize: "0.75rem",
-                fontWeight: 550,
-                color: hovered ? t.accent : t.fg_(0.45),
-                textDecoration: "none",
-                transition: "color 0.2s ease",
-              }}
-            >
-              <Github size={13} /> Code
-            </a>
-          )}
-          {hasLive && (
-            <a
-              href={project.live}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                fontFamily: "var(--font-body)",
-                fontSize: "0.75rem",
-                fontWeight: 550,
-                color: hovered ? t.accent : t.fg_(0.45),
-                textDecoration: "none",
-                transition: "color 0.2s ease",
-              }}
-            >
-              <ArrowUpRight size={13} /> Live
-            </a>
-          )}
-          {!hasGithub && !hasLive && (
+          {/* Meta row */}
+          <div className="pcard-meta">
             <span
               className="data-text"
-              style={{ fontSize: "0.62rem", color: t.fg_(0.28), letterSpacing: "0.1em" }}
+              style={{ fontSize: "0.6rem", letterSpacing: "0.18em", color: t.fg_(0.28) }}
             >
-              PRIVATE
+              {String(index + 1).padStart(2, "0")}
             </span>
-          )}
+            <span className="chip">{project.category}</span>
+          </div>
+
+          <h3
+            className="pcard-title"
+            style={{ color: hovered || open ? t.accent : t.fg }}
+          >
+            {project.title}
+          </h3>
+
+          {/* The claim, before the evidence. */}
+          <Takeaway>{project.takeaway}</Takeaway>
+
+          <p className="body-text pcard-desc">{project.description}</p>
+
+          {/* Tech chips. The full stack unfolds on hover. */}
+          <div className="pcard-chips">
+            {(hovered ? project.technologies : project.technologies.slice(0, 4)).map(
+              (tech) => (
+                <span
+                  key={tech}
+                  className="chip"
+                  style={{ animation: hovered ? "fadeIn 0.3s ease" : undefined }}
+                >
+                  {tech}
+                </span>
+              ),
+            )}
+            {!hovered && project.technologies.length > 4 && (
+              <span className="chip" style={{ borderStyle: "dashed" }}>
+                +{project.technologies.length - 4}
+              </span>
+            )}
+          </div>
+
+          {/* Links + details */}
+          <div className="pcard-foot">
+            {hasGithub && (
+              <a
+                href={project.github ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pcard-link"
+                style={{ color: hovered ? t.accent : t.fg_(0.45) }}
+              >
+                <Github size={13} /> Code
+              </a>
+            )}
+            {hasLive && (
+              <a
+                href={project.live ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pcard-link"
+                style={{ color: hovered ? t.accent : t.fg_(0.45) }}
+              >
+                <ArrowUpRight size={13} /> Live
+              </a>
+            )}
+            {!hasGithub && !hasLive && (
+              <span
+                className="data-text"
+                style={{ fontSize: "0.62rem", color: t.fg_(0.28), letterSpacing: "0.1em" }}
+              >
+                PRIVATE
+              </span>
+            )}
+
+            {hasDetail(project) && (
+              <button
+                className="pcard-details"
+                onClick={onToggle}
+                aria-expanded={open}
+              >
+                {open ? "Hide detail" : "Detail"}
+                <span className="pcard-details-mark" aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
-    </TiltCard>
+      </TiltCard>
+    </div>
   );
 };

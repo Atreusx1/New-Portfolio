@@ -1,24 +1,24 @@
 /**
- * Scrambletext.tsx — per-character scramble reveal, without the layout shift.
+ * Scrambletext.tsx: per-character scramble reveal, without the layout shift.
  *
  * ── The bug this fixes ──
  * The old version started as a run of spaces and filled in, swapping random
  * glyphs at each position every 30ms. In a proportional face like Space Grotesk
  * an `I` and a `W` differ in advance width by more than 3x, so the headline's
- * measured width changed on every tick — and because the hero is centre-aligned,
+ * measured width changed on every tick: and because the hero is centre-aligned,
  * the whole block jittered horizontally for the entire animation. On a 700-weight
  * 7rem headline that is not subtle.
  *
  * ── The fix ──
  * Reserve the width up front. The widest state the animation can *possibly*
  * reach is (number of non-space characters × the widest candidate glyph), and
- * that can be computed exactly with `canvas.measureText` — no DOM measurement,
+ * that can be computed exactly with `canvas.measureText`: no DOM measurement,
  * no `getBoundingClientRect`, no forced reflow. Set it as `min-width` once and
  * the box cannot move.
  *
  * This is the one job the Pretext library would genuinely have been right for.
  * For Latin-only headline text it is about fifteen lines of canvas metrics, so
- * a dependency was not warranted — but the reasoning is the same: measure with
+ * a dependency was not warranted: but the reasoning is the same: measure with
  * the font engine, never with layout.
  *
  * ── Two other changes ──
@@ -54,7 +54,7 @@ const getMeasureCtx = (): CanvasRenderingContext2D | null => {
  *
  * Locking each *slot* to the width of the character that will finally occupy
  * it gives a box exactly as wide as the settled text, and no slot can ever
- * change width — so the shift is structurally impossible rather than merely
+ * change width: so the shift is structurally impossible rather than merely
  * bounded. The 340px of jitter measured on the old version becomes zero.
  */
 export const measureSlots = (
@@ -95,7 +95,7 @@ interface ScrambleTextProps {
    *
    * Once @react-three/fiber is installed it augments the global JSX namespace
    * with every three.js element, so `keyof JSX.IntrinsicElements` balloons into
-   * a union TypeScript refuses to represent — the original signature fails to
+   * a union TypeScript refuses to represent: the original signature fails to
    * compile with TS2590 the moment stage 1's dependencies land. It also let
    * callers pass `<image>`, which has required props this component never sets.
    */
@@ -173,7 +173,7 @@ export const ScrambleText = ({
 
     const settle = (): void => {
       // Hand back to a single text node so the resting headline gets real
-      // kerning and ligatures — the fixed slots exist only during motion.
+      // kerning and ligatures: the fixed slots exist only during motion.
       el.textContent = text;
     };
 
@@ -211,7 +211,7 @@ export const ScrambleText = ({
         display: "inline-block",
         // Capped with min(): a fixed min-width always wins over max-width in
         // CSS's conflict resolution, so an uncapped reservation (e.g. 373px)
-        // would force overflow on any viewport narrower than that — this is
+        // would force overflow on any viewport narrower than that: this is
         // what caused the About.tsx tagline to overflow on mobile. Capping
         // the reservation itself to 100% lets the box shrink to the
         // container and the text wrap normally on narrow screens, at the

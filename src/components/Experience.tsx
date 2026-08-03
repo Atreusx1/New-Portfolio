@@ -1,15 +1,19 @@
 /**
- * Experience.tsx — redesigned.
+ * Experience.tsx: redesigned.
  *
  * The full-width timeline with a 6rem gutter becomes a compact stack of
  * quiet rows: period in mono (it's data), role in the display face,
- * description in Inter at reading size. Hover lights the accent rail.
+ * description in the body face at reading size. Hover lights the accent rail.
+ *
+ * Stage 6 adds the impact line above each description, so a reviewer skimming
+ * the column gets four claims without reading four paragraphs.
  */
 import { useState } from "react";
 import { EXPERIENCE } from "../data/constants";
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
 import { Reveal } from "./motion/Reveal";
+import { Takeaway } from "./patterns/Takeaway";
 
 export const Experience = () => {
   return (
@@ -112,7 +116,14 @@ const ExperienceRow = ({ exp }: { exp: (typeof EXPERIENCE)[0] }) => {
         </span>
       </div>
 
-      <p className="body-text" style={{ fontSize: "0.875rem" }}>
+      {/* The claim first, the detail under it. Same treatment as Projects, so
+          the accent rule means the same thing in both places. */}
+      <Takeaway>{exp.impact}</Takeaway>
+
+      <p
+        className="body-text"
+        style={{ fontSize: "0.875rem", marginTop: "0.7rem" }}
+      >
         {exp.description}
       </p>
     </div>
