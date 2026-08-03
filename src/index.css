@@ -1,14 +1,8 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75..125,500..800&family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400..700&display=swap");
 
 /* ════════════════════════════════════════════════════════════
    DESIGN SYSTEM
    Type roles:
-<<<<<<< Updated upstream
-     --font-display  Space Grotesk — headlines only
-     --font-body     Inter         — all reading text
-     --font-mono     Space Mono    — data, labels, terminal ONLY
-   Mono is no longer the body face: it now *means* "live data".
-=======
      --font-display  Anybody       : headlines only
      --font-body     IBM Plex Sans : all reading text
      --font-mono     IBM Plex Mono : data, labels, terminal ONLY
@@ -38,7 +32,6 @@
    Plex Sans is variable (wght 100–700), so the 450 and 550 weights this
    stylesheet already asked for now interpolate properly instead of being
    snapped or synthesised.
->>>>>>> Stashed changes
    ════════════════════════════════════════════════════════════ */
 
 /* ─── DARK (default) ─────────────────────────────────────── */
@@ -65,9 +58,26 @@
   --accent-muted: rgba(151, 252, 228, 0.09);
   --accent-border: rgba(151, 252, 228, 0.22);
 
-  --font-display: "Space Grotesk", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-mono: "Space Mono", monospace;
+  --font-display: "Anybody", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Directional semantics. Used by the hero rail and anything else that has a
+     sign: accent is "up" throughout the app, matching the order book's
+     convention of painting bids in the accent. */
+  --pos: var(--accent);
+  --neg: rgba(255, 110, 110, 0.85);
+  --warn: rgba(255, 160, 80, 0.85);
+
+  /* Bare RGB triples, for `rgba(var(--x), a)` at call sites that need their own
+     alpha. The order book uses three shades of red at seven alpha levels; these
+     are its dark values verbatim, so routing it through tokens leaves dark mode
+     bit-identical while giving light mode one AA-clean red. */
+  --neg-rgb: 255, 100, 100;
+  --neg-mid-rgb: 255, 80, 80;
+  --neg-deep-rgb: 255, 60, 60;
+  --warn-rgb: 255, 200, 80;
+  --warn-soft-rgb: 255, 180, 50;
 
   --radius-sm: 8px;
   --radius: 12px;
@@ -118,22 +128,12 @@ html[data-theme="light"] {
   --accent-muted: rgba(27, 76, 199, 0.09);
   --accent-border: rgba(27, 76, 199, 0.28);
 
-<<<<<<< Updated upstream
-  /* Light mode elevation is shadow-driven — layered, warm-tinted */
-=======
   /* Light mode elevation is shadow-driven: layered, warm-tinted */
->>>>>>> Stashed changes
   --shadow-sm: 0 1px 2px rgba(31, 27, 16, 0.05), 0 0 0 1px rgba(27, 26, 22, 0.05);
   --shadow-md: 0 1px 2px rgba(31, 27, 16, 0.05), 0 8px 24px rgba(31, 27, 16, 0.07), 0 0 0 1px rgba(27, 26, 22, 0.05);
   --shadow-lg: 0 2px 4px rgba(31, 27, 16, 0.05), 0 20px 48px rgba(31, 27, 16, 0.11), 0 0 0 1px rgba(27, 26, 22, 0.05);
   --card-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 46%);
 
-<<<<<<< Updated upstream
-  --glass-bg: rgba(250, 249, 246, 0.72);
-  --glass-border: rgba(27, 26, 22, 0.08);
-  --glass-blur: 18px;
-  --glass-highlight: rgba(255, 255, 255, 0.6);
-=======
   /* Both re-picked for paper: the dark theme's soft reds and ambers are tuned
      to glow on near-black and measure barely 2:1 here. #B02030 lands at 6.44:1
      and #9A540C at 5.47:1 against --bg, so a falling ticker is as legible as a
@@ -170,7 +170,6 @@ html[data-theme="light"] {
   --glass-shade: rgba(31, 27, 16, 0.09);
   /* Thickness of the refracting edge band, in px. */
   --glass-edge: 14px;
->>>>>>> Stashed changes
 }
 
 /* ─── RESET ──────────────────────────────────────────────── */
@@ -210,20 +209,18 @@ a, button { cursor: pointer; }
   font-size: clamp(3.2rem, 8.4vw, 7.1rem);
   font-weight: 700;
   line-height: 0.98;
-  letter-spacing: -0.042em;
+  /* Retuned for Anybody. Space Grotesk needed -0.042em because it sets loose;
+     Anybody at wdth 88 is already condensed, and carrying the old tracking over
+     collapsed the counters at headline size. */
+  letter-spacing: -0.022em;
+  font-variation-settings: "wdth" 88;
   color: var(--fg);
   text-wrap: balance;
 }
 
-<<<<<<< Updated upstream
-/* The one focal phrase. Accent measures 16.58:1 on --bg and 4.45:1
-   on paper — it is a *stronger* signal than the dim tier it replaces,
-   which measured 2.32:1 and failed AA outright. */
-=======
 /* The one focal phrase. Accent measures 16.58:1 on --bg and 6.87:1 on paper
    since the light accent moved to cobalt: it is a *stronger* signal than the
    dim tier it replaces, which measured 2.32:1 and failed AA outright. */
->>>>>>> Stashed changes
 .display-xl .focal {
   color: var(--accent);
 }
@@ -235,14 +232,10 @@ a, button { cursor: pointer; }
   font-size: clamp(2.3rem, 5.6vw, 4.6rem);
   font-weight: 500;
   line-height: 1.0;
-<<<<<<< Updated upstream
-  letter-spacing: -0.03em;
-=======
   letter-spacing: -0.014em;
   /* Marginally wider than the line above it. The width axis is doing the same
      job the weight drop is: separating two tiers of the same voice. */
   font-variation-settings: "wdth" 94;
->>>>>>> Stashed changes
   color: var(--fg-dim);
   text-wrap: balance;
 }
@@ -251,7 +244,10 @@ a, button { cursor: pointer; }
   font-family: var(--font-display);
   font-size: clamp(1.55rem, 3vw, 2.35rem);
   font-weight: 600;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.012em;
+  /* Section titles sit at normal width: at 2.35rem the condensed setting reads
+     as a different typeface rather than as the same one under tension. */
+  font-variation-settings: "wdth" 100;
   line-height: 1.15;
   color: var(--fg);
 }
@@ -402,8 +398,6 @@ a, button { cursor: pointer; }
   pointer-events: none;
 }
 .glass > * { position: relative; z-index: 1; }
-<<<<<<< Updated upstream
-=======
 
 
 /* ─── HERO: HeroRedesign.tsx ─────────────────────────────
@@ -774,7 +768,6 @@ html[data-theme="light"] .field {
   background: rgba(255, 255, 255, 0.55);
   box-shadow: inset 0 1px 2px rgba(31, 27, 16, 0.05);
 }
->>>>>>> Stashed changes
 
 
 /* ─── TAKEAWAY: the five-second layer ────────────────────
@@ -1478,13 +1471,9 @@ html[data-theme="light"] .field {
   border-color: var(--accent-border);
   box-shadow: 0 0 0 3px var(--accent-muted);
 }
-<<<<<<< Updated upstream
-.field.field-error { border-color: rgba(255, 110, 110, 0.5); }
-=======
 /* Theme-aware: the dark red is invisible against paper, and a form error
    that cannot be seen is worse than no validation at all. */
 .field.field-error { border-color: color-mix(in srgb, var(--neg) 60%, transparent); }
->>>>>>> Stashed changes
 .field input, .field textarea {
   width: 100%;
   font-family: var(--font-body);

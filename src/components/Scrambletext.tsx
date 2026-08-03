@@ -3,7 +3,7 @@
  *
  * ── The bug this fixes ──
  * The old version started as a run of spaces and filled in, swapping random
- * glyphs at each position every 30ms. In a proportional face like Space Grotesk
+ * glyphs at each position every 30ms. In a proportional face like Anybody
  * an `I` and a `W` differ in advance width by more than 3x, so the headline's
  * measured width changed on every tick: and because the hero is centre-aligned,
  * the whole block jittered horizontally for the entire animation. On a 700-weight

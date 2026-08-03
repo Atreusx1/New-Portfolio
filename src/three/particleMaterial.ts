@@ -30,8 +30,6 @@
  *  · **uTighten**: collapses the per-point radial jitter that gives a shell its
  *    thickness, letting an object resolve from a loose cloud into a clean
  *    surface without a second buffer or a second material.
-<<<<<<< Updated upstream
-=======
  *
  * ── Stage 5: light mode is a different medium, not a different palette ──
  * Swapping AdditiveBlending for NormalBlending was necessary and nowhere near
@@ -60,7 +58,6 @@
  *    very different amounts.
  *  · **uSizeScale**: smaller points in light mode. Density carries structure
  *    on paper; size carries it under additive blending.
->>>>>>> Stashed changes
  */
 import {
   AdditiveBlending,
@@ -91,6 +88,11 @@ const VERT = /* glsl */ `
   // ── Shell detail (stage 4) ───────────────────────────────────────────────
   uniform float uRim;           // 0 = off. Radial-normal Fresnel, shells only.
   uniform float uTighten;       // 1 = radial jitter collapsed to a clean surface
+
+  // ── Medium (stage 5) ─────────────────────────────────────────────────────
+  uniform float uAlphaFloor;    // alpha retained at maximum distance
+  uniform float uThemeGain;     // ink multiplier; 1.0 in dark
+  uniform float uSizeScale;     // point size multiplier; 1.0 in dark
 
   // Guards against a point that has arrived near the camera filling the screen.
   uniform float uNearFade;
@@ -153,7 +155,7 @@ const VERT = /* glsl */ `
 
     // Perspective-correct sizing: points shrink with distance like real geometry.
     gl_PointSize = min(
-      uSize * aScale * uPixelRatio * (1.0 + energy) * (1.0 / max(dist, 0.001)),
+      uSize * uSizeScale * aScale * uPixelRatio * (1.0 + energy) * (1.0 / max(dist, 0.001)),
       uMaxSize
     );
 
@@ -164,7 +166,14 @@ const VERT = /* glsl */ `
     // smearing across the viewport as a giant translucent quad.
     float near = smoothstep(0.0, uNearFade, dist);
 
-    vAlpha = mix(1.0, 0.14, depth) * near * tw * rim * (1.0 + energy * 0.6) * uOpacity;
+    // Aerial perspective. The floor is the whole difference between "receding"
+    // and "gone": on black, 0.14 is a point sinking into the dark; on paper the
+    // same 0.14 is a point that has simply been rubbed out.
+    vAlpha = mix(1.0, uAlphaFloor, depth)
+           * near * tw * rim
+           * (1.0 + energy * 0.6)
+           * uThemeGain
+           * uOpacity;
 
     gl_Position = projectionMatrix * mv;
   }
@@ -172,6 +181,7 @@ const VERT = /* glsl */ `
 
 const FRAG = /* glsl */ `
   uniform vec3 uColor;
+  uniform float uEdge;
   varying float vAlpha;
 
   void main() {
@@ -181,15 +191,11 @@ const FRAG = /* glsl */ `
     if (d2 > 0.25) discard;
 
     float falloff = smoothstep(0.25, 0.0, d2);
-<<<<<<< Updated upstream
-    gl_FragColor = vec4(uColor, falloff * falloff * vAlpha);
-=======
     // uEdge 1.0 is falloff*falloff, the original curve exactly. 0.0 is linear,
     // which on paper reads as a drawn dot instead of a haze. A mix rather than
     // pow(falloff, n): this is the hottest fragment path in the app.
     float shape = falloff * mix(1.0, falloff, uEdge);
     gl_FragColor = vec4(uColor, shape * vAlpha);
->>>>>>> Stashed changes
 
     // Raw ShaderMaterial output is linear; this converts to the renderer's
     // output color space. Without it the mint reads noticeably dull.
@@ -215,6 +221,12 @@ export interface ParticleMaterialOptions {
   energyGain?: number;
   /** Radial-normal Fresnel strength. Spherical shells only: 0 elsewhere. */
   rim?: number;
+  /**
+   * Alpha multiplier applied in light mode only. Surfaces differ a lot here:
+   * the globe wants real ink, the starfield is dust behind body copy and wants
+   * noticeably less than it gets in dark mode.
+   */
+  lightGain?: number;
 }
 
 export const parseAccent = (accentRaw: string): Color => {
@@ -237,6 +249,7 @@ export const createParticleMaterial = ({
   maxSize = 64,
   energyGain = 0.3,
   rim = 0,
+  lightGain = 1.45,
 }: ParticleMaterialOptions): ShaderMaterial => {
   const material = new ShaderMaterial({
     vertexShader: VERT,
@@ -262,6 +275,13 @@ export const createParticleMaterial = ({
       uEnergyGain: { value: energyGain },
       uRim: { value: rim },
       uTighten: { value: 0 },
+      // Defaults are the dark-mode values, so a material that is never handed
+      // to applyParticleTheme behaves exactly as it did before stage 5.
+      uEdge: { value: 1 },
+      uAlphaFloor: { value: 0.14 },
+      uThemeGain: { value: 1 },
+      uSizeScale: { value: 1 },
+      uLightGain: { value: lightGain },
     },
   });
 
@@ -294,7 +314,17 @@ export const applyParticleTheme = (
   accentRaw: string,
   isDark: boolean,
 ): void => {
-  material.uniforms.uColor.value = parseAccent(accentRaw);
+  const u = material.uniforms;
+  u.uColor.value = parseAccent(accentRaw);
   material.blending = isDark ? AdditiveBlending : NormalBlending;
+
+  // The medium switch. Every motif already routes its theme change through
+  // here, so light mode's whole particle treatment is these four lines rather
+  // than a conditional in each of the six.
+  u.uEdge.value = isDark ? 1 : 0.22;
+  u.uAlphaFloor.value = isDark ? 0.14 : 0.3;
+  u.uThemeGain.value = isDark ? 1 : (u.uLightGain.value as number);
+  u.uSizeScale.value = isDark ? 1 : 0.8;
+
   material.needsUpdate = true;
 };

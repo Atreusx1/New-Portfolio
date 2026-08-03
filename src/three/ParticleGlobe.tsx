@@ -222,14 +222,11 @@ export const ParticleGlobe = ({
         // artefact, and it is gone by the time the fade below finishes anyway.
         disperseDist: FLIGHT.disperse.distance * 0.86,
         stagger: 0.66,
-<<<<<<< Updated upstream
-=======
         // Well below the line default. Modelled on paper, 2.6x puts these at
         // 4.5:1 against the background, a hard wireframe cage sitting behind
         // the headline rather than structure glimpsed inside a sphere. 1.0
         // lands at 2.7:1, which reads as the same weave dark mode shows.
         lightGain: 1.0,
->>>>>>> Stashed changes
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -245,6 +242,9 @@ export const ParticleGlobe = ({
         fadeFar: 14,
         disperseDist: FLIGHT.haloDisperse.distance,
         stagger: 0.34,
+        // The halo is the outermost, faintest shell; full ink would turn it
+        // into a second silhouette competing with the core.
+        lightGain: 1.15,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -284,14 +284,6 @@ export const ParticleGlobe = ({
     }
     applyLineTheme(linkMat as ShaderMaterial, accentRaw, isDark);
 
-<<<<<<< Updated upstream
-    baseOpacity.current.core = isDark ? 1 : 0.85;
-    baseOpacity.current.lattice = isDark ? 0.7 : 0.55;
-    // The lattice is hairlines at close range. On paper, under normal blending,
-    // the same alpha that reads as a faint weave in dark mode reads as a smudge.
-    baseOpacity.current.link = isDark ? 0.5 : 0.34;
-    baseOpacity.current.halo = isDark ? 0.55 : 0.4;
-=======
     // One value per shell for both themes: the light-mode difference is a
     // property of the *material* now (uLightGain), not of every call site
     // guessing at it separately. The lattice links in particular were being
@@ -301,7 +293,6 @@ export const ParticleGlobe = ({
     baseOpacity.current.lattice = 0.7;
     baseOpacity.current.link = 0.5;
     baseOpacity.current.halo = 0.55;
->>>>>>> Stashed changes
 
     coreMat.uniforms.uOpacity.value = baseOpacity.current.core;
     latticeMat.uniforms.uOpacity.value = baseOpacity.current.lattice;

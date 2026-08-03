@@ -79,6 +79,7 @@ export const Starfield = ({
         fadeNear: 7,
         fadeFar: 30,
         nearFade: 2.5,
+        lightGain: 0.7,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -92,7 +93,7 @@ export const Starfield = ({
     [geometry, material],
   );
 
-  const peak = useRef(isDark ? 0.62 : 0.34);
+  const peak = useRef(0.62);
 
   useEffect(() => {
     const mat = material as ShaderMaterial;
@@ -101,18 +102,12 @@ export const Starfield = ({
     mat.uniforms.uTwinkle.value = still ? 0 : 1;
     mat.uniforms.uPixelRatio.value = dpr;
     mat.needsUpdate = true;
-<<<<<<< Updated upstream
-    // Light mode gets a much fainter field: teal specks on warm paper read as
-    // dust at 0.62 and start competing with body copy.
-    peak.current = isDark ? 0.62 : 0.34;
-=======
     // The one surface that should stay quieter on paper: it is dust sitting
     // directly behind body copy for the whole flight, and the only motif with
     // no panel or scrim in front of it. Handled by lightGain on the material
     // (0.7) rather than by discounting the peak, so the dark value is now the
     // single number here.
     peak.current = 0.62;
->>>>>>> Stashed changes
     invalidate();
   }, [accentRaw, isDark, still, dpr, material, invalidate]);
 

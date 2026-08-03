@@ -194,13 +194,9 @@ export const FlowDrift = ({
     applyParticleTheme(mat, accentRaw, isDark);
     mat.uniforms.uTwinkle.value = still ? 0 : 1;
     mat.uniforms.uPixelRatio.value = dpr;
-<<<<<<< Updated upstream
-    peak.current = isDark ? 0.85 : 0.6;
-=======
     // Single value for both themes: light mode's ink multiplier is on the
     // material now (uLightGain). Discounting here as well was cancelling it out.
     peak.current = 0.85;
->>>>>>> Stashed changes
     invalidate();
   }, [accentRaw, isDark, still, dpr, material, invalidate]);
 

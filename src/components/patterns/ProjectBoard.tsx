@@ -60,6 +60,7 @@ export const ProjectBoard = ({
           style={{ animationDelay: `${200 + i * 90}ms` }}
         >
           <span className="pb-metric-value">
+            {m.prefix}
             <CountUp
               value={m.value}
               decimals={m.decimals ?? 0}

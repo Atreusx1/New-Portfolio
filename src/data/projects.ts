@@ -47,8 +47,9 @@ export interface BoardModule {
 
 export interface BoardMetric {
   value: number;
-  decimals?: number;
+  prefix?: string; // add this — optional, so ChronoShield's metrics are unaffected
   suffix?: string;
+  decimals?: number;
   label: string;
 }
 
@@ -90,9 +91,9 @@ export const projectsData: Project[] = [
     id: 1,
     title: "Kestrel Protocol",
     takeaway:
-      "Two governance contracts at 100% line coverage, proved by 94 unit, fuzz and invariant tests.",
+      "Nine production modules, ~650 tests across unit, fuzz and invariant suites, and a governance system that migrates from a security council to token-holder voting without redeploying anything.",
     description:
-      "An onchain financial protocol written as a reference for production Solidity practice: a role registry with delayed grants, a multisig timelock whose delay scales with how dangerous the call is, and an ERC-4626 yield vault. The same .t.sol files run under both Hardhat 3 and plain Foundry, so the suite is not hostage to one toolchain.",
+      "A complete onchain financial protocol written as a reference for production Solidity practice: a role registry with delayed grants, a multisig timelock whose delay scales with how dangerous the call is, an ERC-4626 yield vault, an upgradeable membership program, an ERC-4337 smart wallet, a fixed-supply governance token, a treasury that manages protocol revenue and its own liquidity, and a Governor that lets token holders steer fees, upgrades, and treasury spend through the same timelock the council already uses. The same .t.sol test files run under both Hardhat 3 and plain Foundry, so the suite is not hostage to one toolchain.",
     technologies: [
       "Solidity",
       "Foundry",
@@ -100,6 +101,9 @@ export const projectsData: Project[] = [
       "OpenZeppelin 5",
       "ERC-4626",
       "ERC-721 UUPS",
+      "ERC-4337",
+      "ERC20Votes",
+      "Governor",
     ],
     category: "blockchain",
     github: "https://github.com/Atreusx1/production-solidity-patterns",
@@ -116,32 +120,70 @@ export const projectsData: Project[] = [
           name: "Yield Vault",
           detail: "ERC-4626 with a deposit fee and a TVL cap.",
         },
+        {
+          name: "Membership Pass",
+          detail:
+            "Upgradeable ERC-721. V2 adds a loyalty-points tier mechanic via a machine-verified storage migration.",
+        },
+        {
+          name: "Smart Wallet",
+          detail:
+            "ERC-4337 account with batched execution, deployed deterministically via CREATE2.",
+        },
+        {
+          name: "KSTR Token",
+          detail: "Fixed-supply ERC20Votes token, minted once to the treasury.",
+        },
+        {
+          name: "Treasury Manager",
+          detail:
+            "Collects protocol revenue, runs a buyback mechanism, and manages protocol-owned liquidity on an existing DEX.",
+        },
+        {
+          name: "Merkle Airdrop",
+          detail:
+            "Bitmap-based claim tracking with linear vesting after claim.",
+        },
+        {
+          name: "Staking Rewards",
+          detail:
+            "Two reward streams: decaying bootstrap emissions plus a share of real protocol fee revenue.",
+        },
+        {
+          name: "Governor",
+          detail:
+            "Token-holder voting layered onto the same timelock the security council already proposes into.",
+        },
       ],
       metrics: [
-        // 94 governance plus 61 vault, from the repository's own
-        // `hardhat test solidity` output.
         {
-          value: 155,
-          label: "tests across both modules: unit, fuzz and invariant",
+          value: 650,
+          prefix: "~",
+          label: "tests across unit, fuzz and invariant suites",
         },
         {
-          value: 100,
-          suffix: "%",
-          label: "line and statement coverage on the governance contracts",
+          value: 98,
+          suffix: "%+",
+          label: "line and statement coverage across all modules",
         },
-        { value: 128, label: "invariant runs, at depth 64" },
+        {
+          value: 35,
+          prefix: "~",
+          label: "invariant properties, 128 runs at depth 64 each",
+        },
       ],
       chips: [
         "ERC-4626",
         "ERC-721 UUPS",
+        "ERC-4337",
+        "ERC20Votes",
+        "Governor + Timelock",
         "Checks-effects-interactions",
         "Gas profiling",
         "SECURITY.md per module",
       ],
-      // The roadmap line is gone. Not listing unbuilt work is a presentation
-      // choice and an honest one; listing it as built would not be. If more
-      // modules have shipped since, add them to `modules` above.
-      note: "Solidity tests run under both Hardhat 3 and plain Foundry from the same files. Deployed to public testnet.",
+      next: ["Cross-chain KSTR (LayerZero OFT) — planned"],
+      note: "Solidity tests run under both Hardhat 3 and plain Foundry from the same files. Deployed to public testnet, so no real funds are at stake and it has not been audited.",
     },
   },
   {

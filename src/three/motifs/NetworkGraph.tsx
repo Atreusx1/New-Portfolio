@@ -185,9 +185,6 @@ export const NetworkGraph = ({
   );
 
   const edgeMat = useMemo(
-<<<<<<< Updated upstream
-    () => createLineMaterial({ accentRaw, isDark, opacity: 0, fadeNear: 9, fadeFar: 30 }),
-=======
     () =>
       createLineMaterial({
         accentRaw,
@@ -201,7 +198,6 @@ export const NetworkGraph = ({
         // one: which is the only thing this motif is actually saying.
         lightGain: 1.8,
       }),
->>>>>>> Stashed changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -242,13 +238,9 @@ export const NetworkGraph = ({
       m.uniforms.uPixelRatio.value = dpr;
     }
     applyLineTheme(edgeMat as ShaderMaterial, accentRaw, isDark);
-<<<<<<< Updated upstream
-    peak.current = isDark ? 1 : 0.75;
-=======
     // Single value for both themes: light mode's ink multiplier is on the
     // material now (uLightGain). Discounting here as well was cancelling it out.
     peak.current = 1;
->>>>>>> Stashed changes
     invalidate();
   }, [accentRaw, isDark, still, dpr, nodeMat, packetMat, edgeMat, invalidate]);
 

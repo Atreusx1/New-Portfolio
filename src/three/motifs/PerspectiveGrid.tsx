@@ -237,13 +237,9 @@ export const PerspectiveGrid = ({
     applyParticleTheme(markMat as ShaderMaterial, accentRaw, isDark);
     markMat.uniforms.uTwinkle.value = still ? 0 : 1;
     markMat.uniforms.uPixelRatio.value = dpr;
-<<<<<<< Updated upstream
-    peak.current = isDark ? 1 : 0.85;
-=======
     // Single value for both themes: light mode's ink multiplier is on the
     // material now (uLightGain). Discounting here as well was cancelling it out.
     peak.current = 1;
->>>>>>> Stashed changes
     invalidate();
   }, [accentRaw, isDark, still, dpr, material, markMat, invalidate]);
 

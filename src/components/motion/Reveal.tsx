@@ -4,8 +4,6 @@
  * Wrap anything: it fades + rises + unblurs when it enters the viewport.
  * `delay` staggers siblings. Respects prefers-reduced-motion (instant).
  * One shared IntersectionObserver per element; unobserves after firing.
-<<<<<<< Updated upstream
-=======
  *
  * ── Publishing `shown` (and why it was needed) ──
  * Reveal only ever controlled opacity and transform, which is fine for static
@@ -18,9 +16,23 @@
  * So Reveal now publishes its state on a context and `RevealScramble` reads it.
  * The wrapper stays the single source of truth for "is this visible yet",
  * rather than every self-animating child growing its own observer.
->>>>>>> Stashed changes
  */
-import { useEffect, useRef, useState, ReactNode, CSSProperties } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+  CSSProperties,
+} from "react";
+import { ScrambleText } from "../Scrambletext";
+import { useEntrance } from "./Entrance";
+
+const RevealCtx = createContext<boolean>(true);
+
+/** True once the enclosing Reveal has entered the viewport. */
+export const useRevealed = (): boolean => useContext(RevealCtx);
 
 export const prefersReducedMotion = (): boolean =>
   typeof window !== "undefined" &&
@@ -79,12 +91,10 @@ export const Reveal = ({
         ...style,
       }}
     >
-      {children}
+      <RevealCtx.Provider value={shown}>{children}</RevealCtx.Provider>
     </Tag>
   );
 };
-<<<<<<< Updated upstream
-=======
 
 /**
  * A scramble that waits for its Reveal: and for the boot screen.
@@ -117,4 +127,3 @@ export const RevealScramble = ({
     />
   );
 };
->>>>>>> Stashed changes

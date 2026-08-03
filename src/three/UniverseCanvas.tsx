@@ -83,7 +83,7 @@ const UniverseCanvas = ({
 
   const onFallback = useCallback(() => {
     pinned.current = true;
-    setStep(MAX_STEP);
+    // setStep(MAX_STEP);
   }, []);
 
   // Everything below derives from `step`. Kept as derivations rather than as
