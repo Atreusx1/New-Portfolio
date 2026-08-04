@@ -73,7 +73,10 @@ export const About = () => {
     // Version suffixes are the same tool, so "Hardhat 3" does not get to count
     // twice. Padding the number would defeat the point of deriving it.
     const normalise = (tech: string): string =>
-      tech.replace(/\s+\d+$/, "").replace(/\s+UUPS$/i, "").trim();
+      tech
+        .replace(/\s+\d+$/, "")
+        .replace(/\s+UUPS$/i, "")
+        .trim();
 
     const techs = new Set(
       projectsData.flatMap((p) => p.technologies.map(normalise)),
@@ -89,8 +92,18 @@ export const About = () => {
 
   const STATS = [
     { value: stats.years, decimals: 1, suffix: "", label: "Years shipping" },
-    { value: stats.projects, decimals: 0, suffix: "", label: "Projects listed" },
-    { value: stats.technologies, decimals: 0, suffix: "", label: "Technologies used" },
+    {
+      value: stats.projects,
+      decimals: 0,
+      suffix: "",
+      label: "Projects listed",
+    },
+    {
+      value: stats.technologies,
+      decimals: 0,
+      suffix: "",
+      label: "Technologies used",
+    },
   ];
 
   return (
@@ -99,7 +112,11 @@ export const About = () => {
         <Reveal className="section-head">
           <span className="mono-label">About</span>
           <h2 className="section-title">
-            <ScrambleText text="Builder of decentralized things" active speed={16} />
+            <ScrambleText
+              text="Builder of decentralized things"
+              active
+              speed={16}
+            />
           </h2>
         </Reveal>
 
@@ -117,7 +134,9 @@ export const About = () => {
               <p
                 key={i}
                 className="body-text"
-                style={{ marginBottom: i < PARAGRAPHS.length - 1 ? "1.25rem" : 0 }}
+                style={{
+                  marginBottom: i < PARAGRAPHS.length - 1 ? "1.25rem" : 0,
+                }}
               >
                 {text}
               </p>
@@ -158,7 +177,11 @@ export const About = () => {
 
             <p
               className="body-text"
-              style={{ marginTop: "1.5rem", fontSize: "0.85rem", color: t.fg_(0.45) }}
+              style={{
+                marginTop: "1.5rem",
+                fontSize: "0.85rem",
+                color: t.fg_(0.45),
+              }}
             >
               Open to work. Most interested in teams where the same person is
               trusted with the contract and the interface.

@@ -200,6 +200,39 @@ html {
   overflow-x: hidden;
 }
 
+/**
+ * The top scrim.
+ *
+ * iOS Safari's compact toolbar samples the page's own top pixels and blends
+ * toward them as you scroll. The first hundred pixels of this page are the 3D
+ * canvas, so what it was sampling was the particle field: a slightly different
+ * shade every frame, which reads as a seam that will not sit still.
+ *
+ * This gives it something flat to sample. It doubles as a vignette the floating
+ * nav pill was already asking for, since the pill sits at 14px with nothing but
+ * moving starfield behind it.
+ *
+ * Solid for the first 18px, which is the band the browser actually samples,
+ * then a long fade so the scene is never visibly cut. z-index 1 puts it over
+ * the canvas at 0 and under the content, which is also at 1 and later in the
+ * document, so the nav and every section still paint above it.
+ */
+.top-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0,
+    var(--bg) 18px,
+    transparent 110px
+  );
+}
+
 body {
   font-family: var(--font-body);
   background: var(--bg);
@@ -1180,7 +1213,7 @@ html[data-theme="light"] .field {
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   /* The rail owns horizontal gestures; the page keeps vertical ones. */
-  touch-action: pan-x pinch-zoom;
+  touch-action: pan-x pan-y pinch-zoom;
   scrollbar-width: none;
   padding-bottom: 2px;
 }

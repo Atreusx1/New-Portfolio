@@ -31,7 +31,13 @@
  * item count, so the component does not need to know which breakpoint is
  * active or duplicate the media query in JavaScript.
  */
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { prefersReducedMotion } from "./../motion/Reveal";
 
@@ -115,8 +121,7 @@ export const ProjectDeck = ({
    * fault rather than as an affordance. The fade should only ever appear on a
    * side there is actually more content on.
    */
-  const edge =
-    pages < 2 ? "none" : atStart ? "end" : atEnd ? "start" : "both";
+  const edge = pages < 2 ? "none" : atStart ? "end" : atEnd ? "start" : "both";
 
   return (
     <div

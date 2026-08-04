@@ -183,10 +183,7 @@ export const projectsData: Project[] = [
         "Gas profiling",
         "SECURITY.md per module",
       ],
-      // The "planned" suffix was dropped: the field is already rendered under a
-      // "Next" label, so the word was doing the label's job twice. It also
-      // carried the only em dash left in the data.
-      next: ["Cross-chain KSTR (LayerZero OFT)"],
+      next: ["Cross-chain KSTR (LayerZero OFT) — planned"],
       note: "Solidity tests run under both Hardhat 3 and plain Foundry from the same files. Deployed to public testnet, so no real funds are at stake and it has not been audited.",
     },
   },
