@@ -129,7 +129,7 @@ export const stepTier = (tier: QualityTier, delta: number): QualityTier => {
  *   NetworkGraph  200 nodes / 339 edges            → 0.039 ms/frame
  *
  * Two things worth reading off that table. The per-particle settle work is
- * nearly free, 2,300 points now cost what ~2,200 would have cost without it , 
+ * nearly free, 2,300 points now cost what ~2,200 would have cost without it ,
  * so the density raise, not the new behaviour, is where the time went. And the
  * hex rhyme only bills inside its seam, which is why it is gated on a threshold
  * rather than multiplied by a bias that is usually zero.

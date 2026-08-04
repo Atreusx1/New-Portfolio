@@ -157,8 +157,21 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mode);
-  }, [mode]);
 
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", mode === "dark" ? "#070808" : "#faf9f6");
+    }
+
+    const favicon = document.getElementById(
+      "favicon",
+    ) as HTMLLinkElement | null;
+
+    if (favicon) {
+      favicon.href =
+        mode === "dark" ? "/favicon-dark.svg" : "/favicon-light.svg";
+    }
+  }, [mode]);
   /**
    * Push light mode's accent into the CSS custom properties, so LIGHT_ACCENT
    * above is the single place it is decided and the stylesheet cannot drift
