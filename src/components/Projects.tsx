@@ -24,10 +24,19 @@
  * The view also carries prev/next, so a reader can go through the work without
  * closing and reopening. Cheap to add and it turns a lookup into browsing.
  *
+ * ── One interaction language for the whole section ──
+ * The order book's explainer had the identical disease: a toggle below the
+ * terminal that opened off-screen on a short viewport. It now opens the same
+ * way, over its own stage, from its own trigger, using the same shell. After
+ * seeing one panel open, a reader knows what every other one here will do.
+ *
+ * Scoped to the two stages rather than the whole section, so headings and body
+ * and much worse idea than a terminal that does.
+ *
  * DEXOrderBook itself remains untouched.
  */
 import { useCallback, useRef, useState } from "react";
-import { Github, ArrowUpRight, Maximize2 } from "lucide-react";
+import { Github, ArrowUpRight, Maximize2, Info } from "lucide-react";
 import { projectsData, type Project } from "../data/projects";
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
@@ -38,13 +47,24 @@ import { Takeaway } from "./patterns/Takeaway";
 import { OrderBookBrief } from "./patterns/OrderBookBrief";
 import { ProjectDeck } from "./patterns/ProjectDeck";
 import { ProjectView } from "./patterns/ProjectView";
+import { useExpandable } from "./patterns/useExpandable";
 
-const CATEGORIES = ["all", "web", "blockchain", "fullstack", "build-tools"] as const;
+const CATEGORIES = [
+  "all",
+  "web",
+  "blockchain",
+  "fullstack",
+  "build-tools",
+] as const;
 const ALL_TABS = [...CATEGORIES, "dex"] as const;
 type Tab = (typeof ALL_TABS)[number];
 
 const tabLabel = (tab: Tab): string =>
-  tab === "dex" ? "DEX / Order Book" : tab === "build-tools" ? "Build tools" : tab;
+  tab === "dex"
+    ? "DEX / Order Book"
+    : tab === "build-tools"
+      ? "Build tools"
+      : tab;
 
 const countFor = (tab: Tab): number =>
   tab === "dex"
@@ -56,12 +76,15 @@ const countFor = (tab: Tab): number =>
 export const Projects = () => {
   const t = useTheme();
   const [filter, setFilter] = useState<Tab>("dex");
-  const [openIdx, setOpenIdx] = useState<number | null>(null);
-  const [origin, setOrigin] = useState({ x: 50, y: 50 });
 
   const stageRef = useRef<HTMLDivElement>(null);
-  /** The button that opened the view, so focus can go back where it came from. */
-  const opener = useRef<HTMLElement | null>(null);
+  const dexStageRef = useRef<HTMLDivElement>(null);
+
+  // Same mechanics for both panels: expand origin, exit phase, focus return.
+  const detail = useExpandable<number>(stageRef);
+  const brief = useExpandable<true>(dexStageRef);
+  /** Stops the trigger's attention pulse once it has done its job. */
+  const [briefSeen, setBriefSeen] = useState(false);
 
   const isDexTab = filter === "dex";
   const filtered = isDexTab
@@ -70,42 +93,34 @@ export const Projects = () => {
       ? projectsData
       : projectsData.filter((p) => p.category === filter);
 
-  /**
-   * Expand origin: the clicked card's centre as a percentage of the stage. This
-   * is the whole trick behind the view looking like it grew out of that card
-   * rather than out of the middle of the section.
-   */
-  const open = useCallback((i: number, el: HTMLElement) => {
-    const stage = stageRef.current;
-    const card = el.closest(".deck-card");
-    if (stage && card) {
-      const s = stage.getBoundingClientRect();
-      const c = card.getBoundingClientRect();
-      setOrigin({
-        x: ((c.left + c.width / 2 - s.left) / s.width) * 100,
-        y: ((c.top + c.height / 2 - s.top) / s.height) * 100,
-      });
-    }
-    opener.current = el;
-    setOpenIdx(i);
-  }, []);
-
-  const close = useCallback(() => {
-    setOpenIdx(null);
-    opener.current?.focus({ preventScroll: true });
-    opener.current = null;
-  }, []);
+  const openIdx = detail.item;
+  const active = openIdx !== null ? (filtered[openIdx] ?? null) : null;
 
   const step = useCallback(
     (delta: number) => {
-      setOpenIdx((cur) =>
-        cur === null ? cur : (cur + delta + filtered.length) % filtered.length,
-      );
+      if (openIdx === null || filtered.length === 0) return;
+      detail.replace((openIdx + delta + filtered.length) % filtered.length);
     },
-    [filtered.length],
+    [openIdx, filtered.length, detail],
   );
 
-  const active = openIdx !== null ? (filtered[openIdx] ?? null) : null;
+  /**
+   * Jumping to a related project. It may not be in the current filter, in which
+   * case widening to "all" is the only way to show it, and the deck behind is
+   * dimmed anyway so the change costs the reader nothing they can see.
+   */
+  const selectProject = useCallback(
+    (target: Project) => {
+      const here = filtered.findIndex((p) => p.id === target.id);
+      if (here >= 0) {
+        detail.replace(here);
+        return;
+      }
+      setFilter("all");
+      detail.replace(projectsData.findIndex((p) => p.id === target.id));
+    },
+    [filtered, detail],
+  );
 
   return (
     <section id="projects" className="section">
@@ -120,7 +135,11 @@ export const Projects = () => {
         {/* Filters. Counts sit in the pill so the size of each set is legible
             before you commit to switching to it. */}
         <Reveal delay={0.06}>
-          <div role="tablist" aria-label="Project categories" className="proj-tabs">
+          <div
+            role="tablist"
+            aria-label="Project categories"
+            className="proj-tabs"
+          >
             {ALL_TABS.map((tab) => {
               const isActive = filter === tab;
               const isDex = tab === "dex";
@@ -132,7 +151,7 @@ export const Projects = () => {
                   aria-selected={isActive}
                   onClick={() => {
                     setFilter(tab);
-                    setOpenIdx(null);
+                    detail.close();
                   }}
                   className="proj-tab"
                   style={{
@@ -155,14 +174,59 @@ export const Projects = () => {
         {/* DEX centrepiece */}
         {isDexTab && (
           <Reveal delay={0.1}>
-            <Takeaway>
-              The gap between an exchange price and the oracle price a contract
-              actually reads is the number that matters. This shows both.
-            </Takeaway>
-            <div className="dex-wrap">
-              <DEXOrderBook />
+            {/* Trigger above the terminal, so the panel grows downward over the
+                thing it describes rather than out of empty space below it. */}
+            <div className="dex-head">
+              <Takeaway>
+                The gap between an exchange price and the oracle price a
+                contract actually reads is the number that matters. This shows
+                both.
+              </Takeaway>
+              {/*
+                Was a ghost pill borrowed from the project cards, which made the
+                one control on this tab read as the quietest thing on it. It now
+                carries the accent as a border and a tint, and a soft halo that
+                pulses until it has been opened once. Discoverability first,
+                restraint second: it is the only affordance here, so it can
+                afford to be the loudest thing that is not the terminal.
+              */}
+              <button
+                className="dex-explain"
+                data-seen={briefSeen ? "true" : "false"}
+                onClick={(e) => {
+                  setBriefSeen(true);
+                  brief.openWith(true, e.currentTarget);
+                }}
+              >
+                <Info size={13} />
+                <span>How this works</span>
+              </button>
             </div>
-            <OrderBookBrief />
+
+            <div className="pstage dex-stage" ref={dexStageRef}>
+              <div
+                className="dex-wrap"
+                data-dimmed={brief.item ? "true" : "false"}
+              >
+                <DEXOrderBook />
+              </div>
+
+              {brief.item && (
+                <button
+                  className="pstage-scrim"
+                  onClick={brief.close}
+                  aria-label="Close"
+                  tabIndex={-1}
+                />
+              )}
+              {brief.item && (
+                <OrderBookBrief
+                  closing={brief.closing}
+                  origin={brief.origin}
+                  onClose={brief.close}
+                />
+              )}
+            </div>
           </Reveal>
         )}
 
@@ -170,7 +234,10 @@ export const Projects = () => {
         {!isDexTab && (
           <Reveal delay={0.1}>
             <div className="pstage" ref={stageRef}>
+              {/* Keyed on the filter so a new set of cards animates in rather
+                  than being swapped underneath the reader. */}
               <ProjectDeck
+                key={filter}
                 resetKey={filter}
                 label={`${tabLabel(filter)} projects`}
                 dimmed={active !== null}
@@ -180,7 +247,7 @@ export const Projects = () => {
                     key={project.id}
                     project={project}
                     index={i}
-                    onOpen={(el) => open(i, el)}
+                    onOpen={(el) => detail.openWith(i, el)}
                   />
                 ))}
               </ProjectDeck>
@@ -189,7 +256,7 @@ export const Projects = () => {
               {active && (
                 <button
                   className="pstage-scrim"
-                  onClick={close}
+                  onClick={detail.close}
                   aria-label="Close detail"
                   tabIndex={-1}
                 />
@@ -200,10 +267,12 @@ export const Projects = () => {
                   project={active}
                   index={openIdx}
                   total={filtered.length}
-                  origin={origin}
+                  closing={detail.closing}
+                  origin={detail.origin}
                   onPrev={() => step(-1)}
                   onNext={() => step(1)}
-                  onClose={close}
+                  onClose={detail.close}
+                  onSelect={selectProject}
                 />
               )}
             </div>
@@ -248,7 +317,10 @@ const ProjectCard = ({
             <span className="chip">{project.category}</span>
           </div>
 
-          <h3 className="pcard-title" style={{ color: hovered ? t.accent : t.fg }}>
+          <h3
+            className="pcard-title"
+            style={{ color: hovered ? t.accent : t.fg }}
+          >
             {project.title}
           </h3>
 

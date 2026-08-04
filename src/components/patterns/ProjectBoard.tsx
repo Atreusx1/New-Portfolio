@@ -41,8 +41,15 @@ export const ProjectBoard = ({
           <li
             className="pb-row"
             key={m.name}
-            /* Staggered from the drawer opening, not from mount. */
-            style={{ animationDelay: `${80 + i * 70}ms` }}
+            /*
+              Stagger written inline rather than as nth-child rules. Kestrel now
+              ships nine modules and a stylesheet cannot know how many the next
+              board will have; the step also shortens as the list grows so a
+              long board still finishes arriving in about half a second.
+            */
+            style={{
+              animationDelay: `${80 + i * Math.max(28, 70 - data.modules.length * 4)}ms`,
+            }}
           >
             <span className="pb-dot" aria-hidden="true" />
             <span className="pb-name">{m.name}</span>
@@ -60,10 +67,10 @@ export const ProjectBoard = ({
           style={{ animationDelay: `${200 + i * 90}ms` }}
         >
           <span className="pb-metric-value">
-            {m.prefix}
             <CountUp
               value={m.value}
               decimals={m.decimals ?? 0}
+              prefix={m.prefix ?? ""}
               suffix={m.suffix ?? ""}
               active={active}
             />

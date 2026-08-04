@@ -294,7 +294,9 @@ const OracleBadge = ({
             width: 4,
             height: 4,
             borderRadius: "50%",
-            background: stale ? "rgba(var(--warn-soft-rgb),0.8)" : "rgba(80,220,120,0.8)",
+            background: stale
+              ? "rgba(var(--warn-soft-rgb),0.8)"
+              : "rgba(80,220,120,0.8)",
             display: "inline-block",
           }}
         />
@@ -703,7 +705,9 @@ export const DEXOrderBook = () => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "0.38rem 0.75rem",
-                background: priceUp ? t.ac_(0.08) : "rgba(var(--neg-deep-rgb),0.06)",
+                background: priceUp
+                  ? t.ac_(0.08)
+                  : "rgba(var(--neg-deep-rgb),0.06)",
                 borderTop: `1px solid ${priceUp ? t.ac_(0.15) : "rgba(var(--neg-deep-rgb),0.15)"}`,
                 borderBottom: `1px solid ${priceUp ? t.ac_(0.15) : "rgba(var(--neg-deep-rgb),0.15)"}`,
               }}
@@ -881,7 +885,9 @@ export const DEXOrderBook = () => {
                         fontFamily: "var(--font-mono)",
                         fontSize: "0.58rem",
                         color:
-                          tr.side === "buy" ? ACCENT : "rgba(var(--neg-rgb),0.85)",
+                          tr.side === "buy"
+                            ? ACCENT
+                            : "rgba(var(--neg-rgb),0.85)",
                         letterSpacing: "0.02em",
                       }}
                     >

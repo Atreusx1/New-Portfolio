@@ -109,9 +109,21 @@ export const ProjectDeck = ({
 
   const atStart = page <= 0;
   const atEnd = page >= pages - 1;
+  /**
+   * Which side of the rail should fade out. Masking both edges unconditionally
+   * would clip the first card's left border at rest, which reads as a rendering
+   * fault rather than as an affordance. The fade should only ever appear on a
+   * side there is actually more content on.
+   */
+  const edge =
+    pages < 2 ? "none" : atStart ? "end" : atEnd ? "start" : "both";
 
   return (
-    <div className="deck" data-dimmed={dimmed ? "true" : "false"}>
+    <div
+      className="deck"
+      data-dimmed={dimmed ? "true" : "false"}
+      data-edge={edge}
+    >
       <div
         className="deck-track"
         ref={trackRef}

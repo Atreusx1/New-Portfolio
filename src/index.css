@@ -85,9 +85,15 @@
 
   /* Depth: dark mode builds elevation with light, not shadow */
   --shadow-sm: 0 0 0 1px rgba(232, 234, 233, 0.05);
-  --shadow-md: 0 0 0 1px rgba(232, 234, 233, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 0 0 1px rgba(232, 234, 233, 0.07), 0 24px 64px rgba(0, 0, 0, 0.55);
-  --card-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 42%);
+  --shadow-md:
+    0 0 0 1px rgba(232, 234, 233, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-lg:
+    0 0 0 1px rgba(232, 234, 233, 0.07), 0 24px 64px rgba(0, 0, 0, 0.55);
+  --card-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.035),
+    rgba(255, 255, 255, 0) 42%
+  );
 
   --glass-bg: rgba(10, 13, 12, 0.6);
   --glass-border: rgba(151, 252, 228, 0.14);
@@ -129,10 +135,19 @@ html[data-theme="light"] {
   --accent-border: rgba(27, 76, 199, 0.28);
 
   /* Light mode elevation is shadow-driven: layered, warm-tinted */
-  --shadow-sm: 0 1px 2px rgba(31, 27, 16, 0.05), 0 0 0 1px rgba(27, 26, 22, 0.05);
-  --shadow-md: 0 1px 2px rgba(31, 27, 16, 0.05), 0 8px 24px rgba(31, 27, 16, 0.07), 0 0 0 1px rgba(27, 26, 22, 0.05);
-  --shadow-lg: 0 2px 4px rgba(31, 27, 16, 0.05), 0 20px 48px rgba(31, 27, 16, 0.11), 0 0 0 1px rgba(27, 26, 22, 0.05);
-  --card-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 46%);
+  --shadow-sm:
+    0 1px 2px rgba(31, 27, 16, 0.05), 0 0 0 1px rgba(27, 26, 22, 0.05);
+  --shadow-md:
+    0 1px 2px rgba(31, 27, 16, 0.05), 0 8px 24px rgba(31, 27, 16, 0.07),
+    0 0 0 1px rgba(27, 26, 22, 0.05);
+  --shadow-lg:
+    0 2px 4px rgba(31, 27, 16, 0.05), 0 20px 48px rgba(31, 27, 16, 0.11),
+    0 0 0 1px rgba(27, 26, 22, 0.05);
+  --card-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0) 46%
+  );
 
   /* Both re-picked for paper: the dark theme's soft reds and ambers are tuned
      to glow on near-black and measure barely 2:1 here. #B02030 lands at 6.44:1
@@ -173,9 +188,17 @@ html[data-theme="light"] {
 }
 
 /* ─── RESET ──────────────────────────────────────────────── */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  overflow-x: hidden;
+}
 
 body {
   font-family: var(--font-body);
@@ -186,18 +209,37 @@ body {
   cursor: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  transition: background 0.35s ease, color 0.35s ease;
+  transition:
+    background 0.35s ease,
+    color 0.35s ease;
 }
 
-*, *::before, *::after { cursor: none; }
-a, button { cursor: pointer; }
+*,
+*::before,
+*::after {
+  cursor: none;
+}
+a,
+button {
+  cursor: pointer;
+}
 
-::selection { background: var(--accent-muted); color: var(--fg); }
+::selection {
+  background: var(--accent-muted);
+  color: var(--fg);
+}
 
 /* ─── SCROLLBAR ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 2px; }
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 2px;
+}
 
 /* ─── TYPE ROLES ─────────────────────────────────────────── */
 /* ── Tier 1: headline ──────────────────────────────────────
@@ -231,7 +273,7 @@ a, button { cursor: pointer; }
   font-family: var(--font-display);
   font-size: clamp(2.3rem, 5.6vw, 4.6rem);
   font-weight: 500;
-  line-height: 1.0;
+  line-height: 1;
   letter-spacing: -0.014em;
   /* Marginally wider than the line above it. The width axis is doing the same
      job the weight drop is: separating two tiers of the same voice. */
@@ -330,10 +372,17 @@ a, button { cursor: pointer; }
   }
 }
 
-.data-text { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.data-text {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ─── LAYOUT ─────────────────────────────────────────────── */
-.container { max-width: 1140px; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 2rem); }
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 2rem);
+}
 
 .section {
   position: relative;
@@ -355,7 +404,10 @@ a, button { cursor: pointer; }
   background: var(--bg-2);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  transition: box-shadow 0.35s var(--ease-out), transform 0.35s var(--ease-out), background 0.35s ease;
+  transition:
+    box-shadow 0.35s var(--ease-out),
+    transform 0.35s var(--ease-out),
+    background 0.35s ease;
 }
 .card::before {
   content: "";
@@ -365,7 +417,9 @@ a, button { cursor: pointer; }
   pointer-events: none;
   border-radius: inherit;
 }
-.card:hover { box-shadow: var(--shadow-md); }
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
 
 /* Glow-follow: components set --gx / --gy from pointer position */
 .card-glow::after {
@@ -373,12 +427,18 @@ a, button { cursor: pointer; }
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: radial-gradient(340px circle at var(--gx, 50%) var(--gy, 50%), var(--accent-muted), transparent 65%);
+  background: radial-gradient(
+    340px circle at var(--gx, 50%) var(--gy, 50%),
+    var(--accent-muted),
+    transparent 65%
+  );
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
 }
-.card-glow:hover::after { opacity: 1; }
+.card-glow:hover::after {
+  opacity: 1;
+}
 
 .glass {
   background: var(--glass-bg);
@@ -388,17 +448,25 @@ a, button { cursor: pointer; }
   border-radius: var(--radius);
   position: relative;
   overflow: hidden;
-  transition: background 0.35s ease, border-color 0.35s ease;
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease;
 }
 .glass::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 55% 35% at 28% 12%, var(--glass-highlight), transparent 68%);
+  background: radial-gradient(
+    ellipse 55% 35% at 28% 12%,
+    var(--glass-highlight),
+    transparent 68%
+  );
   pointer-events: none;
 }
-.glass > * { position: relative; z-index: 1; }
-
+.glass > * {
+  position: relative;
+  z-index: 1;
+}
 
 /* ─── HERO: HeroRedesign.tsx ─────────────────────────────
    A frame with a hole in it. The globe sits dead centre of the viewport at
@@ -434,7 +502,9 @@ a, button { cursor: pointer; }
 }
 
 /* The aperture. Empty by design: see HeroRedesign.tsx. */
-.hero-aperture { min-height: 1px; }
+.hero-aperture {
+  min-height: 1px;
+}
 
 /* One transition definition for every staged element. The component only
    flips opacity/transform/filter; the timing lives here. */
@@ -448,7 +518,10 @@ a, button { cursor: pointer; }
 }
 
 /* ── Lede ── */
-.hero-lede { position: relative; isolation: isolate; }
+.hero-lede {
+  position: relative;
+  isolation: isolate;
+}
 
 /* A directional scrim, not an elliptical one. The composition is asymmetric,
    so the contrast budget should be too: opaque at the left edge where the
@@ -470,7 +543,12 @@ a, button { cursor: pointer; }
 }
 @supports not (background: color-mix(in srgb, red 50%, transparent)) {
   .hero-lede::before {
-    background: linear-gradient(98deg, var(--bg) 0%, var(--bg) 54%, transparent 100%);
+    background: linear-gradient(
+      98deg,
+      var(--bg) 0%,
+      var(--bg) 54%,
+      transparent 100%
+    );
   }
 }
 
@@ -496,14 +574,22 @@ a, button { cursor: pointer; }
   gap: 0.1em;
   margin: 0;
 }
-.hero .hero-name { font-size: clamp(2.7rem, 5.6vw, 5.2rem); }
-.hero .hero-claim { font-size: clamp(1.6rem, 3.1vw, 2.8rem); }
+.hero .hero-name {
+  font-size: clamp(2.7rem, 5.6vw, 5.2rem);
+}
+.hero .hero-claim {
+  font-size: clamp(1.6rem, 3.1vw, 2.8rem);
+}
 
 .hero-blurb {
   margin: clamp(1rem, 2.6vh, 1.7rem) 0 clamp(1.4rem, 3.4vh, 2.2rem);
   max-width: 42ch;
 }
-.hero-actions { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+.hero-actions {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
 
 /* ── Instrument rail ──
    A vertical tape reads as a market feed. The old horizontal strip of four
@@ -525,16 +611,24 @@ a, button { cursor: pointer; }
   text-transform: uppercase;
   color: var(--fg-muted);
 }
-.hero-tape-state[data-live="true"] { color: var(--pos); }
-.hero-tape-state[data-live="false"] { color: var(--warn); }
+.hero-tape-state[data-live="true"] {
+  color: var(--pos);
+}
+.hero-tape-state[data-live="false"] {
+  color: var(--warn);
+}
 
 .tape-row {
   padding: 0.6rem 0.95rem 0.5rem;
   border-bottom: 1px solid var(--border-faint);
   border-left: 2px solid transparent;
-  transition: background 0.5s ease, border-left-color 0.5s ease;
+  transition:
+    background 0.5s ease,
+    border-left-color 0.5s ease;
 }
-.tape-row:last-child { border-bottom: none; }
+.tape-row:last-child {
+  border-bottom: none;
+}
 /* Tick flash: an edge marker rather than a background wash, so a fast-moving
    pair does not strobe the whole panel. */
 .tape-row[data-flash="true"] {
@@ -548,7 +642,10 @@ a, button { cursor: pointer; }
   justify-content: space-between;
   gap: 0.75rem;
 }
-.tape-line-under { align-items: center; margin-top: 0.28rem; }
+.tape-line-under {
+  align-items: center;
+  margin-top: 0.28rem;
+}
 .tape-pair {
   font-family: var(--font-mono);
   font-size: 0.6rem;
@@ -562,15 +659,24 @@ a, button { cursor: pointer; }
   font-size: 0.86rem;
   color: var(--fg);
 }
-.tape-spark { flex: 1; min-width: 0; height: 18px; opacity: 0.9; }
+.tape-spark {
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  opacity: 0.9;
+}
 .tape-change {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 0.58rem;
   white-space: nowrap;
 }
-.tape-change[data-up="true"] { color: var(--pos); }
-.tape-change[data-up="false"] { color: var(--neg); }
+.tape-change[data-up="true"] {
+  color: var(--pos);
+}
+.tape-change[data-up="false"] {
+  color: var(--neg);
+}
 
 /* ── Status bar: system state, not market data ── */
 .hero-status {
@@ -589,14 +695,20 @@ a, button { cursor: pointer; }
   text-transform: uppercase;
   color: var(--fg-muted);
 }
-.hero-stat { display: inline-flex; align-items: center; gap: 0.45rem; }
+.hero-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
 .hero-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
   background: var(--warn);
 }
-.hero-dot[data-live="true"] { background: var(--pos); }
+.hero-dot[data-live="true"] {
+  background: var(--pos);
+}
 .hero-scroll {
   margin-left: auto;
   display: inline-flex;
@@ -607,7 +719,9 @@ a, button { cursor: pointer; }
   border-radius: 50%;
   border: 1px solid var(--border);
   color: var(--fg-muted);
-  transition: color 0.25s ease, border-color 0.25s ease,
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
     transform 0.25s var(--ease-spring);
 }
 .hero-scroll:hover {
@@ -620,13 +734,21 @@ a, button { cursor: pointer; }
   /* Narrow the aperture rather than closing it: the globe still needs a gap
      to be seen through, it just needs less of one. */
   .hero-frame {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.34fr) minmax(210px, 0.62fr);
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.34fr) minmax(
+        210px,
+        0.62fr
+      );
   }
 }
 
 @media (max-width: 820px) {
-  .hero-frame { grid-template-columns: 1fr; gap: clamp(1.75rem, 5vh, 2.75rem); }
-  .hero-aperture { display: none; }
+  .hero-frame {
+    grid-template-columns: 1fr;
+    gap: clamp(1.75rem, 5vh, 2.75rem);
+  }
+  .hero-aperture {
+    display: none;
+  }
   /* Stacked, the copy is back over the middle of the globe, so the scrim goes
      back to being radial: the same reasoning as .text-well. */
   .hero-lede::before {
@@ -638,12 +760,21 @@ a, button { cursor: pointer; }
       transparent 100%
     );
   }
-  .hero-tape { display: grid; grid-template-columns: 1fr 1fr; padding-bottom: 0; }
-  .hero-tape-head { grid-column: 1 / -1; }
-  .tape-row:nth-child(even) { border-right: 1px solid var(--border-faint); }
-  .tape-row:nth-last-child(-n + 2) { border-bottom: none; }
+  .hero-tape {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-bottom: 0;
+  }
+  .hero-tape-head {
+    grid-column: 1 / -1;
+  }
+  .tape-row:nth-child(even) {
+    border-right: 1px solid var(--border-faint);
+  }
+  .tape-row:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
 }
-
 
 /* ─── LIQUID GLASS: light mode only ──────────────────────
    Dark mode's glass is a dark sheet you see light through: one flat fill, one
@@ -678,19 +809,19 @@ html[data-theme="light"] .glass {
     var(--glass-face-bottom) 100%
   );
   backdrop-filter: blur(var(--glass-blur)) saturate(190%) brightness(1.06);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(190%) brightness(1.06);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(190%)
+    brightness(1.06);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   box-shadow:
     /* lit top edge */
     inset 0 1px 0 0 var(--glass-spec),
-    /* inner rim, all the way round */
-    inset 0 0 0 1px var(--glass-rim),
-    /* thickness: the panel occludes slightly at its own base */
-    inset 0 -18px 26px -22px var(--glass-shade),
-    /* contact shadow, then two lifts: warm, because paper shadows are warm */
-    0 1px 1px rgba(31, 27, 16, 0.04),
-    0 10px 24px -12px rgba(31, 27, 16, 0.10),
+    /* inner rim, all the way round */ inset 0 0 0 1px var(--glass-rim),
+    /* thickness: the panel occludes slightly at its own base */ inset 0 -18px
+      26px -22px var(--glass-shade),
+    /* contact shadow, then two lifts: warm, because paper shadows are warm */ 0
+      1px 1px rgba(31, 27, 16, 0.04),
+    0 10px 24px -12px rgba(31, 27, 16, 0.1),
     0 30px 60px -28px rgba(31, 27, 16, 0.14);
 }
 
@@ -729,7 +860,9 @@ html[data-theme="light"] .glass::after {
 /* Safari <15.4 and anything without mask-composite gets the panel without the
    refraction band rather than a solid white ring over its own content. */
 @supports not ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
-  html[data-theme="light"] .glass::after { display: none; }
+  html[data-theme="light"] .glass::after {
+    display: none;
+  }
 }
 
 /* Cards become a material too. Solid --bg-2 panels were the main reason the
@@ -757,9 +890,15 @@ html[data-theme="light"] .card:hover {
     var(--shadow-md);
 }
 /* No backdrop-filter means no translucency budget: fall back to opaque. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  html[data-theme="light"] .card { background: var(--bg-2); }
-  html[data-theme="light"] .glass { background: rgba(255, 255, 255, 0.92); }
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  html[data-theme="light"] .card {
+    background: var(--bg-2);
+  }
+  html[data-theme="light"] .glass {
+    background: rgba(255, 255, 255, 0.92);
+  }
 }
 
 /* Form fields sit inside cards, so they need to be a shade *deeper* than the
@@ -768,7 +907,6 @@ html[data-theme="light"] .field {
   background: rgba(255, 255, 255, 0.55);
   box-shadow: inset 0 1px 2px rgba(31, 27, 16, 0.05);
 }
-
 
 /* ─── TAKEAWAY: the five-second layer ────────────────────
    One consistent treatment everywhere a claim precedes its evidence:
@@ -803,7 +941,9 @@ html[data-theme="light"] .field {
 .takeaway-lead {
   margin-bottom: clamp(1.5rem, 3.5vh, 2.25rem);
 }
-.takeaway-lead .takeaway-rule { width: 3px; }
+.takeaway-lead .takeaway-rule {
+  width: 3px;
+}
 .takeaway-lead .takeaway-text {
   font-size: clamp(1rem, 1.5vw, 1.15rem);
   font-weight: 450;
@@ -822,7 +962,9 @@ html[data-theme="light"] .field {
 }
 /* The digits themselves. inline-block stops a mid-count value from wrapping
    between the integer and decimal parts at an awkward width. */
-.countup-value { display: inline-block; }
+.countup-value {
+  display: inline-block;
+}
 .countup-rule {
   position: absolute;
   left: 0;
@@ -845,7 +987,9 @@ html[data-theme="light"] .field {
   grid-template-columns: repeat(3, 1fr);
   gap: 0.9rem;
 }
-.stat-card { padding: 1.4rem 1.1rem; }
+.stat-card {
+  padding: 1.4rem 1.1rem;
+}
 .stat-value {
   font-family: var(--font-display);
   font-variation-settings: "wdth" 92;
@@ -906,16 +1050,23 @@ html[data-theme="light"] .field {
 }
 /* min-width: 0 lets the bar column actually shrink. Grid children default to
    min-content width, which would push a long metric label out of the card. */
-.cmp-rows { min-width: 0; }
+.cmp-rows {
+  min-width: 0;
+}
 .cmp-row {
   display: grid;
-  grid-template-columns: minmax(90px, 1.1fr) minmax(0, 1.3fr) minmax(0, 1fr) 44px;
+  grid-template-columns: minmax(90px, 1.1fr) minmax(0, 1.3fr) minmax(
+      0,
+      1fr
+    ) 44px;
   align-items: center;
   gap: 0.75rem;
   padding: 0.55rem 0.85rem;
   border-bottom: 1px solid var(--border-faint);
 }
-.cmp-row:last-child { border-bottom: none; }
+.cmp-row:last-child {
+  border-bottom: none;
+}
 .cmp-label {
   font-family: var(--font-body);
   font-size: 0.75rem;
@@ -938,9 +1089,17 @@ html[data-theme="light"] .field {
   font-variant-numeric: tabular-nums;
   font-size: 0.72rem;
 }
-.cmp-before { color: var(--fg-muted); text-decoration: line-through; }
-.cmp-arrow { color: var(--fg-muted); }
-.cmp-after { color: var(--fg); font-weight: 500; }
+.cmp-before {
+  color: var(--fg-muted);
+  text-decoration: line-through;
+}
+.cmp-arrow {
+  color: var(--fg-muted);
+}
+.cmp-after {
+  color: var(--fg);
+  font-weight: 500;
+}
 .cmp-bar {
   display: block;
   height: 4px;
@@ -956,7 +1115,9 @@ html[data-theme="light"] .field {
   transform-origin: left;
   transition: transform 0.9s var(--ease-out);
 }
-.cmp-bar-fill[data-good="true"] { background: var(--pos); }
+.cmp-bar-fill[data-good="true"] {
+  background: var(--pos);
+}
 .cmp-delta {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -964,14 +1125,18 @@ html[data-theme="light"] .field {
   text-align: right;
   color: var(--neg);
 }
-.cmp-delta[data-good="true"] { color: var(--pos); }
+.cmp-delta[data-good="true"] {
+  color: var(--pos);
+}
 
 /* ─── PROJECT STAGE ───────────────────────────────────────
    The deck and the detail view share one positioned box. That is the whole
    fix for the old drawer: detail no longer lives further down the page, it
    lives exactly where the cards were, so opening a card cannot move the answer
    somewhere the reader has to go looking for it. */
-.pstage { position: relative; }
+.pstage {
+  position: relative;
+}
 
 .pstage-scrim {
   position: absolute;
@@ -991,7 +1156,13 @@ html[data-theme="light"] .field {
    The track flows in columns over two fixed rows, so cards fill down then
    across and a page is two columns, which is why only every fourth card is a
    snap point. Below 820px it drops to one row and one card per view. */
-.deck { position: relative; transition: opacity 0.4s var(--ease-out), filter 0.4s var(--ease-out), transform 0.4s var(--ease-out); }
+.deck {
+  position: relative;
+  transition:
+    opacity 0.4s var(--ease-out),
+    filter 0.4s var(--ease-out),
+    transform 0.4s var(--ease-out);
+}
 .deck[data-dimmed="true"] {
   opacity: 0.25;
   filter: blur(5px);
@@ -1014,14 +1185,60 @@ html[data-theme="light"] .field {
   scrollbar-width: none;
   padding-bottom: 2px;
 }
-.deck-track::-webkit-scrollbar { display: none; }
+.deck-track::-webkit-scrollbar {
+  display: none;
+}
 .deck-track:focus-visible {
   outline: 1px solid var(--accent-border);
   outline-offset: 6px;
   border-radius: var(--radius);
 }
-.deck-card { min-width: 0; scroll-snap-align: none; }
-.deck-track > .deck-card:nth-child(4n + 1) { scroll-snap-align: start; }
+/* Fade only on a side there is more content on. Masking both edges
+   unconditionally clips the first card's border at rest, which reads as a
+   rendering fault rather than as an affordance. */
+.deck[data-edge="both"] .deck-track {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 34px,
+    #000 calc(100% - 34px),
+    transparent 100%
+  );
+}
+.deck[data-edge="start"] .deck-track {
+  mask-image: linear-gradient(to right, transparent 0, #000 34px, #000 100%);
+}
+.deck[data-edge="end"] .deck-track {
+  mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - 34px),
+    transparent 100%
+  );
+}
+
+.deck-card {
+  min-width: 0;
+  scroll-snap-align: none;
+  animation: cardIn 0.5s var(--ease-out) both;
+}
+/* Staggered across the first page only. Beyond that the reader has to scroll
+   to see them, by which point a delay is just latency. */
+.deck-card:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.deck-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.deck-card:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.deck-card:nth-child(4) {
+  animation-delay: 0.22s;
+}
+.deck-track > .deck-card:nth-child(4n + 1) {
+  scroll-snap-align: start;
+}
 
 .deck-controls {
   display: flex;
@@ -1041,16 +1258,26 @@ html[data-theme="light"] .field {
   background: transparent;
   color: var(--fg-muted);
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s var(--ease-spring);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s var(--ease-spring);
 }
 .deck-arrow:hover:not(:disabled) {
   color: var(--accent);
   border-color: var(--accent-border);
   transform: scale(1.08);
 }
-.deck-arrow:disabled { opacity: 0.3; cursor: default; }
+.deck-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
 
-.deck-dots { display: flex; align-items: center; gap: 0.4rem; }
+.deck-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 .deck-dot {
   width: 6px;
   height: 6px;
@@ -1059,14 +1286,21 @@ html[data-theme="light"] .field {
   border-radius: 999px;
   background: var(--border-active);
   cursor: pointer;
-  transition: width 0.32s var(--ease-spring), background 0.25s ease;
+  transition:
+    width 0.32s var(--ease-spring),
+    background 0.25s ease;
 }
 /* The active dot stretches rather than only recolouring, so position is
    legible without relying on colour alone. */
-.deck-dot[data-active="true"] { width: 18px; background: var(--accent); }
+.deck-dot[data-active="true"] {
+  width: 18px;
+  background: var(--accent);
+}
 
 /* ─── CARD ────────────────────────────────────────────────*/
-.pcard-shell { overflow: hidden; }
+.pcard-shell {
+  overflow: hidden;
+}
 .pcard {
   position: relative;
   display: flex;
@@ -1088,11 +1322,18 @@ html[data-theme="light"] .field {
   color: var(--fg);
   opacity: 0.045;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.4s var(--ease-out);
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s var(--ease-out);
 }
-.pcard-shell:hover .pcard-num { opacity: 0.09; transform: translateY(-2px); }
+.pcard-shell:hover .pcard-num {
+  opacity: 0.09;
+  transform: translateY(-2px);
+}
 
-.pcard-meta { margin-bottom: 0.85rem; }
+.pcard-meta {
+  margin-bottom: 0.85rem;
+}
 .pcard-title {
   font-family: var(--font-display);
   font-variation-settings: "wdth" 96;
@@ -1116,7 +1357,12 @@ html[data-theme="light"] .field {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.pcard-chips { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+.pcard-chips {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
 .pcard-foot {
   display: flex;
   align-items: center;
@@ -1137,7 +1383,9 @@ html[data-theme="light"] .field {
   position: relative;
   z-index: 1;
 }
-.pcard-link:hover { color: var(--accent); }
+.pcard-link:hover {
+  color: var(--accent);
+}
 /* Pushed right: it is the card's own action, not another outbound link. */
 .pcard-open {
   margin-left: auto;
@@ -1154,7 +1402,10 @@ html[data-theme="light"] .field {
   text-transform: uppercase;
   color: var(--fg-muted);
   cursor: pointer;
-  transition: color 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
   position: relative;
   z-index: 1;
 }
@@ -1171,11 +1422,18 @@ html[data-theme="light"] .field {
    panel appeared in the middle of the section". */
 .pv {
   position: absolute;
-  inset: 0;
+  /* Top-anchored with a cap rather than pinned to all four sides. A project
+     with three sentences got a full-height panel and several hundred pixels of
+     empty surface under the last line, which reads as something failing to
+     load. Now the panel is as tall as it has to be and only long ones scroll. */
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 100%;
   z-index: 3;
   display: flex;
   flex-direction: column;
-  border-radius: var(--radius);
+  border-radius: 10px;
   overflow: hidden;
   transform-origin: var(--pv-ox, 50%) var(--pv-oy, 50%);
   animation: pvIn 0.42s var(--ease-spring) both;
@@ -1186,8 +1444,19 @@ html[data-theme="light"] .field {
   --glass-bg: color-mix(in srgb, var(--bg-2) 92%, transparent);
   --glass-blur: 30px;
 }
-.pv:focus { outline: none; }
-.pv:focus-visible { outline: 1px solid var(--accent-border); outline-offset: -2px; }
+/* Unmounting on close is instant, so the panel would vanish while everything
+   else in the app eases. The hook keeps it mounted through this phase. */
+.pv[data-closing="true"] {
+  animation: pvOut 0.26s var(--ease-out) forwards;
+  pointer-events: none;
+}
+.pv:focus {
+  outline: none;
+}
+.pv:focus-visible {
+  outline: 1px solid var(--accent-border);
+  outline-offset: -2px;
+}
 
 html[data-theme="light"] .pv {
   --glass-face-top: rgba(255, 255, 255, 0.93);
@@ -1196,7 +1465,70 @@ html[data-theme="light"] .pv {
   --glass-edge: 18px;
 }
 
+/* ── macOS title bar ──
+   The same object Skills is drawn as, so the two most detailed surfaces on the
+   site read as one family. 12px lights and a 10px corner radius are the real
+   values, which is most of why the shape is recognisable at a glance. */
+.pv-lights {
+  display: flex;
+  gap: 0.5rem;
+  flex: none;
+  z-index: 1;
+}
+.pv-light {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pv-light[data-c="close"] {
+  background: radial-gradient(circle at 35% 30%, #ff5f57, #e0443e);
+  box-shadow: 0 0 0 0.5px rgba(224, 68, 62, 0.4);
+  cursor: pointer;
+}
+.pv-light[data-c="min"] {
+  background: radial-gradient(circle at 35% 30%, #febc2e, #dea123);
+  box-shadow: 0 0 0 0.5px rgba(222, 161, 35, 0.4);
+}
+.pv-light[data-c="zoom"] {
+  background: radial-gradient(circle at 35% 30%, #28c840, #1aab29);
+  box-shadow: 0 0 0 0.5px rgba(26, 171, 41, 0.4);
+}
+.pv-light-glyph {
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  user-select: none;
+  transition: opacity 0.12s ease;
+}
+/* Glyphs appear for the whole cluster on hover, as they do on a real title
+   bar, rather than one light at a time. */
+.pv-lights:hover .pv-light-glyph {
+  opacity: 1;
+}
+.pv-titlebar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 55%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.pv-meta {
+  margin-bottom: 0.9rem;
+}
+
 .pv-head {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.9rem;
@@ -1212,7 +1544,13 @@ html[data-theme="light"] .pv {
   letter-spacing: 0.16em;
   color: var(--accent);
 }
-.pv-heading { display: flex; align-items: baseline; gap: 0.7rem; min-width: 0; flex: 1; }
+.pv-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  min-width: 0;
+  flex: 1;
+}
 .pv-title {
   font-family: var(--font-display);
   font-variation-settings: "wdth" 94;
@@ -1225,7 +1563,12 @@ html[data-theme="light"] .pv {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.pv-nav { display: flex; align-items: center; gap: 0.35rem; flex: none; }
+.pv-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+}
 .pv-pos {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -1245,16 +1588,27 @@ html[data-theme="light"] .pv {
   background: transparent;
   color: var(--fg-muted);
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s var(--ease-spring);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s var(--ease-spring);
 }
 .pv-btn:hover:not(:disabled) {
   color: var(--accent);
   border-color: var(--accent-border);
   transform: scale(1.08);
 }
-.pv-btn:disabled { opacity: 0.3; cursor: default; }
-.pv-close { margin-left: 0.4rem; }
-.pv-close:hover { color: var(--neg); border-color: color-mix(in srgb, var(--neg) 40%, transparent); }
+.pv-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.pv-close {
+  margin-left: 0.4rem;
+}
+.pv-close:hover {
+  color: var(--neg);
+  border-color: color-mix(in srgb, var(--neg) 40%, transparent);
+}
 
 .pv-body {
   flex: 1;
@@ -1266,14 +1620,30 @@ html[data-theme="light"] .pv {
 }
 /* Content arrives in sequence rather than all at once, which gives the eye an
    order to read in. Keyed on the project, so prev/next replays it. */
-.pv-body > * { animation: pvRise 0.45s var(--ease-out) both; }
-.pv-body > *:nth-child(1) { animation-delay: 0.10s; }
-.pv-body > *:nth-child(2) { animation-delay: 0.16s; }
-.pv-body > *:nth-child(3) { animation-delay: 0.22s; }
-.pv-body > *:nth-child(4) { animation-delay: 0.28s; }
-.pv-body > *:nth-child(5) { animation-delay: 0.34s; }
+.pv-body > * {
+  animation: pvRise 0.45s var(--ease-out) both;
+}
+.pv-body > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.pv-body > *:nth-child(2) {
+  animation-delay: 0.16s;
+}
+.pv-body > *:nth-child(3) {
+  animation-delay: 0.22s;
+}
+.pv-body > *:nth-child(4) {
+  animation-delay: 0.28s;
+}
+.pv-body > *:nth-child(5) {
+  animation-delay: 0.34s;
+}
 
-.pv-desc { font-size: 0.88rem; margin: 1rem 0 1.3rem; max-width: 68ch; }
+.pv-desc {
+  font-size: 0.88rem;
+  margin: 1rem 0 1.3rem;
+  max-width: 68ch;
+}
 .pv-stack {
   display: flex;
   align-items: baseline;
@@ -1283,9 +1653,67 @@ html[data-theme="light"] .pv {
   padding-top: 1rem;
   border-top: 1px solid var(--border-subtle);
 }
-.pv-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.pv-links { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.2rem; }
-.pv-link { font-size: 0.76rem; padding: 0.55rem 1rem; }
+.pv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+/* Footer splits: actions on the left, somewhere else to go on the right. On a
+   sparse project the related list is what stops the panel ending abruptly. */
+.pv-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+}
+.pv-links {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.pv-related {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+.pv-related-list {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.pv-related-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.34rem 0.6rem 0.34rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 550;
+  color: var(--fg-dim);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s var(--ease-spring);
+}
+.pv-related-item:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-muted);
+  transform: translateX(2px);
+}
+.pv-link {
+  font-size: 0.76rem;
+  padding: 0.55rem 1rem;
+}
 .pv-private {
   font-family: var(--font-mono);
   font-size: 0.58rem;
@@ -1303,8 +1731,15 @@ html[data-theme="light"] .pv {
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
-.pb-built { display: block; padding: 0.7rem 0.9rem 0.55rem; }
-.pb-list { list-style: none; margin: 0; padding: 0 0.9rem 0.85rem; }
+.pb-built {
+  display: block;
+  padding: 0.7rem 0.9rem 0.55rem;
+}
+.pb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.9rem 0.85rem;
+}
 .pb-row {
   display: grid;
   grid-template-columns: 9px minmax(120px, auto) 1fr;
@@ -1314,10 +1749,11 @@ html[data-theme="light"] .pv {
   border-top: 1px solid var(--border-faint);
   animation: pbRow 0.5s var(--ease-out) both;
 }
-.pb-row:first-child { border-top: none; }
-.pb-row:nth-child(1) { animation-delay: 0.30s; }
-.pb-row:nth-child(2) { animation-delay: 0.36s; }
-.pb-row:nth-child(3) { animation-delay: 0.42s; }
+.pb-row:first-child {
+  border-top: none;
+}
+/* Delays are written inline by ProjectBoard: a board can hold two modules or
+   nine, and a stylesheet cannot know which. */
 .pb-dot {
   width: 5px;
   height: 5px;
@@ -1325,8 +1761,17 @@ html[data-theme="light"] .pv {
   background: var(--accent);
   transform: translateY(-1px);
 }
-.pb-name { font-family: var(--font-body); font-size: 0.8rem; font-weight: 550; color: var(--fg); }
-.pb-detail { font-family: var(--font-body); font-size: 0.74rem; color: var(--fg-muted); }
+.pb-name {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 550;
+  color: var(--fg);
+}
+.pb-detail {
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  color: var(--fg-muted);
+}
 
 .pb-metrics {
   display: grid;
@@ -1337,10 +1782,19 @@ html[data-theme="light"] .pv {
   border-bottom: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--accent) 4%, transparent);
 }
-.pb-metric { min-width: 0; animation: pbRow 0.55s var(--ease-out) both; }
-.pb-metric:nth-child(1) { animation-delay: 0.40s; }
-.pb-metric:nth-child(2) { animation-delay: 0.48s; }
-.pb-metric:nth-child(3) { animation-delay: 0.56s; }
+.pb-metric {
+  min-width: 0;
+  animation: pbRow 0.55s var(--ease-out) both;
+}
+.pb-metric:nth-child(1) {
+  animation-delay: 0.4s;
+}
+.pb-metric:nth-child(2) {
+  animation-delay: 0.48s;
+}
+.pb-metric:nth-child(3) {
+  animation-delay: 0.56s;
+}
 .pb-metric-value {
   display: block;
   font-family: var(--font-display);
@@ -1351,8 +1805,18 @@ html[data-theme="light"] .pv {
   color: var(--accent);
   margin-bottom: 0.4rem;
 }
-.pb-metric-label { font-family: var(--font-body); font-size: 0.66rem; line-height: 1.4; color: var(--fg-muted); }
-.pb-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; padding: 0.85rem 0.9rem 0; }
+.pb-metric-label {
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  line-height: 1.4;
+  color: var(--fg-muted);
+}
+.pb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.85rem 0.9rem 0;
+}
 .pb-next {
   display: flex;
   gap: 0.65rem;
@@ -1377,53 +1841,22 @@ html[data-theme="light"] .pv {
    Closed it is one row, roughly the height of the caption it replaced. The
    terminal is the thing worth looking at; the explanation should not push it
    up the page. */
-.obb { margin-top: 0.85rem; }
-.obb-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  padding: 0.6rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.25s ease, background 0.25s ease;
-}
-.obb-toggle:hover { border-color: var(--accent-border); background: var(--accent-muted); }
-.obb-toggle-label { font-family: var(--font-body); font-size: 0.76rem; color: var(--fg-dim); }
-.obb-toggle-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex: none;
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-.obb-chevron { transition: transform 0.35s var(--ease-spring); }
-.obb[data-open="true"] .obb-chevron { transform: rotate(180deg); }
-
-.obb-drawer {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.5s var(--ease-out);
-}
-.obb-drawer[data-open="true"] { grid-template-rows: 1fr; }
-.obb-drawer-inner { overflow: hidden; min-height: 0; }
+/* The brief is a .pv now, so it needs no wrapper of its own. */
 .obb-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: clamp(1.25rem, 3vw, 2.5rem);
-  padding: 1.1rem 0.9rem 0;
 }
-.obb-col { min-width: 0; }
-.obb-col-title { display: block; margin-bottom: 0.7rem; }
-.obb-facts { margin: 0; }
+.obb-col {
+  min-width: 0;
+}
+.obb-col-title {
+  display: block;
+  margin-bottom: 0.7rem;
+}
+.obb-facts {
+  margin: 0;
+}
 .obb-fact {
   display: grid;
   grid-template-columns: minmax(78px, 92px) 1fr;
@@ -1431,7 +1864,10 @@ html[data-theme="light"] .pv {
   padding: 0.38rem 0;
   border-top: 1px solid var(--border-faint);
 }
-.obb-fact:first-child { border-top: none; padding-top: 0; }
+.obb-fact:first-child {
+  border-top: none;
+  padding-top: 0;
+}
 .obb-fact dt {
   font-family: var(--font-mono);
   font-size: 0.57rem;
@@ -1452,14 +1888,23 @@ html[data-theme="light"] .pv {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin: 0.95rem 0.9rem 0.2rem;
-  padding-top: 0.8rem;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
   border-top: 1px solid var(--border-subtle);
 }
-.obb-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.obb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
 
 /* ─── TABS ────────────────────────────────────────────────*/
-.proj-tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+.proj-tabs {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.6rem;
+}
 .proj-tab {
   font-family: var(--font-body);
   font-size: 0.75rem;
@@ -1486,47 +1931,211 @@ html[data-theme="light"] .pv {
   background: var(--accent);
   animation: blink 2s ease-in-out infinite;
 }
-.dex-wrap { margin-bottom: 0; }
-.chip-quiet { color: var(--fg-muted); border-style: dashed; }
+/* Trigger sits above the terminal so the panel grows down over the thing it
+   describes, rather than out of empty space beneath it. */
+.dex-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+.dex-explain {
+  /* The one control on this tab, so it stops borrowing the project cards'
+     ghost pill and carries the accent outright. The halo pulses until it has
+     been used once and then never again: an attention cue that keeps pulsing
+     after it has been noticed is just noise. */
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-muted);
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s var(--ease-spring),
+    box-shadow 0.25s ease;
+}
+.dex-explain:hover {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.dex-explain[data-seen="false"] {
+  animation: dexHalo 2.6s ease-in-out infinite;
+}
+.dex-explain[data-seen="false"]:hover {
+  animation: none;
+}
+@keyframes dexHalo {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 32%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+.dex-stage {
+  border-radius: var(--radius);
+}
+.dex-wrap {
+  margin-bottom: 0;
+  transition:
+    opacity 0.4s var(--ease-out),
+    filter 0.4s var(--ease-out),
+    transform 0.4s var(--ease-out);
+}
+.dex-wrap[data-dimmed="true"] {
+  opacity: 0.25;
+  filter: blur(5px);
+  transform: scale(0.99);
+  pointer-events: none;
+}
+.chip-quiet {
+  color: var(--fg-muted);
+  border-style: dashed;
+}
 
 @keyframes pvIn {
-  from { opacity: 0; transform: scale(0.88); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes pvOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 @keyframes pvRise {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 @keyframes pbRow {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (max-width: 880px) {
-  .stat-grid { grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
-  .stat-card { padding: 1.1rem 0.8rem; }
-  .obb-grid { grid-template-columns: 1fr; gap: 1.4rem; }
-  .pb-metrics { grid-template-columns: 1fr; gap: 0.85rem; }
-  .pb-row { grid-template-columns: 9px 1fr; }
+  .stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+  }
+  .stat-card {
+    padding: 1.1rem 0.8rem;
+  }
+  .obb-grid {
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+  }
+  .pb-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .pb-row {
+    grid-template-columns: 9px 1fr;
+  }
   /* The sub-label goes first: the module name is the fact that has to survive
      a narrow column. */
-  .pb-detail { display: none; }
-  .cmp-row { grid-template-columns: 1fr auto; row-gap: 0.4rem; }
-  .cmp-bar { grid-column: 1 / -1; }
-  .cmp-delta { text-align: left; }
+  .pb-detail {
+    display: none;
+  }
+  .cmp-row {
+    grid-template-columns: 1fr auto;
+    row-gap: 0.4rem;
+  }
+  .cmp-bar {
+    grid-column: 1 / -1;
+  }
+  .cmp-delta {
+    text-align: left;
+  }
 }
 
 @media (max-width: 820px) {
   /* One row, one card per view: swiping, which is what a phone expects. */
-  .deck-track { grid-template-rows: minmax(0, 1fr); grid-auto-columns: 86%; }
-  .deck-track > .deck-card { scroll-snap-align: start; }
-  .pcard { padding: 1.3rem; }
+  .deck-track {
+    grid-template-rows: minmax(0, 1fr);
+    grid-auto-columns: 86%;
+  }
+  .deck-track > .deck-card {
+    scroll-snap-align: start;
+  }
+  .pcard {
+    padding: 1.3rem;
+  }
   /* A phone has no room for a 26px hit target next to three others, and no
      room for the position counter either. */
-  .pv-head { padding: 0.7rem 0.8rem; gap: 0.6rem; }
-  .pv-pos { display: none; }
-  .pv-heading { gap: 0.5rem; }
-  .pv-body { padding: 1rem 0.9rem 1.2rem; }
+  .pv-head {
+    padding: 0.7rem 0.8rem;
+    gap: 0.6rem;
+  }
+  .pv-pos {
+    display: none;
+  }
+  .pv-heading {
+    gap: 0.5rem;
+  }
+  .pv-body {
+    padding: 1rem 0.9rem 1.2rem;
+  }
+  /* Stacked, the related list reads as a continuation of the actions rather
+     than as a second column crushed against the right edge. */
+  .pv-foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.1rem;
+  }
+  .pv-related {
+    align-items: flex-start;
+  }
+  .pv-related-list {
+    justify-content: flex-start;
+  }
+  .dex-head {
+    flex-direction: column;
+    gap: 0.9rem;
+  }
 }
 
 /* ─── BUTTONS ────────────────────────────────────────────── */
@@ -1542,11 +2151,17 @@ html[data-theme="light"] .pv {
   border-radius: 999px;
   text-decoration: none;
   border: 1px solid transparent;
-  transition: transform 0.25s var(--ease-spring), box-shadow 0.3s ease,
-    background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  transition:
+    transform 0.25s var(--ease-spring),
+    box-shadow 0.3s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
   will-change: transform;
 }
-.btn:active { transform: scale(0.97); }
+.btn:active {
+  transform: scale(0.97);
+}
 
 .btn-primary {
   background: var(--accent);
@@ -1554,7 +2169,9 @@ html[data-theme="light"] .pv {
   box-shadow: 0 0 0 0 var(--accent-muted);
 }
 .btn-primary:hover {
-  box-shadow: 0 6px 24px var(--accent-muted), 0 0 0 4px var(--accent-muted);
+  box-shadow:
+    0 6px 24px var(--accent-muted),
+    0 0 0 4px var(--accent-muted);
   transform: translateY(-1px);
 }
 
@@ -1575,7 +2192,10 @@ html[data-theme="light"] .pv {
   color: var(--fg-muted);
   padding: 0.5rem 0.9rem;
 }
-.btn-ghost:hover { color: var(--fg); background: var(--border-faint); }
+.btn-ghost:hover {
+  color: var(--fg);
+  background: var(--border-faint);
+}
 
 /* ─── CHIPS ──────────────────────────────────────────────── */
 .chip {
@@ -1590,7 +2210,10 @@ html[data-theme="light"] .pv {
   transition: all 0.2s ease;
   white-space: nowrap;
 }
-.chip:hover { border-color: var(--accent-border); color: var(--accent); }
+.chip:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
 
 /* ─── FORMS ──────────────────────────────────────────────── */
 .field {
@@ -1598,7 +2221,9 @@ html[data-theme="light"] .pv {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-2);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 .field:focus-within {
   border-color: var(--accent-border);
@@ -1606,8 +2231,11 @@ html[data-theme="light"] .pv {
 }
 /* Theme-aware: the dark red is invisible against paper, and a form error
    that cannot be seen is worse than no validation at all. */
-.field.field-error { border-color: color-mix(in srgb, var(--neg) 60%, transparent); }
-.field input, .field textarea {
+.field.field-error {
+  border-color: color-mix(in srgb, var(--neg) 60%, transparent);
+}
+.field input,
+.field textarea {
   width: 100%;
   font-family: var(--font-body);
   font-size: 0.875rem;
@@ -1627,14 +2255,18 @@ html[data-theme="light"] .pv {
   color: var(--fg-muted);
   pointer-events: none;
   transform-origin: left top;
-  transition: transform 0.22s var(--ease-out), color 0.22s ease;
+  transition:
+    transform 0.22s var(--ease-out),
+    color 0.22s ease;
 }
 .field:focus-within label,
 .field.field-filled label {
   transform: translateY(-0.5rem) scale(0.72);
   color: var(--fg-muted);
 }
-.field:focus-within label { color: var(--accent); }
+.field:focus-within label {
+  color: var(--accent);
+}
 
 /* ─── NAV ────────────────────────────────────────────────── */
 .nav-pill {
@@ -1649,10 +2281,15 @@ html[data-theme="light"] .pv {
   border-radius: 999px;
   box-shadow: var(--shadow-md);
   max-width: calc(100vw - 1.5rem);
-  transition: transform 0.45s var(--ease-spring), padding 0.35s var(--ease-out),
-    background 0.35s ease, border-color 0.35s ease;
+  transition:
+    transform 0.45s var(--ease-spring),
+    padding 0.35s var(--ease-out),
+    background 0.35s ease,
+    border-color 0.35s ease;
 }
-.nav-pill.nav-compact { padding: 0.3rem 0.45rem; }
+.nav-pill.nav-compact {
+  padding: 0.3rem 0.45rem;
+}
 .nav-link {
   position: relative;
   font-family: var(--font-body);
@@ -1667,8 +2304,12 @@ html[data-theme="light"] .pv {
   transition: color 0.2s ease;
   z-index: 1;
 }
-.nav-link:hover { color: var(--fg); }
-.nav-link.nav-active { color: var(--fg); }
+.nav-link:hover {
+  color: var(--fg);
+}
+.nav-link.nav-active {
+  color: var(--fg);
+}
 .nav-indicator {
   position: absolute;
   top: 0.45rem;
@@ -1676,26 +2317,69 @@ html[data-theme="light"] .pv {
   border-radius: 999px;
   background: var(--border-faint);
   border: 1px solid var(--border);
-  transition: left 0.4s var(--ease-spring), width 0.4s var(--ease-spring), opacity 0.25s ease;
+  transition:
+    left 0.4s var(--ease-spring),
+    width 0.4s var(--ease-spring),
+    opacity 0.25s ease;
   pointer-events: none;
 }
-.nav-compact .nav-indicator { top: 0.3rem; bottom: 0.3rem; }
+.nav-compact .nav-indicator {
+  top: 0.3rem;
+  bottom: 0.3rem;
+}
 
 /* ─── ANIMATIONS ─────────────────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px); filter: blur(6px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-@keyframes drawCheck { to { stroke-dashoffset: 0; } }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes drawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
 @keyframes scanline {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(100vh); }
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100vh);
+  }
 }
 
-.animate-fade-up { animation: fadeUp 0.9s var(--ease-out) forwards; opacity: 0; }
-.animate-fade-in { animation: fadeIn 0.8s ease forwards; opacity: 0; }
+.animate-fade-up {
+  animation: fadeUp 0.9s var(--ease-out) forwards;
+  opacity: 0;
+}
+.animate-fade-in {
+  animation: fadeIn 0.8s ease forwards;
+  opacity: 0;
+}
 
 /* ─── GRAIN (kept: but calmer) ──────────────────────────── */
 body::after {
@@ -1708,18 +2392,32 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
 }
-html[data-theme="light"] body::after { opacity: 0.02; mix-blend-mode: multiply; }
+html[data-theme="light"] body::after {
+  opacity: 0.02;
+  mix-blend-mode: multiply;
+}
 
 /* ─── SECTION TRANSPARENCY (universe canvas shows through) ── */
-#about, #projects, #skills, #experience, #contact {
+#about,
+#projects,
+#skills,
+#experience,
+#contact {
   background: transparent !important;
 }
-section, header, footer, nav {
-  transition: background 0.35s ease, border-color 0.35s ease;
+section,
+header,
+footer,
+nav {
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease;
 }
 
 /* ─── ACCESSIBILITY ──────────────────────────────────────── */
-:focus { outline: none; }
+:focus {
+  outline: none;
+}
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
@@ -1728,21 +2426,42 @@ section, header, footer, nav {
 /* The custom cursor hides the pointer: keyboard users get real focus rings */
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  body { cursor: auto; }
-  *, *::before, *::after { cursor: auto; }
+  body {
+    cursor: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    cursor: auto;
+  }
 }
 
 /* ─── RESPONSIVE HELPERS ─────────────────────────────────── */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
-.grid-projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+.grid-projects {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
 
 @media (max-width: 880px) {
-  .grid-2 { grid-template-columns: 1fr; }
-  .grid-projects { grid-template-columns: 1fr; }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .grid-projects {
+    grid-template-columns: 1fr;
+  }
 }

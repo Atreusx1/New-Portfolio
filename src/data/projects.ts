@@ -47,7 +47,8 @@ export interface BoardModule {
 
 export interface BoardMetric {
   value: number;
-  prefix?: string; // add this — optional, so ChronoShield's metrics are unaffected
+  /** Rendered before the number. For approximations: "~650 tests". */
+  prefix?: string;
   suffix?: string;
   decimals?: number;
   label: string;
@@ -182,7 +183,10 @@ export const projectsData: Project[] = [
         "Gas profiling",
         "SECURITY.md per module",
       ],
-      next: ["Cross-chain KSTR (LayerZero OFT) — planned"],
+      // The "planned" suffix was dropped: the field is already rendered under a
+      // "Next" label, so the word was doing the label's job twice. It also
+      // carried the only em dash left in the data.
+      next: ["Cross-chain KSTR (LayerZero OFT)"],
       note: "Solidity tests run under both Hardhat 3 and plain Foundry from the same files. Deployed to public testnet, so no real funds are at stake and it has not been audited.",
     },
   },
