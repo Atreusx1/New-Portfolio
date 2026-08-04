@@ -40,9 +40,20 @@ export interface ProjectDeckProps {
   /** Changing this scrolls back to the first page. */
   resetKey: string;
   label: string;
+  /**
+   * True while a detail view is open over the deck. The rail dims, blurs and
+   * stops taking input, which is what makes the panel above it read as *this
+   * card, opened* rather than as an unrelated thing that appeared.
+   */
+  dimmed?: boolean;
 }
 
-export const ProjectDeck = ({ children, resetKey, label }: ProjectDeckProps) => {
+export const ProjectDeck = ({
+  children,
+  resetKey,
+  label,
+  dimmed = false,
+}: ProjectDeckProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState(1);
   const [page, setPage] = useState(0);
@@ -100,16 +111,17 @@ export const ProjectDeck = ({ children, resetKey, label }: ProjectDeckProps) => 
   const atEnd = page >= pages - 1;
 
   return (
-    <div className="deck">
+    <div className="deck" data-dimmed={dimmed ? "true" : "false"}>
       <div
         className="deck-track"
         ref={trackRef}
         role="group"
         aria-label={label}
+        aria-hidden={dimmed || undefined}
         /* Focusable so the rail is keyboard-scrollable, which is the browser's
            own behaviour for an overflow container and better than reimplementing
            arrow-key handling on top of it. */
-        tabIndex={0}
+        tabIndex={dimmed ? -1 : 0}
       >
         {children}
       </div>

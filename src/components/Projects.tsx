@@ -1,26 +1,33 @@
 /**
  * Projects.tsx
  *
- * ── Stage 7: the section stopped growing ──
- * Eleven projects in a two-column grid was six rows of scroll, and eleven on a
- * phone. The fix is structural rather than cosmetic:
+ * ── Stage 8: detail arrives where you are looking ──
+ * The previous version opened detail in a drawer below the deck. On a short
+ * viewport that put the answer off-screen, so clicking appeared to do nothing,
+ * and the drawer's translucent surface over a live 3D scene was close to
+ * unreadable once you found it. Both problems come from treating detail as more
+ * page rather than as a change of state in the card you touched.
  *
- *  · Cards live in a paged horizontal rail (ProjectDeck), so the section has a
- *    fixed height no matter how many projects the filter matched.
- *  · Everything a card cannot hold moved into a drawer that opens below the
- *    rail on demand: the Kestrel and ChronoShield boards, the build toolkit's
- *    before/after table. Default state shows none of it, so the page is as
- *    short as it was before any of this existed.
- *  · The order book brief collapses to a single row.
+ * Now the deck sits on a *stage*: a positioned box the cards fill. Opening a
+ * project expands a view over that stage, scaling out of the clicked card's own
+ * centre, while the deck dims and blurs underneath. Nothing reflows, nothing
+ * moves down the page, and the panel is bounded by the space you were already
+ * looking at.
  *
- * One drawer at a time, deliberately. Two open boards is the vertical sprawl
- * this was meant to remove, and a reader comparing two projects is better
- * served by closing one than by scrolling past both.
+ * ── Every card opens ──
+ * Detail used to be a privilege of the two projects with boards, which made the
+ * affordance inconsistent and meant a card had to carry its full description in
+ * case it was one of the ones that could not expand. Now every card opens, so
+ * card copy can be trimmed to three lines and the full text lives in the view.
+ * That shortens the deck as a side effect of making it consistent.
+ *
+ * The view also carries prev/next, so a reader can go through the work without
+ * closing and reopening. Cheap to add and it turns a lookup into browsing.
  *
  * DEXOrderBook itself remains untouched.
  */
-import { useRef, useState } from "react";
-import { Github, ArrowUpRight, X } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { Github, ArrowUpRight, Maximize2 } from "lucide-react";
 import { projectsData, type Project } from "../data/projects";
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
@@ -28,10 +35,9 @@ import { DEXOrderBook } from "./Dexorderbook";
 import { Reveal } from "./motion/Reveal";
 import { TiltCard } from "./motion/TiltCard";
 import { Takeaway } from "./patterns/Takeaway";
-import { BeforeAfter } from "./patterns/BeforeAfter";
-import { ProjectBoard } from "./patterns/ProjectBoard";
 import { OrderBookBrief } from "./patterns/OrderBookBrief";
 import { ProjectDeck } from "./patterns/ProjectDeck";
+import { ProjectView } from "./patterns/ProjectView";
 
 const CATEGORIES = ["all", "web", "blockchain", "fullstack", "build-tools"] as const;
 const ALL_TABS = [...CATEGORIES, "dex"] as const;
@@ -40,14 +46,24 @@ type Tab = (typeof ALL_TABS)[number];
 const tabLabel = (tab: Tab): string =>
   tab === "dex" ? "DEX / Order Book" : tab === "build-tools" ? "Build tools" : tab;
 
-const hasDetail = (p: Project): boolean => !!p.board || !!p.comparison;
+const countFor = (tab: Tab): number =>
+  tab === "dex"
+    ? 0
+    : tab === "all"
+      ? projectsData.length
+      : projectsData.filter((p) => p.category === tab).length;
 
 export const Projects = () => {
   const t = useTheme();
   const [filter, setFilter] = useState<Tab>("dex");
-  const [openId, setOpenId] = useState<number | null>(null);
-  const isDexTab = filter === "dex";
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
 
+  const stageRef = useRef<HTMLDivElement>(null);
+  /** The button that opened the view, so focus can go back where it came from. */
+  const opener = useRef<HTMLElement | null>(null);
+
+  const isDexTab = filter === "dex";
   const filtered = isDexTab
     ? []
     : filter === "all"
@@ -55,16 +71,41 @@ export const Projects = () => {
       : projectsData.filter((p) => p.category === filter);
 
   /**
-   * The drawer collapses to zero height rather than unmounting, so its content
-   * has to survive the close in order to animate out. This holds the last
-   * project that was open purely so there is something to collapse.
+   * Expand origin: the clicked card's centre as a percentage of the stage. This
+   * is the whole trick behind the view looking like it grew out of that card
+   * rather than out of the middle of the section.
    */
-  const shown = useRef<Project | null>(null);
-  const open = filtered.find((p) => p.id === openId) ?? null;
-  if (open) shown.current = open;
+  const open = useCallback((i: number, el: HTMLElement) => {
+    const stage = stageRef.current;
+    const card = el.closest(".deck-card");
+    if (stage && card) {
+      const s = stage.getBoundingClientRect();
+      const c = card.getBoundingClientRect();
+      setOrigin({
+        x: ((c.left + c.width / 2 - s.left) / s.width) * 100,
+        y: ((c.top + c.height / 2 - s.top) / s.height) * 100,
+      });
+    }
+    opener.current = el;
+    setOpenIdx(i);
+  }, []);
 
-  const toggle = (p: Project): void =>
-    setOpenId((cur) => (cur === p.id ? null : p.id));
+  const close = useCallback(() => {
+    setOpenIdx(null);
+    opener.current?.focus({ preventScroll: true });
+    opener.current = null;
+  }, []);
+
+  const step = useCallback(
+    (delta: number) => {
+      setOpenIdx((cur) =>
+        cur === null ? cur : (cur + delta + filtered.length) % filtered.length,
+      );
+    },
+    [filtered.length],
+  );
+
+  const active = openIdx !== null ? (filtered[openIdx] ?? null) : null;
 
   return (
     <section id="projects" className="section">
@@ -76,44 +117,42 @@ export const Projects = () => {
           </h2>
         </Reveal>
 
-        {/* Tabs */}
+        {/* Filters. Counts sit in the pill so the size of each set is legible
+            before you commit to switching to it. */}
         <Reveal delay={0.06}>
-          <div
-            role="tablist"
-            aria-label="Project categories"
-            className="proj-tabs"
-          >
+          <div role="tablist" aria-label="Project categories" className="proj-tabs">
             {ALL_TABS.map((tab) => {
-              const active = filter === tab;
+              const isActive = filter === tab;
               const isDex = tab === "dex";
+              const count = countFor(tab);
               return (
                 <button
                   key={tab}
                   role="tab"
-                  aria-selected={active}
+                  aria-selected={isActive}
                   onClick={() => {
                     setFilter(tab);
-                    // A different list makes an open drawer meaningless.
-                    setOpenId(null);
+                    setOpenIdx(null);
                   }}
                   className="proj-tab"
                   style={{
-                    border: `1px solid ${active ? "transparent" : "var(--border)"}`,
-                    background: active ? t.accent : "transparent",
-                    color: active ? t.bg : isDex ? t.ac_(0.8) : t.fg_(0.5),
+                    border: `1px solid ${isActive ? "transparent" : "var(--border)"}`,
+                    background: isActive ? t.accent : "transparent",
+                    color: isActive ? t.bg : isDex ? t.ac_(0.8) : t.fg_(0.5),
                   }}
                 >
-                  {isDex && !active && (
+                  {isDex && !isActive && (
                     <span className="proj-tab-dot" aria-hidden="true" />
                   )}
                   {tabLabel(tab)}
+                  {!isDex && <span className="proj-tab-count">{count}</span>}
                 </button>
               );
             })}
           </div>
         </Reveal>
 
-        {/* DEX centerpiece */}
+        {/* DEX centrepiece */}
         {isDexTab && (
           <Reveal delay={0.1}>
             <Takeaway>
@@ -127,50 +166,46 @@ export const Projects = () => {
           </Reveal>
         )}
 
-        {/* Deck + drawer */}
+        {/* Deck and the view that opens over it */}
         {!isDexTab && (
           <Reveal delay={0.1}>
-            <ProjectDeck resetKey={filter} label={`${tabLabel(filter)} projects`}>
-              {filtered.map((project, i) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  index={i}
-                  open={openId === project.id}
-                  onToggle={() => toggle(project)}
-                />
-              ))}
-            </ProjectDeck>
+            <div className="pstage" ref={stageRef}>
+              <ProjectDeck
+                resetKey={filter}
+                label={`${tabLabel(filter)} projects`}
+                dimmed={active !== null}
+              >
+                {filtered.map((project, i) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    index={i}
+                    onOpen={(el) => open(i, el)}
+                  />
+                ))}
+              </ProjectDeck>
 
-            <div className="drawer" data-open={open ? "true" : "false"}>
-              <div className="drawer-inner">
-                {shown.current && (
-                  <div className="drawer-body">
-                    <div className="drawer-head">
-                      <span className="mono-label">{shown.current.title}</span>
-                      <button
-                        className="drawer-close"
-                        onClick={() => setOpenId(null)}
-                        aria-label="Close details"
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
-                    {shown.current.board && (
-                      <ProjectBoard
-                        data={shown.current.board}
-                        active={!!open}
-                      />
-                    )}
-                    {shown.current.comparison && (
-                      <BeforeAfter
-                        data={shown.current.comparison}
-                        active={!!open}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
+              {/* Click-off. Sits under the panel, over the dimmed deck. */}
+              {active && (
+                <button
+                  className="pstage-scrim"
+                  onClick={close}
+                  aria-label="Close detail"
+                  tabIndex={-1}
+                />
+              )}
+
+              {active && openIdx !== null && (
+                <ProjectView
+                  project={active}
+                  index={openIdx}
+                  total={filtered.length}
+                  origin={origin}
+                  onPrev={() => step(-1)}
+                  onNext={() => step(1)}
+                  onClose={close}
+                />
+              )}
             </div>
           </Reveal>
         )}
@@ -182,13 +217,11 @@ export const Projects = () => {
 const ProjectCard = ({
   project,
   index,
-  open,
-  onToggle,
+  onOpen,
 }: {
   project: Project;
   index: number;
-  open: boolean;
-  onToggle: () => void;
+  onOpen: (el: HTMLElement) => void;
 }) => {
   const t = useTheme();
   const [hovered, setHovered] = useState(false);
@@ -197,57 +230,47 @@ const ProjectCard = ({
   const hasLive = project.live && project.live !== "Not Live Yet";
 
   return (
-    <div className="deck-card" data-open={open ? "true" : "false"}>
-      <TiltCard style={{ height: "100%" }}>
+    <div className="deck-card">
+      <TiltCard className="pcard-shell" style={{ height: "100%" }}>
         <div
           className="pcard"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
-          {/* Meta row */}
+          {/* The index as a watermark rather than a label: it gives each card a
+              distinct silhouette at a glance without adding another line of
+              type competing with the title. */}
+          <span className="pcard-num" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+
           <div className="pcard-meta">
-            <span
-              className="data-text"
-              style={{ fontSize: "0.6rem", letterSpacing: "0.18em", color: t.fg_(0.28) }}
-            >
-              {String(index + 1).padStart(2, "0")}
-            </span>
             <span className="chip">{project.category}</span>
           </div>
 
-          <h3
-            className="pcard-title"
-            style={{ color: hovered || open ? t.accent : t.fg }}
-          >
+          <h3 className="pcard-title" style={{ color: hovered ? t.accent : t.fg }}>
             {project.title}
           </h3>
 
-          {/* The claim, before the evidence. */}
           <Takeaway>{project.takeaway}</Takeaway>
 
+          {/* Clamped: the full text is one click away in the view, and uniform
+              card height is what keeps the deck a predictable size. */}
           <p className="body-text pcard-desc">{project.description}</p>
 
-          {/* Tech chips. The full stack unfolds on hover. */}
           <div className="pcard-chips">
-            {(hovered ? project.technologies : project.technologies.slice(0, 4)).map(
-              (tech) => (
-                <span
-                  key={tech}
-                  className="chip"
-                  style={{ animation: hovered ? "fadeIn 0.3s ease" : undefined }}
-                >
-                  {tech}
-                </span>
-              ),
-            )}
-            {!hovered && project.technologies.length > 4 && (
+            {project.technologies.slice(0, 3).map((tech) => (
+              <span key={tech} className="chip">
+                {tech}
+              </span>
+            ))}
+            {project.technologies.length > 3 && (
               <span className="chip" style={{ borderStyle: "dashed" }}>
-                +{project.technologies.length - 4}
+                +{project.technologies.length - 3}
               </span>
             )}
           </div>
 
-          {/* Links + details */}
           <div className="pcard-foot">
             {hasGithub && (
               <a
@@ -255,7 +278,7 @@ const ProjectCard = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pcard-link"
-                style={{ color: hovered ? t.accent : t.fg_(0.45) }}
+                onClick={(e) => e.stopPropagation()}
               >
                 <Github size={13} /> Code
               </a>
@@ -266,30 +289,20 @@ const ProjectCard = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pcard-link"
-                style={{ color: hovered ? t.accent : t.fg_(0.45) }}
+                onClick={(e) => e.stopPropagation()}
               >
                 <ArrowUpRight size={13} /> Live
               </a>
             )}
-            {!hasGithub && !hasLive && (
-              <span
-                className="data-text"
-                style={{ fontSize: "0.62rem", color: t.fg_(0.28), letterSpacing: "0.1em" }}
-              >
-                PRIVATE
-              </span>
-            )}
 
-            {hasDetail(project) && (
-              <button
-                className="pcard-details"
-                onClick={onToggle}
-                aria-expanded={open}
-              >
-                {open ? "Hide detail" : "Detail"}
-                <span className="pcard-details-mark" aria-hidden="true" />
-              </button>
-            )}
+            <button
+              className="pcard-open"
+              onClick={(e) => onOpen(e.currentTarget)}
+              aria-label={`Open ${project.title} detail`}
+            >
+              <span>Detail</span>
+              <Maximize2 size={12} />
+            </button>
           </div>
         </div>
       </TiltCard>
