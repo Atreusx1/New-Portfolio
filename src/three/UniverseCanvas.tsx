@@ -1,5 +1,5 @@
 /**
- * UniverseCanvas.tsx — the only <Canvas> in the app.
+ * UniverseCanvas.tsx: the only <Canvas> in the app.
  *
  * Default-exported because this is the React.lazy() split point: the entire
  * three.js + R3F + postprocessing graph hangs off this module and must not
@@ -8,7 +8,7 @@
  * Stage 3 composes the full flight. Note what is *not* here: no per-section
  * mounting, no route awareness, no transition orchestration. Every motif is a
  * static object at a fixed z, and the camera flies past it. The continuity is
- * a consequence of the geometry, not of code coordinating between sections —
+ * a consequence of the geometry, not of code coordinating between sections ,
  * which is why there is no place for the sections to fall out of sync.
  *
  * ── The degradation ladder (stage 4) ──
@@ -17,8 +17,8 @@
  * it, and it now does so in graded steps rather than by dropping dpr and hoping:
  *
  *   step 0  everything on
- *   step 1  dpr pinned to 1, bloom off        — free, no GPU buffers touched
- *   step 2  effective tier down one notch     — every budget below re-derives
+ *   step 1  dpr pinned to 1, bloom off       : free, no GPU buffers touched
+ *   step 2  effective tier down one notch    : every budget below re-derives
  *   step 3  effective tier down two notches
  *
  * Steps 2 and 3 rebuild geometry, including the graph topology, so they are
@@ -27,7 +27,7 @@
  * has flip-flopped too many times to trust its own readings, and pins the
  * bottom rung so the scene cannot oscillate between quality levels forever.
  */
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
@@ -72,25 +72,6 @@ const UniverseCanvas = ({
   /** Once the monitor has proved unreliable, stop letting it climb back up. */
   const pinned = useRef(false);
 
-  /**
-   * All six motifs and the starfield build their full geometry the instant
-   * this canvas mounts — at the same moment Boot is animating, the WebSocket
-   * is connecting, and four kline fetches are in flight. That one-time
-   * startup cost was landing inside PerformanceMonitor's first sampling
-   * window and reading as a sustained frame-rate problem, tripping a false
-   * decline a couple of seconds in: dpr pinned to 1 and bloom killed
-   * (bloom is gated on step < 1, by stage 4's design), permanently dimming
-   * the globe for a burst that had already passed by the time the monitor
-   * finished evaluating it. Delaying when the monitor starts sampling fixes
-   * the cause rather than the symptom — the ladder itself is unchanged.
-   */
-  const MONITOR_GRACE_MS = 2600;
-  const [monitorArmed, setMonitorArmed] = useState(false);
-  useEffect(() => {
-    const id = window.setTimeout(() => setMonitorArmed(true), MONITOR_GRACE_MS);
-    return () => window.clearTimeout(id);
-  }, []);
-
   const onDecline = useCallback(() => {
     setStep((s) => Math.min(MAX_STEP, s + 1));
   }, []);
@@ -100,31 +81,9 @@ const UniverseCanvas = ({
     setStep((s) => Math.max(0, s - 1));
   }, []);
 
-  // I don't trust the monitor anymore
-  // ↓
-  // Force lowest quality permanently
-  // ↓
-  // step = 3
-  // ↓
-  // low tier
-  // ↓
-  // bloom off
-  // ↓
-  // globe looks dead
-
-  // const onFallback = useCallback(() => {
-  //   pinned.current = true;
-  //   setStep(MAX_STEP);
-  // }, []);
-
-  //now its I don't trust the monitor anymore
-  // ↓
-  // Stop trusting it
-  // ↓
-  // Keep current quality
-
   const onFallback = useCallback(() => {
     pinned.current = true;
+    // setStep(MAX_STEP);
   }, []);
 
   // Everything below derives from `step`. Kept as derivations rather than as
@@ -139,7 +98,7 @@ const UniverseCanvas = ({
 
   /**
    * Pointer repulsion is a hover effect, so it is fine-pointer only, and it is
-   * motion, so prefers-reduced-motion turns it off outright — the same two
+   * motion, so prefers-reduced-motion turns it off outright: the same two
    * gates useQuality already applies everywhere else. Probed once: neither
    * answer can change without a reload.
    */
@@ -151,15 +110,6 @@ const UniverseCanvas = ({
   // It is also the first thing to go when the frame budget slips.
   const bloomEnabled =
     isDark && !reducedMotion && effectiveTier !== "low" && step < 1;
-
-  useEffect(() => {
-    console.log({
-      step,
-      bloomEnabled,
-      effectiveTier,
-      dpr,
-    });
-  }, [step, bloomEnabled, effectiveTier, dpr]);
 
   const budget = Math.round(
     PARTICLE_BUDGET[effectiveTier] * (reducedMotion ? 0.6 : 1),
@@ -175,7 +125,7 @@ const UniverseCanvas = ({
       aria-hidden="true"
       dpr={dpr}
       // 'demand' means a reduced-motion visitor renders a handful of frames and
-      // then the GPU goes idle — a genuine battery win, not a token gesture.
+      // then the GPU goes idle: a genuine battery win, not a token gesture.
       frameloop={reducedMotion ? "demand" : "always"}
       gl={{
         antialias: false,
@@ -206,7 +156,7 @@ const UniverseCanvas = ({
       }}
     >
       <Suspense fallback={null}>
-        {flying && monitorArmed && (
+        {flying && (
           <PerformanceMonitor
             onDecline={onDecline}
             onIncline={onIncline}

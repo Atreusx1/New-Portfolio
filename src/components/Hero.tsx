@@ -1,8 +1,8 @@
 /**
- * Hero.tsx — redesigned.
+ * Hero.tsx: redesigned.
  *
  * The old hero was a wall of terminal. The new one is one statement and
- * one proof: a display headline, a single readable subtitle, two CTAs —
+ * one proof: a display headline, a single readable subtitle, two CTAs , 
  * and beneath them a slim glass strip of *real* live market data
  * (Binance WebSocket tickers + sparklines + Pyth oracle basis). The full
  * DEX terminal still lives in Projects → DEX tab; the hero just proves
@@ -231,7 +231,7 @@ export const Hero = () => {
           builds on-chain.
         </h1>
 
-        {/* Subtitle — one sentence, readable width */}
+        {/* Subtitle: one sentence, readable width */}
         <p
           className="body-text"
           style={{
@@ -241,8 +241,9 @@ export const Hero = () => {
             fontSize: "1.0313rem",
           }}
         >
-          Engineer of Web3 systems — building secure backends, smart contracts,
-          and intuitive user experiences.
+          Solidity and full-stack, three years in. Right now that means
+          Kestrel Protocol: an ERC-4626 vault and tiered-timelock governance,
+          covered by fuzz and invariant tests.
         </p>
 
         {/* CTAs */}
@@ -268,7 +269,7 @@ export const Hero = () => {
         </div>
       </div>
 
-      {/* Live market strip — the proof the wires are real */}
+      {/* Live market strip: the proof the wires are real */}
       <div
         className="glass"
         style={{
@@ -335,7 +336,7 @@ export const Hero = () => {
                   marginBottom: "0.3rem",
                 }}
               >
-                {tk.price ? `$${fmtPrice(tk.price)}` : "—"}
+                {tk.price ? `$${fmtPrice(tk.price)}` : "···"}
               </div>
               <svg
                 width="100%"
@@ -379,12 +380,12 @@ export const Hero = () => {
           </span>{" "}
           {live ? "Binance WS live" : "reconnecting"}
         </span>
-        <span>Pyth oracle {pythEth ? `$${fmtPrice(pythEth.price)}` : "—"}</span>
+        <span>Pyth oracle {pythEth ? `$${fmtPrice(pythEth.price)}` : "···"}</span>
         <span>
           basis{" "}
           {basisBps !== null
             ? `${basisBps >= 0 ? "+" : ""}${basisBps.toFixed(1)} bps`
-            : "—"}
+            : "···"}
         </span>
       </div>
 

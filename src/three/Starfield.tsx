@@ -1,17 +1,17 @@
 /**
- * Starfield.tsx — the space on the other side of the globe.
+ * Starfield.tsx: the space on the other side of the globe.
  *
  * Without this, breaking through the shell delivers you into an empty black
  * page and the dive reads as "the graphic went away" rather than "we arrived
  * somewhere". It fades in from leg 0.34, so deep space is already visible
- * through the widening gaps in the shell before the camera reaches them —
+ * through the widening gaps in the shell before the camera reaches them , 
  * that overlap is the whole trick.
  *
  * Stage 3 promoted it from a leg-1 destination to the ambient backdrop of the
  * entire corridor: once faded in, it stays, and it re-centres on the camera
  * every frame so the flight never outruns it. A fixed starfield at the origin
  * would be 100 units behind you by Contact, and deep space would simply run
- * out — the one artefact that would give away that the corridor is finite.
+ * out: the one artefact that would give away that the corridor is finite.
  */
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -102,7 +102,7 @@ export const Starfield = ({
     mat.uniforms.uTwinkle.value = still ? 0 : 1;
     mat.uniforms.uPixelRatio.value = dpr;
     mat.needsUpdate = true;
-    // The one surface that should stay quieter on paper — it is dust sitting
+    // The one surface that should stay quieter on paper: it is dust sitting
     // directly behind body copy for the whole flight, and the only motif with
     // no panel or scrim in front of it. Handled by lightGain on the material
     // (0.7) rather than by discounting the peak, so the dark value is now the

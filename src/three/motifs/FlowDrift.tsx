@@ -1,8 +1,8 @@
 /**
- * FlowDrift.tsx — About (waypoint 1).
+ * FlowDrift.tsx: About (waypoint 1).
  *
  * The first thing on the other side of the shattered globe. A loose volume of
- * particles whose positions are `home + flowField(home, t) * amplitude` — the
+ * particles whose positions are `home + flowField(home, t) * amplitude`: the
  * ported FlowField behaviour exactly, just in three axes.
  *
  * This is the one motif where the CPU does the work per frame rather than the
@@ -15,12 +15,12 @@
  *
  * ── Settle time (stage 4) ──
  * The section header says this is what is on the other side of the shattered
- * globe, but a uniform noise field does not read as *debris* — it reads as
+ * globe, but a uniform noise field does not read as *debris*: it reads as
  * weather. So every particle now has two anchors and its own clock:
  *
  *   anchor(i) = mix(origin(i), home(i), settled(i))
  *
- * `origin` is a point on a shell where the globe used to be — literally six
+ * `origin` is a point on a shell where the globe used to be: literally six
  * units in front of this motif's centre, which is where the hero globe sits in
  * world space. `home` is its final position in the ambient volume. `settled`
  * runs 0 → 1 across the flight with a per-particle delay, so at any moment part
@@ -69,7 +69,7 @@ const BOX = { w: 26, h: 16, d: 20 };
 /**
  * Where the wreckage comes from. The hero globe lives at world z = 0 and this
  * motif's group sits at waypointZ(1) = -6, so +6 on the local z axis is exactly
- * the globe's position — the debris starts where the thing that broke was.
+ * the globe's position: the debris starts where the thing that broke was.
  */
 const ORIGIN_Z = 6;
 const ORIGIN_RADIUS = 2.7;
@@ -81,7 +81,7 @@ const SETTLE_SPREAD = 0.55;
 
 /**
  * The handoff into HexBelt. Particles bias toward six-fold spokes and discrete
- * rings — near enough to a hex lattice that the eye reads the next motif
+ * rings: near enough to a hex lattice that the eye reads the next motif
  * beginning to form in the previous one's material, without either motif
  * knowing the other exists.
  */
@@ -194,7 +194,7 @@ export const FlowDrift = ({
     applyParticleTheme(mat, accentRaw, isDark);
     mat.uniforms.uTwinkle.value = still ? 0 : 1;
     mat.uniforms.uPixelRatio.value = dpr;
-    // Single value for both themes — light mode's ink multiplier is on the
+    // Single value for both themes: light mode's ink multiplier is on the
     // material now (uLightGain). Discounting here as well was cancelling it out.
     peak.current = 0.85;
     invalidate();
@@ -257,7 +257,7 @@ export const FlowDrift = ({
       const ay = origins[i3 + 1] + (hy - origins[i3 + 1]) * s;
       const az = origins[i3 + 2] + (hz - origins[i3 + 2]) * s;
 
-      // Sampled at the anchor, as the original field was — so the motion stays
+      // Sampled at the anchor, as the original field was: so the motion stays
       // a displacement rather than becoming an integration with drift.
       const f = field.sample(ax, ay, az, time);
       // Debris that has not joined the ambient current carries less of it.

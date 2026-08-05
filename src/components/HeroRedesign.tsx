@@ -1,11 +1,11 @@
 /**
- * HeroRedesign.tsx — the hero, rebuilt around the globe instead of on top of it.
+ * HeroRedesign.tsx: the hero, rebuilt around the globe instead of on top of it.
  *
  * ── What changed and why ──
  * The previous hero was a centred column: eyebrow, headline, subtitle, buttons,
  * then a full-width glass strip of tickers, all stacked down the middle of the
  * screen. That layout was designed when the background was a decoration. It no
- * longer is — the globe is three shells, a drawn phyllotactic lattice, rim
+ * longer is: the globe is three shells, a drawn phyllotactic lattice, rim
  * light and a pointer field, and it sits dead centre of the viewport at roughly
  * 68% of its height. A centred column puts every word of copy directly on top
  * of the one object the section exists to show.
@@ -31,7 +31,7 @@
  *     and covering one.
  *  2. **The centre column is empty and stays empty.** It is the widest single
  *     region in the layout and it holds nothing. That is the negative space
- *     doing the work — the eye lands there because there is nothing else there.
+ *     doing the work: the eye lands there because there is nothing else there.
  *  3. **The tickers became an instrument rail.** Four rows on the right edge,
  *     right-aligned, tabular, hairline-separated, with the sparkline running
  *     the full width of its row. A vertical tape reads as a market feed; the
@@ -39,7 +39,7 @@
  *
  * ── Semantics fixed on the way past ──
  * The old hero had two `<h1>` elements. This has one, with the two type tiers
- * as spans inside it — and it finally uses `.display-sub`, which has been
+ * as spans inside it: and it finally uses `.display-sub`, which has been
  * defined in index.css all along with a comment describing exactly this job
  * while the old hero used a second `.display-xl` at 0.3 alpha instead.
  *
@@ -47,7 +47,7 @@
  * Carried over verbatim: the Binance WebSocket ticker stream with its reconnect
  * loop, the 15-minute kline poll for sparkline history, and the Pyth oracle
  * basis. It still mounts immediately rather than waiting for the boot screen,
- * which is the point — see motion/Entrance.tsx.
+ * which is the point: see motion/Entrance.tsx.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUpRight, ArrowDown } from "lucide-react";
@@ -217,7 +217,7 @@ export const HeroRedesign = () => {
    * Entrance state for one stage. Transitions live in CSS (`.hero-step`); this
    * only flips the end values.
    *
-   * The rail animates as a single panel rather than row by row — it is a sheet
+   * The rail animates as a single panel rather than row by row: it is a sheet
    * of glass, and a sheet of glass does not arrive in four pieces. A per-row
    * stagger would also have had to share the `transition-delay` the tick flash
    * uses, which would have made every price update feel a fifth of a second
@@ -240,7 +240,7 @@ export const HeroRedesign = () => {
               style={{ background: t.accent }}
               aria-hidden="true"
             />
-            Full-stack · Blockchain · Pune, IN
+            Smart Contracts · Backend · Frontend
           </div>
 
           <h1 className="hero-headline">
@@ -252,13 +252,20 @@ export const HeroRedesign = () => {
               )}
             </span>
             <span className="display-sub hero-claim hero-step" style={step(3)}>
-              builds on-chain.
+              builds on-chain systems.
             </span>
           </h1>
 
+          {/*
+            Stage 6. The old line was "Engineer of Web3 systems, building secure
+            backends, smart contracts, and intuitive user experiences", which is
+            three adjectives and no facts, and stays true if you paste any other
+            developer's name above it. This names the actual project, the actual
+            standard, and the actual test discipline.
+          */}
           <p className="body-text hero-blurb hero-step" style={step(4)}>
-            Engineer of Web3 systems — building secure backends, smart contracts,
-            and intuitive user experiences.
+            2+ years across smart contracts, APIs, and frontend with a habit of
+            testing the parts that actually matter.
           </p>
 
           <div className="hero-actions hero-step" style={step(5)}>
@@ -309,7 +316,7 @@ export const HeroRedesign = () => {
                 <div className="tape-line">
                   <span className="tape-pair">{tk.pair}</span>
                   <span className="tape-price">
-                    {tk.price ? fmtPrice(tk.price) : "—"}
+                    {tk.price ? fmtPrice(tk.price) : "···"}
                   </span>
                 </div>
                 <div className="tape-line tape-line-under">
@@ -328,10 +335,7 @@ export const HeroRedesign = () => {
                       vectorEffect="non-scaling-stroke"
                     />
                   </svg>
-                  <span
-                    className="tape-change"
-                    data-up={up ? "true" : "false"}
-                  >
+                  <span className="tape-change" data-up={up ? "true" : "false"}>
                     {up ? "+" : ""}
                     {tk.change}%
                   </span>
@@ -353,13 +357,13 @@ export const HeroRedesign = () => {
           Binance WS {live ? "live" : "reconnecting"}
         </span>
         <span className="hero-stat">
-          Pyth ETH/USDC {pythEth ? `$${fmtPrice(pythEth.price)}` : "—"}
+          Pyth ETH/USDC {pythEth ? `$${fmtPrice(pythEth.price)}` : "···"}
         </span>
         <span className="hero-stat">
           Basis{" "}
           {basisBps !== null
             ? `${basisBps >= 0 ? "+" : ""}${basisBps.toFixed(1)} bps`
-            : "—"}
+            : "···"}
         </span>
 
         <a href="#about" className="hero-scroll" aria-label="Scroll to about">

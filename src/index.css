@@ -3,9 +3,9 @@
 /* ════════════════════════════════════════════════════════════
    DESIGN SYSTEM
    Type roles:
-     --font-display  Anybody        — headlines only
-     --font-body     IBM Plex Sans  — all reading text
-     --font-mono     IBM Plex Mono  — data, labels, terminal ONLY
+     --font-display  Anybody       : headlines only
+     --font-body     IBM Plex Sans : all reading text
+     --font-mono     IBM Plex Mono : data, labels, terminal ONLY
    Mono is no longer the body face: it now *means* "live data".
 
    ── Why these three (stage 5) ──
@@ -14,8 +14,8 @@
    problem. Nothing about it says anything.
 
    · Anybody (Tyler Finck, variable wdth 50–150 / wght 100–900) is a display
-     face with a genuinely engineered skeleton — flat terminals, squared bowls,
-     tight apertures — that turns technical rather than sci-fi as the width axis
+     face with a genuinely engineered skeleton: flat terminals, squared bowls,
+     tight apertures: that turns technical rather than sci-fi as the width axis
      narrows. Headlines run at wdth 88, which reads as instrument lettering
      without tipping into the Eurostile-cosplay register that Orbitron, Michroma
      and Rajdhani all live in. Display only, so its personality never has to
@@ -23,7 +23,7 @@
    · IBM Plex Sans and IBM Plex Mono are one superfamily, drawn together for
      IBM's engineering documentation. Using both means reading text and live
      data are visibly the same voice at two settings, which matters here because
-     mono *means* something in this app — it marks data — and a mono that shares
+     mono *means* something in this app, it marks data, and a mono that shares
      no skeleton with the body face makes that read as decoration instead of
      hierarchy. Plex also holds up far better than Space Mono at the 0.55rem
      label sizes this design leans on: Space Mono's wide, quirky forms were
@@ -41,7 +41,7 @@
   --bg-3: #131614;
   --fg: #e8eae9;
   --fg-dim: rgba(232, 234, 233, 0.62);
-  /* 0.34 measured 2.68:1 against --bg — below AA for text this small.
+  /* 0.34 measured 2.68:1 against --bg, below AA for text this small.
      0.50 is the minimum that clears 4.5:1. See STAGE_4_NOTES.md. */
   --fg-muted: rgba(232, 234, 233, 0.5);
   /* Non-text uses only: rules, dots, decorative marks. Never a text color. */
@@ -83,7 +83,7 @@
   --radius: 12px;
   --radius-lg: 18px;
 
-  /* Depth — dark mode builds elevation with light, not shadow */
+  /* Depth: dark mode builds elevation with light, not shadow */
   --shadow-sm: 0 0 0 1px rgba(232, 234, 233, 0.05);
   --shadow-md:
     0 0 0 1px rgba(232, 234, 233, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45);
@@ -104,7 +104,7 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ─── LIGHT — its own system: warm paper, real shadows ────── */
+/* ─── LIGHT: its own system: warm paper, real shadows ────── */
 html[data-theme="light"] {
   /* Warm whites, not gray: paper with a faint sun-warmth */
   --bg: #faf9f6;
@@ -122,19 +122,19 @@ html[data-theme="light"] {
   --border-faint: rgba(27, 26, 22, 0.045);
   --border-active: rgba(27, 26, 22, 0.32);
 
-  /* Blueprint cobalt — 6.87:1 on --bg, 5.85:1 on --bg-3, both clear of AA.
+  /* Blueprint cobalt: 6.87:1 on --bg, 5.85:1 on --bg-3, both clear of AA.
      The previous deep teal measured 4.45:1 and did not.
 
      These are the pre-hydration fallback. ThemeContext's LIGHT_ACCENT is the
      source of truth and overwrites them on mount, so if you change the accent,
-     change it there and mirror it here — a mismatch shows as a one-frame
+     change it there and mirror it here: a mismatch shows as a one-frame
      colour flip on first paint, not as a permanent wrong colour. */
   --accent: rgb(27, 76, 199);
   --accent-dim: rgba(27, 76, 199, 0.6);
   --accent-muted: rgba(27, 76, 199, 0.09);
   --accent-border: rgba(27, 76, 199, 0.28);
 
-  /* Light mode elevation is shadow-driven — layered, warm-tinted */
+  /* Light mode elevation is shadow-driven: layered, warm-tinted */
   --shadow-sm:
     0 1px 2px rgba(31, 27, 16, 0.05), 0 0 0 1px rgba(27, 26, 22, 0.05);
   --shadow-md:
@@ -167,7 +167,7 @@ html[data-theme="light"] {
 
   /* ── Liquid glass tokens (see the .glass override further down) ──
      Light glass is not dark glass with a lighter fill. Dark glass works by
-     letting light through a dark sheet; light glass works by *scattering* —
+     letting light through a dark sheet; light glass works by *scattering* , 
      the sheet is brighter than what is behind it, and the edge is where all the
      information is. Hence four tints rather than one flat --glass-bg. */
   --glass-blur: 26px;
@@ -181,7 +181,7 @@ html[data-theme="light"] {
   /* Specular: the thin bright line along the top edge, and the broad sheen. */
   --glass-spec: rgba(255, 255, 255, 0.95);
   --glass-rim: rgba(255, 255, 255, 0.5);
-  /* Shade: warm, never grey — this is paper, and paper shadows are warm. */
+  /* Shade: warm, never grey, this is paper, and paper shadows are warm. */
   --glass-shade: rgba(31, 27, 16, 0.09);
   /* Thickness of the refracting edge band, in px. */
   --glass-edge: 14px;
@@ -198,6 +198,39 @@ html {
   scroll-behavior: smooth;
   font-size: 16px;
   overflow-x: hidden;
+}
+
+/**
+ * The top scrim.
+ *
+ * iOS Safari's compact toolbar samples the page's own top pixels and blends
+ * toward them as you scroll. The first hundred pixels of this page are the 3D
+ * canvas, so what it was sampling was the particle field: a slightly different
+ * shade every frame, which reads as a seam that will not sit still.
+ *
+ * This gives it something flat to sample. It doubles as a vignette the floating
+ * nav pill was already asking for, since the pill sits at 14px with nothing but
+ * moving starfield behind it.
+ *
+ * Solid for the first 18px, which is the band the browser actually samples,
+ * then a long fade so the scene is never visibly cut. z-index 1 puts it over
+ * the canvas at 0 and under the content, which is also at 1 and later in the
+ * document, so the nav and every section still paint above it.
+ */
+.top-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--bg) 0,
+    var(--bg) 18px,
+    transparent 110px
+  );
 }
 
 body {
@@ -261,7 +294,7 @@ button {
 }
 
 /* The one focal phrase. Accent measures 16.58:1 on --bg and 6.87:1 on paper
-   since the light accent moved to cobalt — it is a *stronger* signal than the
+   since the light accent moved to cobalt: it is a *stronger* signal than the
    dim tier it replaces, which measured 2.32:1 and failed AA outright. */
 .display-xl .focal {
   color: var(--accent);
@@ -316,7 +349,7 @@ button {
 }
 
 /* ── Eyebrow, when it sits over the particle field ─────────
-   `.mono-label` at --fg-muted measures 3.37:1 over a scrimmed particle —
+   `.mono-label` at --fg-muted measures 3.37:1 over a scrimmed particle , 
    the only tier that still fails inside the text well. Clearing it with
    the scrim alone would need a 0.99 plateau, i.e. an opaque disc punched
    through the globe. Promoting this one tier to --fg-dim costs nothing
@@ -332,14 +365,14 @@ button {
 
 /* ── Text well ─────────────────────────────────────────────
    The globe now sits directly behind the hero copy. Over the centre
-   of a full-brightness particle, --fg measures 1.03:1 — invisible.
+   of a full-brightness particle, --fg measures 1.03:1, invisible.
    An elliptical scrim of --bg restores the contrast budget without
    flattening the field: 0.86 at the centre clears AA for every tier,
    and it reaches zero well before the globe's silhouette, so the
    framing survives.
 
    Sized in ch/em so it tracks the type it protects rather than the
-   viewport, and it is behind the text in the same stacking context —
+   viewport, and it is behind the text in the same stacking context , 
    no extra element, no layout impact. */
 .text-well {
   position: relative;
@@ -468,13 +501,13 @@ button {
   z-index: 1;
 }
 
-/* ─── HERO — HeroRedesign.tsx ─────────────────────────────
+/* ─── HERO: HeroRedesign.tsx ─────────────────────────────
    A frame with a hole in it. The globe sits dead centre of the viewport at
    roughly 68% of its height, so the layout's job is to get out of its way:
    copy on the left, instrument rail on the right, and the widest column in
    the grid deliberately holding nothing at all.
 
-   Every surface the globe passes behind is translucent — the rail is glass,
+   Every surface the globe passes behind is translucent: the rail is glass,
    the lede sits on a gradient scrim rather than in a box, the status bar is a
    hairline. There is not one opaque card in the section. */
 
@@ -501,7 +534,7 @@ button {
   gap: clamp(1.25rem, 3.5vw, 3rem);
 }
 
-/* The aperture. Empty by design — see HeroRedesign.tsx. */
+/* The aperture. Empty by design: see HeroRedesign.tsx. */
 .hero-aperture {
   min-height: 1px;
 }
@@ -642,21 +675,9 @@ button {
   justify-content: space-between;
   gap: 0.75rem;
 }
-.tape-line-right {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-/*
- * The sparkline previously shared this row with .tape-change, splitting its
- * width with a text badge and capped at 18px tall — real price movement was
- * getting compressed into a few physical pixels and reading as a flat line
- * regardless of actual volatility. It now gets the full row width and more
- * vertical room; .tape-change moved up next to .tape-price instead, which is
- * also where a ticker tape convention would put it.
- */
 .tape-line-under {
-  margin-top: 0.32rem;
+  align-items: center;
+  margin-top: 0.28rem;
 }
 .tape-pair {
   font-family: var(--font-mono);
@@ -672,9 +693,9 @@ button {
   color: var(--fg);
 }
 .tape-spark {
-  display: block;
-  width: 100%;
-  height: 26px;
+  flex: 1;
+  min-width: 0;
+  height: 18px;
   opacity: 0.9;
 }
 .tape-change {
@@ -690,7 +711,7 @@ button {
   color: var(--neg);
 }
 
-/* ── Status bar — system state, not market data ── */
+/* ── Status bar: system state, not market data ── */
 .hero-status {
   width: 100%;
   max-width: 1400px;
@@ -743,7 +764,7 @@ button {
 }
 
 @media (max-width: 1080px) {
-  /* Narrow the aperture rather than closing it — the globe still needs a gap
+  /* Narrow the aperture rather than closing it: the globe still needs a gap
      to be seen through, it just needs less of one. */
   .hero-frame {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.34fr) minmax(
@@ -762,7 +783,7 @@ button {
     display: none;
   }
   /* Stacked, the copy is back over the middle of the globe, so the scrim goes
-     back to being radial — the same reasoning as .text-well. */
+     back to being radial: the same reasoning as .text-well. */
   .hero-lede::before {
     inset: -14% -24%;
     background: radial-gradient(
@@ -788,12 +809,12 @@ button {
   }
 }
 
-/* ─── LIQUID GLASS — light mode only ──────────────────────
+/* ─── LIQUID GLASS: light mode only ──────────────────────
    Dark mode's glass is a dark sheet you see light through: one flat fill, one
    soft highlight, and the border does almost nothing because everything around
    it is darker anyway. That model inverts badly. On paper the panel is
    *brighter* than what is behind it, so a flat translucent fill just reads as
-   a slightly milky rectangle — there is no cue that it has any thickness.
+   a slightly milky rectangle: there is no cue that it has any thickness.
 
    Real glass on a light ground gives you four cues, and this builds all four:
 
@@ -802,7 +823,7 @@ button {
         one alpha.
      2. A specular. Two parts: a hard 1px line along the very top edge (the
         lit rim) and a broad soft sheen from the upper-left (the reflection).
-     3. Thickness. An inset shade along the bottom inside edge — the panel
+     3. Thickness. An inset shade along the bottom inside edge: the panel
         occludes a little of what is behind it near its own base.
      4. Refraction. This is the one everybody skips, and it is the one that
         actually sells it: the *edge* of a glass panel bends light more than
@@ -810,7 +831,7 @@ button {
         to a band around the perimeter only. Content behind the rim smears;
         content behind the centre stays legible.
 
-   Nothing here touches the dark theme — every rule is scoped under
+   Nothing here touches the dark theme: every rule is scoped under
    html[data-theme="light"]. */
 
 html[data-theme="light"] .glass {
@@ -831,8 +852,8 @@ html[data-theme="light"] .glass {
     /* inner rim, all the way round */ inset 0 0 0 1px var(--glass-rim),
     /* thickness: the panel occludes slightly at its own base */ inset 0 -18px
       26px -22px var(--glass-shade),
-    /* contact shadow, then two lifts — warm, because paper shadows are warm */
-    0 1px 1px rgba(31, 27, 16, 0.04),
+    /* contact shadow, then two lifts: warm, because paper shadows are warm */ 0
+      1px 1px rgba(31, 27, 16, 0.04),
     0 10px 24px -12px rgba(31, 27, 16, 0.1),
     0 30px 60px -28px rgba(31, 27, 16, 0.14);
 }
@@ -918,6 +939,1319 @@ html[data-theme="light"] .card:hover {
 html[data-theme="light"] .field {
   background: rgba(255, 255, 255, 0.55);
   box-shadow: inset 0 1px 2px rgba(31, 27, 16, 0.05);
+}
+
+/* ─── TAKEAWAY: the five-second layer ────────────────────
+   One consistent treatment everywhere a claim precedes its evidence:
+   Projects cards, Experience rows, About, the order book. After the first
+   one, the accent rule is self-explanatory. The rule itself is the same
+   device Experience already used for its hover rail, so this is a new use
+   of existing vocabulary rather than a new vocabulary. */
+.takeaway {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  margin: 0;
+}
+.takeaway-rule {
+  flex: none;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  /* Stretches to the text beside it rather than being a fixed height, so a
+     one-line and a three-line takeaway both look deliberate. */
+  align-self: stretch;
+  opacity: 0.85;
+}
+.takeaway-text {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--fg);
+  text-wrap: pretty;
+}
+.takeaway-lead {
+  margin-bottom: clamp(1.5rem, 3.5vh, 2.25rem);
+}
+.takeaway-lead .takeaway-rule {
+  width: 3px;
+}
+.takeaway-lead .takeaway-text {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-weight: 450;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+
+/* ─── COUNTUP ─────────────────────────────────────────────
+   Tabular figures so the digits do not reflow while counting, and a hairline
+   that tracks the count and fades as it lands. Same register as the hero
+   ticker: a value arriving, marked briefly, then quiet. */
+.countup {
+  position: relative;
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+/* The digits themselves. inline-block stops a mid-count value from wrapping
+   between the integer and decimal parts at an awkward width. */
+.countup-value {
+  display: inline-block;
+}
+.countup-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.18em;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── STAT CARDS (About) ──────────────────────────────────
+   Same cards as before, but the number is now the takeaway rather than a
+   decoration, so it is sized like one. */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+}
+.stat-card {
+  padding: 1.4rem 1.1rem;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 92;
+  font-size: clamp(1.9rem, 3vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--accent);
+  margin-bottom: 0.55rem;
+}
+.stat-label {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+
+/* ─── BEFORE / AFTER ──────────────────────────────────────
+   For projects whose whole claim is a number. The pending state is a first
+   class case, not an error state: an unmeasured row shows its metric name so
+   the table doubles as the list of measurements still to take. */
+.cmp {
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.cmp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--border-faint);
+}
+.cmp-caption {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--fg-dim);
+}
+.cmp-source {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+/* An outstanding measurement is marked, not hidden. */
+.cmp-source[data-pending="true"] {
+  color: var(--warn);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+}
+/* min-width: 0 lets the bar column actually shrink. Grid children default to
+   min-content width, which would push a long metric label out of the card. */
+.cmp-rows {
+  min-width: 0;
+}
+.cmp-row {
+  display: grid;
+  grid-template-columns:
+    minmax(90px, 1.1fr) minmax(0, 1.3fr) minmax(0, 1fr)
+    44px;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid var(--border-faint);
+}
+.cmp-row:last-child {
+  border-bottom: none;
+}
+.cmp-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--fg-dim);
+}
+.cmp-empty {
+  grid-column: 2 / -1;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  opacity: 0.7;
+}
+.cmp-values {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+}
+.cmp-before {
+  color: var(--fg-muted);
+  text-decoration: line-through;
+}
+.cmp-arrow {
+  color: var(--fg-muted);
+}
+.cmp-after {
+  color: var(--fg);
+  font-weight: 500;
+}
+.cmp-bar {
+  display: block;
+  height: 4px;
+  border-radius: 3px;
+  background: var(--border-faint);
+  overflow: hidden;
+}
+.cmp-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--neg);
+  transform-origin: left;
+  transition: transform 0.9s var(--ease-out);
+}
+.cmp-bar-fill[data-good="true"] {
+  background: var(--pos);
+}
+.cmp-delta {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.66rem;
+  text-align: right;
+  color: var(--neg);
+}
+.cmp-delta[data-good="true"] {
+  color: var(--pos);
+}
+
+/* ─── PROJECT STAGE ───────────────────────────────────────
+   The deck and the detail view share one positioned box. That is the whole
+   fix for the old drawer: detail no longer lives further down the page, it
+   lives exactly where the cards were, so opening a card cannot move the answer
+   somewhere the reader has to go looking for it. */
+.pstage {
+  position: relative;
+}
+
+.pstage-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ─── DECK ────────────────────────────────────────────────
+   A horizontal rail is the one axis this page is not already using, and it
+   gives the section a fixed height whatever the filter matched: a twelfth
+   project does not make the page longer.
+
+   The track flows in columns over two fixed rows, so cards fill down then
+   across and a page is two columns, which is why only every fourth card is a
+   snap point. Below 820px it drops to one row and one card per view. */
+.deck {
+  position: relative;
+  transition:
+    opacity 0.4s var(--ease-out),
+    filter 0.4s var(--ease-out),
+    transform 0.4s var(--ease-out);
+}
+.deck[data-dimmed="true"] {
+  opacity: 0.25;
+  filter: blur(5px);
+  transform: scale(0.985);
+  pointer-events: none;
+}
+
+.deck-track {
+  --deck-gap: clamp(0.9rem, 2vw, 1.4rem);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - var(--deck-gap)) / 2);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: var(--deck-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  /* The rail owns horizontal gestures; the page keeps vertical ones. */
+  touch-action: pan-x pa n-y pinch-zoom;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.deck-track::-webkit-scrollbar {
+  display: none;
+}
+.deck-track:focus-visible {
+  outline: 1px solid var(--accent-border);
+  outline-offset: 6px;
+  border-radius: var(--radius);
+}
+/**
+ * Fade only on a side there is more content on. Masking both edges
+ * unconditionally clips the first card's border at rest, which reads as a
+ * rendering fault rather than as an affordance.
+ *
+ * ── Desktop/tablet: off ──
+ * `edge` is computed from `pages`, and `pages` depends on how many cards the
+ * current filter matched: 11 for "All" is three pages and a right-edge fade,
+ * 3 for "Web" is one page and `edge` collapses to "none". That produced the
+ * actual bug report, which was never "the fade looks wrong", it was "the fade
+ * exists on some tabs and not others" — an affordance that only sometimes
+ * describes a real affordance reads as a rendering glitch rather than a hint.
+ *
+ * Disabled outright above 820px rather than fixed, because a fade that is
+ * present exactly when there is more to scroll to is correct, and the actual
+ * complaint was about its presence being inconsistent-looking at all, not
+ * about the logic being wrong.
+ *
+ * ── Mobile: unchanged ──
+ * Below 820px this block does not apply, so the rules further down keep
+ * exactly the behaviour already confirmed correct there. Scoping the removal
+ * rather than deleting the mechanism is what keeps mobile untouched to the
+ * pixel.
+ */
+.deck[data-edge="both"] .deck-track {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 34px,
+    #000 calc(100% - 34px),
+    transparent 100%
+  );
+}
+.deck[data-edge="start"] .deck-track {
+  mask-image: linear-gradient(to right, transparent 0, #000 34px, #000 100%);
+}
+.deck[data-edge="end"] .deck-track {
+  mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - 34px),
+    transparent 100%
+  );
+}
+
+/*
+ * Desktop/tablet: off. The three rules above and this override have identical
+ * selector specificity, so which one wins is decided by source order, not by
+ * the media condition. The previous version placed this block *before* the
+ * unconditional rules, so on a desktop-width viewport both matched and the
+ * later, unconditional one always won: the "none" was being silently
+ * overridden the instant the stylesheet loaded, which is why the fade kept
+ * appearing on desktop after the fix that was supposed to remove it.
+ *
+ * Moving it after them is the entire fix. Nothing about the logic changed.
+ *
+ * `edge` is computed from `pages`, and `pages` depends on how many cards the
+ * current filter matched: 11 for "All" is three pages, 3 for "Web" is one
+ * page. That is the actual bug report this exists for: not that the fade
+ * looked wrong, but that it appeared on some tabs and not others, which reads
+ * as a rendering glitch rather than as a hint tied to real scrollable content.
+ * Disabled outright above 820px rather than fixed, because the complaint was
+ * about the fade's presence being inconsistent-looking at all on desktop, not
+ * about the underlying logic being wrong, and mobile already keeps it.
+ */
+@media (min-width: 821px) {
+  .deck[data-edge="both"] .deck-track,
+  .deck[data-edge="start"] .deck-track,
+  .deck[data-edge="end"] .deck-track {
+    mask-image: none;
+  }
+}
+
+.deck-card {
+  min-width: 0;
+  scroll-snap-align: none;
+  animation: cardIn 0.5s var(--ease-out) both;
+}
+/* Staggered across the first page only. Beyond that the reader has to scroll
+   to see them, by which point a delay is just latency. */
+.deck-card:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.deck-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.deck-card:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.deck-card:nth-child(4) {
+  animation-delay: 0.22s;
+}
+.deck-track > .deck-card:nth-child(4n + 1) {
+  scroll-snap-align: start;
+}
+
+/*
+ * Controls moved from the bottom of the rail to the top right, beside the tab
+ * bar, in stage 8's follow-up pass. The old position put the only way to
+ * change page below however many rows of cards the current filter produced,
+ * which on a narrow desktop window could be several screens down. Up here it
+ * sits next to the control that already changes what the deck shows.
+ *
+ * Dots became a compact "2 / 5" readout plus a thin progress line under the
+ * tab row: nine dots for the "All" filter at low card counts would have been
+ * wider than the tab bar itself, and a readout scales to any page count for
+ * free.
+ */
+.deck-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+  padding: 0.2rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-muted);
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+/* .deck-controls[data-seen="false"] {
+  animation: dexHalo 2.6s ease-in-out infinite;
+}
+.deck-controls[data-seen="false"]:hover {
+  animation: none;
+} */
+.deck-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s var(--ease-spring);
+}
+.deck-arrow:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  transform: scale(1.08);
+}
+.deck-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.deck-controls-pos {
+  min-width: 2.6rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+/* The row holding the tab bar and the controls: tabs wrap onto their own
+   lines on a narrow measure, controls stay pinned to the right end. */
+.proj-tabs-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Thin track under the tab row, filled to the current page's share of the
+   whole. Same visual language as the hero's live-data hairlines: a line that
+   fills rather than a bar that looks decorative. */
+.deck-progress {
+  height: 2px;
+  margin: 0.7rem 0 1.6rem;
+  border-radius: 2px;
+  background: var(--border-faint);
+  overflow: hidden;
+}
+.deck-progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.45s var(--ease-out);
+}
+
+/* ─── CARD ────────────────────────────────────────────────*/
+.pcard-shell {
+  overflow: hidden;
+}
+.pcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem;
+}
+/* The index as a watermark: it gives each card a distinct silhouette without
+   adding a line of type next to the title. */
+.pcard-num {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.9rem;
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 78;
+  font-size: 3.4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fg);
+  opacity: 0.045;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s var(--ease-out);
+}
+.pcard-shell:hover .pcard-num {
+  opacity: 0.09;
+  transform: translateY(-2px);
+}
+
+.pcard-meta {
+  margin-bottom: 0.85rem;
+}
+.pcard-title {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 96;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  line-height: 1.25;
+  margin-bottom: 0.7rem;
+  transition: color 0.25s ease;
+  position: relative;
+}
+.pcard-desc {
+  font-size: 0.8rem;
+  flex: 1;
+  margin: 0.8rem 0 1rem;
+  /* Three lines. The full text is one click away in the detail view, and a
+     uniform card height is what keeps the deck a predictable size. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pcard-chips {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+.pcard-foot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.pcard-link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 550;
+  color: var(--fg-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+.pcard-link:hover {
+  color: var(--accent);
+}
+/* Pushed right: it is the card's own action, not another outbound link. */
+.pcard-open {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.34rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
+  position: relative;
+  z-index: 1;
+}
+.pcard-shell:hover .pcard-open,
+.pcard-open:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-muted);
+}
+
+/* ─── PROJECT VIEW ────────────────────────────────────────
+   Expands over the deck from the clicked card's own centre. --pv-ox/--pv-oy
+   are written per open, which is what separates "that card opened" from "a
+   panel appeared in the middle of the section". */
+.pv {
+  position: absolute;
+  /* Top-anchored with a cap rather than pinned to all four sides. A project
+     with three sentences got a full-height panel and several hundred pixels of
+     empty surface under the last line, which reads as something failing to
+     load. Now the panel is as tall as it has to be and only long ones scroll. */
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 100%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  transform-origin: var(--pv-ox, 50%) var(--pv-oy, 50%);
+  animation: pvIn 0.42s var(--ease-spring) both;
+
+  /* Glass over a live 3D scene has to earn its transparency. These override
+     the shared tokens locally: far more opaque than a nav pill needs, because
+     three paragraphs have to stay readable over a moving particle field. */
+  --glass-bg: color-mix(in srgb, var(--bg-2) 92%, transparent);
+  --glass-blur: 30px;
+}
+/* Unmounting on close is instant, so the panel would vanish while everything
+   else in the app eases. The hook keeps it mounted through this phase. */
+.pv[data-closing="true"] {
+  animation: pvOut 0.26s var(--ease-out) forwards;
+  pointer-events: none;
+}
+.pv:focus {
+  outline: none;
+}
+.pv:focus-visible {
+  outline: 1px solid var(--accent-border);
+  outline-offset: -2px;
+}
+
+html[data-theme="light"] .pv {
+  --glass-face-top: rgba(255, 255, 255, 0.93);
+  --glass-face-mid: rgba(255, 255, 255, 0.86);
+  --glass-face-bottom: rgba(255, 255, 255, 0.91);
+  --glass-edge: 18px;
+}
+
+/* ── macOS title bar ──
+   The same object Skills is drawn as, so the two most detailed surfaces on the
+   site read as one family. 12px lights and a 10px corner radius are the real
+   values, which is most of why the shape is recognisable at a glance. */
+.pv-lights {
+  display: flex;
+  gap: 0.5rem;
+  flex: none;
+  z-index: 1;
+}
+.pv-light {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pv-light[data-c="close"] {
+  background: radial-gradient(circle at 35% 30%, #ff5f57, #e0443e);
+  box-shadow: 0 0 0 0.5px rgba(224, 68, 62, 0.4);
+  cursor: pointer;
+}
+.pv-light[data-c="min"] {
+  background: radial-gradient(circle at 35% 30%, #febc2e, #dea123);
+  box-shadow: 0 0 0 0.5px rgba(222, 161, 35, 0.4);
+}
+.pv-light[data-c="zoom"] {
+  background: radial-gradient(circle at 35% 30%, #28c840, #1aab29);
+  box-shadow: 0 0 0 0.5px rgba(26, 171, 41, 0.4);
+}
+.pv-light-glyph {
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  user-select: none;
+  transition: opacity 0.12s ease;
+}
+/* Glyphs appear for the whole cluster on hover, as they do on a real title
+   bar, rather than one light at a time. */
+.pv-lights:hover .pv-light-glyph {
+  opacity: 1;
+}
+.pv-titlebar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 55%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.pv-meta {
+  margin-bottom: 0.9rem;
+}
+
+.pv-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex: none;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  /* Its own faint layer so the header separates from the scrolling body. */
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
+}
+.pv-index {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+}
+.pv-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  min-width: 0;
+  flex: 1;
+}
+.pv-title {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 94;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--fg);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pv-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+}
+.pv-pos {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+  padding: 0 0.15rem;
+}
+.pv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s var(--ease-spring);
+}
+.pv-btn:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  transform: scale(1.08);
+}
+.pv-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.pv-close {
+  margin-left: 0.4rem;
+}
+.pv-close:hover {
+  color: var(--neg);
+  border-color: color-mix(in srgb, var(--neg) 40%, transparent);
+}
+
+.pv-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.2rem 1.15rem 1.4rem;
+  scrollbar-width: thin;
+}
+/* Content arrives in sequence rather than all at once, which gives the eye an
+   order to read in. Keyed on the project, so prev/next replays it. */
+.pv-body > * {
+  animation: pvRise 0.45s var(--ease-out) both;
+}
+.pv-body > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.pv-body > *:nth-child(2) {
+  animation-delay: 0.16s;
+}
+.pv-body > *:nth-child(3) {
+  animation-delay: 0.22s;
+}
+.pv-body > *:nth-child(4) {
+  animation-delay: 0.28s;
+}
+.pv-body > *:nth-child(5) {
+  animation-delay: 0.34s;
+}
+
+.pv-desc {
+  font-size: 0.88rem;
+  margin: 1rem 0 1.3rem;
+  max-width: 68ch;
+}
+.pv-stack {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 1.3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.pv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+/* Footer splits: actions on the left, somewhere else to go on the right. On a
+   sparse project the related list is what stops the panel ending abruptly. */
+.pv-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+}
+.pv-links {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.pv-related {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+.pv-related-list {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.pv-related-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.34rem 0.6rem 0.34rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 550;
+  color: var(--fg-dim);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s var(--ease-spring);
+}
+.pv-related-item:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-muted);
+  transform: translateX(2px);
+}
+.pv-link {
+  font-size: 0.76rem;
+  padding: 0.55rem 1rem;
+}
+.pv-private {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+/* ─── PROJECT BOARD (inside the view) ─────────────────────
+   Leads with what is built, at full weight. What is not built, when it is
+   listed at all, is one quiet line: a roadmap at the same visual weight as
+   delivered work makes delivered work look unfinished. */
+.pb {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.pb-built {
+  display: block;
+  padding: 0.7rem 0.9rem 0.55rem;
+}
+.pb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.9rem 0.85rem;
+}
+.pb-row {
+  display: grid;
+  grid-template-columns: 9px minmax(120px, auto) 1fr;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border-faint);
+  animation: pbRow 0.5s var(--ease-out) both;
+}
+.pb-row:first-child {
+  border-top: none;
+}
+/* Delays are written inline by ProjectBoard: a board can hold two modules or
+   nine, and a stylesheet cannot know which. */
+.pb-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+.pb-name {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 550;
+  color: var(--fg);
+}
+.pb-detail {
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  color: var(--fg-muted);
+}
+
+.pb-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+  padding: 0.95rem 0.9rem;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+.pb-metric {
+  min-width: 0;
+  animation: pbRow 0.55s var(--ease-out) both;
+}
+.pb-metric:nth-child(1) {
+  animation-delay: 0.4s;
+}
+.pb-metric:nth-child(2) {
+  animation-delay: 0.48s;
+}
+.pb-metric:nth-child(3) {
+  animation-delay: 0.56s;
+}
+.pb-metric-value {
+  display: block;
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 92;
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+.pb-metric-label {
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  line-height: 1.4;
+  color: var(--fg-muted);
+}
+.pb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.85rem 0.9rem 0;
+}
+.pb-next {
+  display: flex;
+  gap: 0.65rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0.75rem 0.9rem 0;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+}
+.pb-note {
+  margin: 0;
+  padding: 0.75rem 0.9rem 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--fg-muted);
+}
+
+/* ─── ORDER BOOK BRIEF (collapsible) ──────────────────────
+   Closed it is one row, roughly the height of the caption it replaced. The
+   terminal is the thing worth looking at; the explanation should not push it
+   up the page. */
+/* The brief is a .pv now, so it needs no wrapper of its own. */
+.obb-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+}
+.obb-col {
+  min-width: 0;
+}
+.obb-col-title {
+  display: block;
+  margin-bottom: 0.7rem;
+}
+.obb-facts {
+  margin: 0;
+}
+.obb-fact {
+  display: grid;
+  grid-template-columns: minmax(78px, 92px) 1fr;
+  gap: 0.75rem;
+  padding: 0.38rem 0;
+  border-top: 1px solid var(--border-faint);
+}
+.obb-fact:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.obb-fact dt {
+  font-family: var(--font-mono);
+  font-size: 0.57rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  padding-top: 0.15rem;
+}
+.obb-fact dd {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--fg-dim);
+}
+.obb-stack {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.obb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* ─── TABS ────────────────────────────────────────────────*/
+.proj-tabs {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.6rem;
+}
+.proj-tab {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 550;
+  text-transform: capitalize;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+}
+.proj-tab-count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.58rem;
+  opacity: 0.65;
+}
+.proj-tab-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: blink 2s ease-in-out infinite;
+}
+/* Trigger sits above the terminal so the panel grows down over the thing it
+   describes, rather than out of empty space beneath it. */
+.dex-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+.dex-explain {
+  /* The one control on this tab, so it stops borrowing the project cards'
+     ghost pill and carries the accent outright. The halo pulses until it has
+     been used once and then never again: an attention cue that keeps pulsing
+     after it has been noticed is just noise. */
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-muted);
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s var(--ease-spring),
+    box-shadow 0.25s ease;
+}
+.dex-explain:hover {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.dex-explain[data-seen="false"] {
+  animation: dexHalo 2.6s ease-in-out infinite;
+}
+.dex-explain[data-seen="false"]:hover {
+  animation: none;
+}
+@keyframes dexHalo {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 32%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+.dex-stage {
+  border-radius: var(--radius);
+}
+.dex-wrap {
+  margin-bottom: 0;
+  transition:
+    opacity 0.4s var(--ease-out),
+    filter 0.4s var(--ease-out),
+    transform 0.4s var(--ease-out);
+}
+.dex-wrap[data-dimmed="true"] {
+  opacity: 0.25;
+  filter: blur(5px);
+  transform: scale(0.99);
+  pointer-events: none;
+}
+.chip-quiet {
+  color: var(--fg-muted);
+  border-style: dashed;
+}
+
+@keyframes pvIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes pvOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pvRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pbRow {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 880px) {
+  .stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+  }
+  .stat-card {
+    padding: 1.1rem 0.8rem;
+  }
+  .obb-grid {
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+  }
+  .pb-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .pb-row {
+    grid-template-columns: 9px 1fr;
+  }
+  /* The sub-label goes first: the module name is the fact that has to survive
+     a narrow column. */
+  .pb-detail {
+    display: none;
+  }
+  .cmp-row {
+    grid-template-columns: 1fr auto;
+    row-gap: 0.4rem;
+  }
+  .cmp-bar {
+    grid-column: 1 / -1;
+  }
+  .cmp-delta {
+    text-align: left;
+  }
+}
+
+@media (max-width: 820px) {
+  /* One row, one card per view: swiping, which is what a phone expects. */
+  .deck-track {
+    grid-template-rows: minmax(0, 1fr);
+    grid-auto-columns: 86%;
+  }
+  .deck-track > .deck-card {
+    scroll-snap-align: start;
+  }
+  .pcard {
+    padding: 1.3rem;
+  }
+  /* A phone has no room for a 26px hit target next to three others, and no
+     room for the position counter either. */
+  .pv-head {
+    padding: 0.7rem 0.8rem;
+    gap: 0.6rem;
+  }
+  .pv-pos {
+    display: none;
+  }
+  .pv-heading {
+    gap: 0.5rem;
+  }
+  .pv-body {
+    padding: 1rem 0.9rem 1.2rem;
+  }
+  /* Stacked, the related list reads as a continuation of the actions rather
+     than as a second column crushed against the right edge. */
+  .pv-foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.1rem;
+  }
+  .pv-related {
+    align-items: flex-start;
+  }
+  .pv-related-list {
+    justify-content: flex-start;
+  }
+  .dex-head {
+    flex-direction: column;
+    gap: 0.9rem;
+  }
 }
 
 /* ─── BUTTONS ────────────────────────────────────────────── */
@@ -1163,7 +2497,7 @@ html[data-theme="light"] .field {
   opacity: 0;
 }
 
-/* ─── GRAIN (kept — but calmer) ──────────────────────────── */
+/* ─── GRAIN (kept: but calmer) ──────────────────────────── */
 body::after {
   content: "";
   position: fixed;
@@ -1205,7 +2539,7 @@ nav {
   outline-offset: 3px;
   border-radius: 4px;
 }
-/* The custom cursor hides the pointer — keyboard users get real focus rings */
+/* The custom cursor hides the pointer: keyboard users get real focus rings */
 
 @media (prefers-reduced-motion: reduce) {
   *,

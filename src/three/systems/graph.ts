@@ -1,16 +1,16 @@
 /**
- * graph.ts — the blockchain topology, ported from `universe/Graph.ts`.
+ * graph.ts: the blockchain topology, ported from `universe/Graph.ts`.
  *
- * The generation pipeline is unchanged and deliberately so — this is the part
+ * The generation pipeline is unchanged and deliberately so: this is the part
  * of the old engine that was genuinely good, and it was never 2D-specific:
  *
  *   assignKinds → buildEdges (k-nearest) → ensureConnected (union-find) → adjacency
  *
  * Only the *space* changed. The original placed nodes on a jittered 2-D grid
  * sized from viewport area (`areaPerNode: 11000` px²); this places them on a
- * jittered 3-D lattice inside a world-space box. Everything downstream — the
+ * jittered 3-D lattice inside a world-space box. Everything downstream: the
  * kind ratios, the per-kind edge counts, the union-find bridge pass, the BFS
- * routing and ripple — operates on ids and neighbours and did not care about
+ * routing and ripple: operates on ids and neighbours and did not care about
  * dimensionality at all.
  *
  * Rendering lives in `motifs/NetworkGraph.tsx`. This file has no three.js
@@ -21,7 +21,7 @@ import { createRandom, dist3 } from "./noise";
 export type NodeKind = "validator" | "relay" | "client";
 
 export const GRAPH_CONFIG = {
-  /** Kind mix — carried over unchanged from the old Config.graph. */
+  /** Kind mix: carried over unchanged from the old Config.graph. */
   validatorRatio: 0.06,
   relayRatio: 0.22,
   edgesPerValidator: 5,
@@ -128,7 +128,7 @@ export class NetworkTopology {
   private generate(count: number, bounds: GraphBounds): void {
     const kinds = this.assignKinds(count);
 
-    // Jittered 3-D lattice — the direct analogue of the original's jittered
+    // Jittered 3-D lattice: the direct analogue of the original's jittered
     // grid. Even, organic coverage; no clumping, no visible rows.
     const { width, height, depth } = bounds;
     const cells = Math.cbrt(count);
@@ -213,7 +213,7 @@ export class NetworkTopology {
     }
   }
 
-  /** Insertion into a tiny sorted list (k ≤ 6) — cheaper than sorting all. */
+  /** Insertion into a tiny sorted list (k ≤ 6): cheaper than sorting all. */
   private kNearest(i: number, k: number): void {
     this.nnDist.length = 0;
     this.nnIdx.length = 0;
@@ -238,7 +238,7 @@ export class NetworkTopology {
   /**
    * Union-find pass: stitch disconnected components with their nearest bridge.
    *
-   * This matters more in 3-D than it did in 2-D — k-nearest in a volume
+   * This matters more in 3-D than it did in 2-D: k-nearest in a volume
    * fragments into isolated clusters far more readily than on a plane, and an
    * unconnected client is a node the packet router can never route from.
    */
@@ -295,7 +295,7 @@ export class NetworkTopology {
   }
 
   /**
-   * Consensus ripple — BFS outward from a validator, scheduling a glow time on
+   * Consensus ripple: BFS outward from a validator, scheduling a glow time on
    * every node reached: `rippleAt = now + hops * hopDelay`.
    *
    * Unchanged from `universe/Ripple.ts`, including the "keep the earlier

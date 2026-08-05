@@ -1,9 +1,9 @@
 /**
- * useFlightProgress.ts — turns window scroll into a continuous flight coordinate.
+ * useFlightProgress.ts: turns window scroll into a continuous flight coordinate.
  *
  * The coordinate `t` is a float where each integer is a section waypoint:
  * t=0 is the hero at rest, t=1 is About, t=2 is Projects, and so on. Leg 1 of
- * the flight is therefore simply `clamp(t, 0, 1)` — and stage 3 extends the
+ * the flight is therefore simply `clamp(t, 0, 1)`: and stage 3 extends the
  * same number without this file changing.
  *
  * Two rules make this cheap enough to read every frame:
@@ -12,7 +12,7 @@
  *    the entire React tree on every scroll event, which is the single most
  *    common way scroll-driven 3D ends up janky.
  * 2. Layout reads (`getBoundingClientRect`) happen only on mount, resize, and
- *    content mutation — never per scroll frame, and never inside `useFrame`.
+ *    content mutation: never per scroll frame, and never inside `useFrame`.
  *    The scroll handler itself only touches `window.scrollY`.
  */
 import { useEffect, useRef, type MutableRefObject } from "react";
@@ -88,7 +88,7 @@ export const useFlightProgress = (
     window.addEventListener("scroll", sample, { passive: true });
     window.addEventListener("resize", measure);
 
-    // Section offsets shift when async content lands — the ticker strip
+    // Section offsets shift when async content lands: the ticker strip
     // populating, sparklines arriving, fonts swapping. Without this the
     // waypoints stay pinned to the pre-hydration layout.
     const ro = new ResizeObserver(measure);

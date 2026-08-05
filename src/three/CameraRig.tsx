@@ -1,5 +1,5 @@
 /**
- * CameraRig.tsx — the whole flight path, in one place.
+ * CameraRig.tsx: the whole flight path, in one place.
  *
  * Deliberately the only thing in the app that touches the camera.
  *
@@ -12,7 +12,7 @@
  *    reads as "things got bigger"; a dolly with a widening fov reads as speed.
  *
  * ── Legs 2–5: the corridor (t > 1) ──
- *  · **z** becomes linear in t — one section is one `CORRIDOR.spacing`. Linear
+ *  · **z** becomes linear in t: one section is one `CORRIDOR.spacing`. Linear
  *    is correct here and eased would be wrong: the scroll bar is the throttle,
  *    so travel must be proportional to it or the page feels like it is fighting
  *    the wheel.
@@ -72,7 +72,7 @@ export const CameraRig = ({ flight, still = false }: CameraRigProps) => {
     const targetZ = cameraZAt(t);
 
     // fov: rest → dive spike → cruise. The second lerp only engages past t=1,
-    // so leg 1 behaves exactly as it did in stage 2 — an explicit goal, since
+    // so leg 1 behaves exactly as it did in stage 2: an explicit goal, since
     // that leg was already signed off.
     const diveFov = MathUtils.lerp(
       FLIGHT.camera.fovRest,
@@ -86,7 +86,7 @@ export const CameraRig = ({ flight, still = false }: CameraRigProps) => {
       MOTION.easeOutCubic(settle),
     );
 
-    // Sway ramps in only after the breakthrough — swaying during the dive
+    // Sway ramps in only after the breakthrough: swaying during the dive
     // would read as the camera losing its aim at the exact moment it needs to
     // look purposeful.
     const swayAmount = MathUtils.clamp(t - 1, 0, 1);

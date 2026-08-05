@@ -1,5 +1,5 @@
 /**
- * ParticleGlobe.tsx — the hero globe, and the shell we fly through.
+ * ParticleGlobe.tsx: the hero globe, and the shell we fly through.
  *
  * Three shells, not one:
  *  · a dense surface shell that reads as the globe itself
@@ -10,7 +10,7 @@
  *    parallax as the camera moves and stops the silhouette from looking like
  *    a decal. It is also the shell that opens first during the dive.
  *
- * They open in that order reversed — halo, then surface, then lattice — so the
+ * They open in that order reversed, halo, then surface, then lattice, so the
  * structure is the last thing to let go. A globe whose skeleton survives a
  * moment longer than its skin reads as something being taken apart; everything
  * leaving at once reads as a particle preset.
@@ -80,7 +80,7 @@ const useShellGeometry = (opts: ShellOptions): BufferGeometry =>
 const POINTER = {
   /** Radius of influence, as a fraction of the globe's radius. */
   radius: 0.62,
-  /** Peak displacement in local units — about 10% of the radius. */
+  /** Peak displacement in local units: about 10% of the radius. */
   strength: 0.2,
   /** Approach rate for the displacement, both outward and back. */
   lambda: 3.2,
@@ -146,7 +146,7 @@ export const ParticleGlobe = ({
 
   /**
    * The lattice's links. Built once from the inner shell's own positions, so it
-   * inherits mulberry32's determinism for free — same globe, same skeleton,
+   * inherits mulberry32's determinism for free: same globe, same skeleton,
    * every reload.
    *
    * Stride is the density knob. Two links per sampled point is what produces
@@ -200,7 +200,7 @@ export const ParticleGlobe = ({
         fadeNear: 3,
         fadeFar: 10,
         disperseDist: FLIGHT.disperse.distance * 0.82,
-        // Longest stagger of the three shells — the structure lets go last.
+        // Longest stagger of the three shells: the structure lets go last.
         stagger: 0.66,
         rim: 0.5,
       }),
@@ -218,12 +218,12 @@ export const ParticleGlobe = ({
         // Matches the lattice points closely enough that the links stretch with
         // them rather than sliding through them. Not exactly: points scale their
         // travel by aScale and lines have no per-vertex scale, so the lattice
-        // tears slightly ahead of its points — which is the correct-looking
+        // tears slightly ahead of its points: which is the correct-looking
         // artefact, and it is gone by the time the fade below finishes anyway.
         disperseDist: FLIGHT.disperse.distance * 0.86,
         stagger: 0.66,
         // Well below the line default. Modelled on paper, 2.6x puts these at
-        // 4.5:1 against the background — a hard wireframe cage sitting behind
+        // 4.5:1 against the background, a hard wireframe cage sitting behind
         // the headline rather than structure glimpsed inside a sphere. 1.0
         // lands at 2.7:1, which reads as the same weave dark mode shows.
         lightGain: 1.0,
@@ -276,7 +276,7 @@ export const ParticleGlobe = ({
     ],
   );
 
-  // Theme forwarding — imperative uniform writes, no canvas remount. Mirrors
+  // Theme forwarding: imperative uniform writes, no canvas remount. Mirrors
   // the discipline the old Renderer.setTheme() had, which was worth keeping.
   useEffect(() => {
     for (const mat of [coreMat, latticeMat, haloMat] as ShaderMaterial[]) {
@@ -287,8 +287,8 @@ export const ParticleGlobe = ({
     // One value per shell for both themes: the light-mode difference is a
     // property of the *material* now (uLightGain), not of every call site
     // guessing at it separately. The lattice links in particular were being
-    // discounted twice — once here and once by the line shader's dark-tuned
-    // base alphas — which is why the globe's structure was invisible on paper.
+    // discounted twice: once here and once by the line shader's dark-tuned
+    // base alphas: which is why the globe's structure was invisible on paper.
     baseOpacity.current.core = 1;
     baseOpacity.current.lattice = 0.7;
     baseOpacity.current.link = 0.5;
@@ -358,7 +358,7 @@ export const ParticleGlobe = ({
       range(leg, FLIGHT.disperse.start, FLIGHT.disperse.end),
     );
     // The lattice lags the surface by a fraction of the window rather than
-    // running on its own schedule — same curve, later start.
+    // running on its own schedule: same curve, later start.
     const latticeTarget = MOTION.easeInOutCubic(
       range(leg, FLIGHT.disperse.start + 0.08, FLIGHT.disperse.end + 0.06),
     );
@@ -367,7 +367,7 @@ export const ParticleGlobe = ({
     );
 
     // Damping is what makes this survive a trackpad flick or a smooth-scrolled
-    // nav jump — the raw scroll value can teleport, the shell never does.
+    // nav jump: the raw scroll value can teleport, the shell never does.
     disperse.current.core = damp(
       disperse.current.core,
       coreTarget,
@@ -427,7 +427,7 @@ export const ParticleGlobe = ({
     }
 
     // ── Pointer: parallax tilt, then repulsion ───────────────────────────
-    // Tapers off during the dive — once you are inside the shell, leaning it
+    // Tapers off during the dive: once you are inside the shell, leaning it
     // looks like a camera wobble.
     const authorityDive = 1 - coreTarget;
     const px = pointer ? pointer.current.x * pointer.current.active : 0;
@@ -464,7 +464,7 @@ export const ParticleGlobe = ({
       if (live) {
         // One unproject per frame onto the plane the globe sits on, then one
         // matrix inverse to get it into the shell's own rotating space. The
-        // alternative — raycasting the point cloud — would test every point
+        // alternative, raycasting the point cloud, would test every point
         // every frame to answer a question this does not even ask.
         pointerOnPlane(
           pointer.current.x,

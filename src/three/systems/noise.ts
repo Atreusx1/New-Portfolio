@@ -1,5 +1,5 @@
 /**
- * noise.ts — seeded PRNG + 3-D simplex noise.
+ * noise.ts: seeded PRNG + 3-D simplex noise.
  *
  * Lifted **verbatim** from `universe/Utils.ts`. This is the part of the old
  * engine that was never 2D-specific: `noise3` was already sampling a 3-D field,
@@ -13,7 +13,7 @@
 
 // ── Seeded PRNG ───────────────────────────────────────────────────────────────
 
-/** mulberry32 — tiny, fast, good-enough seeded PRNG. */
+/** mulberry32: tiny, fast, good-enough seeded PRNG. */
 export const createRandom = (seed: number): (() => number) => {
   let a = seed >>> 0;
   return () => {
@@ -36,7 +36,7 @@ export const smoothstep = (edge0: number, edge1: number, x: number): number => {
   return t * t * (3 - 2 * t);
 };
 
-/** Squared distance in 3-D — the 2-D `dist2` from Utils, one axis richer. */
+/** Squared distance in 3-D: the 2-D `dist2` from Utils, one axis richer. */
 export const dist3 = (
   ax: number, ay: number, az: number,
   bx: number, by: number, bz: number,

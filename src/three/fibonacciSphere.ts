@@ -1,5 +1,5 @@
 /**
- * fibonacciSphere.ts — even point coverage on a sphere, no random jitter.
+ * fibonacciSphere.ts: even point coverage on a sphere, no random jitter.
  *
  * Random spherical sampling clumps at the poles and leaves visible voids;
  * the golden-angle spiral gives near-uniform spacing at any count, which is
@@ -10,15 +10,15 @@
  *
  * `phyllotacticLattice` (stage 4) exploits the same spiral a second time. On a
  * golden-angle distribution a point's nearest neighbours are not its index
- * neighbours — they sit at index offsets equal to *Fibonacci numbers*, which is
+ * neighbours: they sit at index offsets equal to *Fibonacci numbers*, which is
  * the same fact that makes sunflower seeds visibly spiral. So the lattice can
  * be built by testing ten candidate offsets per point instead of running an
  * O(n^2) nearest-neighbour search or standing up a spatial hash, and the links
- * it produces are the parastichies — the spiral arms the eye already half-sees
+ * it produces are the parastichies: the spiral arms the eye already half-sees
  * in the point field, now drawn.
  */
 
-/** Deterministic PRNG — same globe every reload, so visual diffs are real diffs. */
+/** Deterministic PRNG: same globe every reload, so visual diffs are real diffs. */
 export const mulberry32 = (seed: number): (() => number) => {
   let a = seed >>> 0;
   return () => {
@@ -46,7 +46,7 @@ export interface ShellBuffers {
   /** Per-point twinkle phase offset, 0..1. */
   phases: Float32Array;
   /**
-   * Per-point signed radial jitter as a fraction of radius — the same value
+   * Per-point signed radial jitter as a fraction of radius: the same value
    * already baked into `positions`. Handed to the shader as `aJitter` so a
    * shell can be *un*-thickened on demand (particleMaterial's uTighten), which
    * is how Convergence resolves into a cleaner sphere than the one the hero
@@ -77,7 +77,7 @@ export const fibonacciSphere = ({
     const ring = Math.sqrt(Math.max(0, 1 - y * y));
     const theta = GOLDEN_ANGLE * i;
 
-    // Radial jitter only — angular jitter would undo the even coverage.
+    // Radial jitter only: angular jitter would undo the even coverage.
     const jitter = (rand() * 2 - 1) * thickness;
     const r = radius * (1 + jitter);
     jitters[i] = jitter;

@@ -1,5 +1,5 @@
 /**
- * useMotif.ts — how a section's motif knows whether it exists yet.
+ * useMotif.ts: how a section's motif knows whether it exists yet.
  *
  * `presenceAt(t, waypoint)` is a pure function of the flight coordinate: 1 when
  * the camera is at that waypoint, tapering to 0 roughly one section away in
@@ -10,7 +10,7 @@
  *
  *  1. **Opacity.** Motifs fade rather than pop.
  *  2. **Culling.** At presence 0 a motif sets `group.visible = false` *and*
- *     skips its simulation entirely — no flow-field sampling, no packet
+ *     skips its simulation entirely: no flow-field sampling, no packet
  *     integration, no buffer uploads. Five motifs are affordable only because
  *     at most two are ever awake.
  *
@@ -23,14 +23,14 @@
  * Overlap alone only guarantees two motifs are on screen together; it does not
  * make the transition feel *authored*. `seamAt` gives every surface in the
  * scene a second shared coordinate: how deep the flight is into the gap
- * between two waypoints — 0 at either end, 1 at the midpoint. Two things ride
+ * between two waypoints: 0 at either end, 1 at the midpoint. Two things ride
  * on it:
  *
- *  1. `handoffEnergy` — one number, read by every particle and line material in
+ *  1. `handoffEnergy`: one number, read by every particle and line material in
  *     the app as `uEnergy`. Because it is the *same* number everywhere, a seam
  *     reads as a single substance pulsing as it changes shape rather than as
  *     one effect fading out while an unrelated one fades in.
- *  2. Per-motif *rhymes* — each motif leans slightly toward its neighbour's
+ *  2. Per-motif *rhymes*: each motif leans slightly toward its neighbour's
  *     visual language across the seam (FlowDrift clusters hexagonally just
  *     before HexBelt arrives; the graph stratifies into layers just before the
  *     grid does). Deliberately approximate: the goal is a visual rhyme, not
@@ -66,7 +66,7 @@ export const PRESENCE_EPSILON = 0.012;
 export const presenceAt = (t: number, waypoint: number, reach = 0.9): number => {
   const d = Math.abs(t - waypoint) / reach;
   if (d >= 1) return 0;
-  // Symmetric ease so approaching and leaving mirror each other exactly —
+  // Symmetric ease so approaching and leaving mirror each other exactly , 
   // scrolling back up must undo what scrolling down did, frame for frame.
   return MOTION.easeInOutCubic(1 - d);
 };
@@ -87,7 +87,7 @@ export const presenceHeld = (
 
 // ── Seams ───────────────────────────────────────────────────────────────────
 
-/** Tuning for the shared handoff behaviour — one place, in the spirit of MOTION. */
+/** Tuning for the shared handoff behaviour: one place, in the spirit of MOTION. */
 export const HANDOFF = {
   /**
    * Ceiling on the shared energy value. It is filling in a dip rather than

@@ -10,7 +10,7 @@ export type ThemeMode = "dark" | "light";
 
 // ── Raw RGB tuples ────────────────────────────────────────────────────────────
 const DARK_FG = "232,234,233";
-const DARK_AC = "151,252,228"; // neon mint — the brand
+const DARK_AC = "151,252,228"; // neon mint: the brand
 
 // Light mode is its own design system: warm paper + ink + a signal color.
 // Warm (not gray) whites read as "Notion / Linear light".
@@ -23,10 +23,10 @@ const LIGHT_FG = "27,26,22"; // warm near-black ink
  * Two reasons that is no longer the choice:
  *
  *  1. **It failed AA.** Measured against LIGHT_BG (#faf9f6) the teal is
- *     4.45:1 — under the 4.5:1 floor for normal text, and --accent is a text
+ *     4.45:1, under the 4.5:1 floor for normal text, and --accent is a text
  *     color throughout the site, not just a border.
  *  2. **Matching the mint was the wrong goal.** Light mode is already its own
- *     system everywhere else — warm paper instead of near-black, real shadows
+ *     system everywhere else: warm paper instead of near-black, real shadows
  *     instead of light-as-elevation, normal blending instead of additive. The
  *     accent was the last piece still deferring to the dark identity.
  *
@@ -34,13 +34,13 @@ const LIGHT_FG = "27,26,22"; // warm near-black ink
  * surfaces the accent is ever drawn on. All three options clear AA on all three
  * surfaces; the teal cleared none of them.
  *
- * To switch, change LIGHT_ACCENT and nothing else — the CSS custom properties
+ * To switch, change LIGHT_ACCENT and nothing else: the CSS custom properties
  * are pushed from here (see ThemeProvider), so this constant is the only place
  * light mode's accent is decided.
  */
 const LIGHT_ACCENTS = {
   /**
-   * Blueprint cobalt. Schematic ink on warm paper — the same register as the
+   * Blueprint cobalt. Schematic ink on warm paper: the same register as the
    * wireframe hexagons, the perspective grid and the network topology the 3D
    * background is built from, so light mode reads as the drawing and dark mode
    * as the thing lit up. Also the only option that keeps the order book legible:
@@ -51,7 +51,7 @@ const LIGHT_ACCENTS = {
   cobalt: "27,76,199",
   /**
    * Electric violet. The closest translation of the mint's *voltage* into
-   * something paper can hold — furthest from it in hue, nearest in attitude.
+   * something paper can hold: furthest from it in hue, nearest in attitude.
    * 7.71:1 / 7.12:1 / 6.57:1
    */
   violet: "91,52,179",
@@ -65,7 +65,7 @@ const LIGHT_ACCENTS = {
 
 const LIGHT_AC: string = LIGHT_ACCENTS.cobalt;
 
-// Warm paper surfaces — synced with index.css light tokens.
+// Warm paper surfaces: synced with index.css light tokens.
 const LIGHT_BG = "#faf9f6";
 const LIGHT_BG2 = "#f2f0ea";
 const LIGHT_BG3 = "#eae7df";
@@ -157,14 +157,27 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mode);
-  }, [mode]);
 
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", mode === "dark" ? "#070808" : "#faf9f6");
+    }
+
+    const favicon = document.getElementById(
+      "favicon",
+    ) as HTMLLinkElement | null;
+
+    if (favicon) {
+      favicon.href =
+        mode === "dark" ? "/favicon-dark.svg" : "/favicon-light.svg";
+    }
+  }, [mode]);
   /**
    * Push light mode's accent into the CSS custom properties, so LIGHT_ACCENT
    * above is the single place it is decided and the stylesheet cannot drift
    * from what the 3D scene is drawing.
    *
-   * index.css still ships the same values as a static fallback — they are what
+   * index.css still ships the same values as a static fallback: they are what
    * paints before this effect runs, so they must agree with the default here.
    * Dark mode removes the overrides entirely and falls back to :root.
    */

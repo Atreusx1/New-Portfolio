@@ -1,12 +1,12 @@
 /**
- * Entrance.tsx — when is it safe for an entrance animation to start?
+ * Entrance.tsx: when is it safe for an entrance animation to start?
  *
  * ── The bug this exists to fix ──
  * Boot renders as a fixed overlay while the whole app stays mounted beneath it
  * at `opacity: 0`. Every entrance animation in that subtree therefore starts
  * counting from *page load*, not from when the overlay clears. Boot runs for
  * roughly 3.28s (5 lines x 340ms + 17 typed chars x 26ms + a 520ms hold + a
- * 620ms exit fade), while Hero's staged reveal finishes at 1.25s — so the
+ * 620ms exit fade), while Hero's staged reveal finishes at 1.25s: so the
  * entire choreography played out behind an opaque screen and the visitor only
  * ever saw the settled result.
  *
@@ -14,12 +14,12 @@
  * Not mounting Hero until Boot finishes would fix the timing and break
  * something better: Hero opens a Binance WebSocket and fetches four 96-candle
  * kline series on mount. Letting that happen *during* boot is the whole point
- * of having a boot screen — by the time the ticker rail is revealed it already
+ * of having a boot screen: by the time the ticker rail is revealed it already
  * has real prices in it rather than four em-dashes. So the data plumbing keeps
  * mounting immediately and only the choreography waits.
  *
- * The context defaults to `true`, so anything rendered outside a provider —
- * the original Hero.tsx kept as a fallback, a test, a future page — behaves
+ * The context defaults to `true`, so anything rendered outside a provider , 
+ * the original Hero.tsx kept as a fallback, a test, a future page: behaves
  * exactly as it does today.
  */
 import {

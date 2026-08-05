@@ -1,9 +1,9 @@
 /**
- * TiltCard.tsx — 3-D tilt toward the pointer plus a glow that follows it.
+ * TiltCard.tsx: 3-D tilt toward the pointer plus a glow that follows it.
  *
  * The glow uses the .card-glow CSS (radial gradient at --gx/--gy), so the
  * only work per pointer move is writing three CSS custom properties and a
- * transform — GPU-composited, no re-renders, no layout thrash.
+ * transform: GPU-composited, no re-renders, no layout thrash.
  */
 import { useRef, ReactNode, CSSProperties, PointerEvent } from "react";
 import { prefersReducedMotion } from "./Reveal";

@@ -5,7 +5,7 @@
  *
  * Key design: ALL mutable state (refs, RAF id, WebSocket, pending buffers)
  * lives INSIDE the useEffect. Each pair switch gets a completely fresh,
- * isolated instance. Cleanup tears it all down atomically — no shared refs
+ * isolated instance. Cleanup tears it all down atomically: no shared refs
  * that can bleed between effect runs when the user switches pairs rapidly.
  */
 
@@ -94,7 +94,7 @@ export const useOrderBook = (pairLabel: string): OrderBookState => {
   const [ticker, setTicker] = useState<Ticker24h>(emptyTicker);
   const [status, setStatus] = useState<OrderBookState["status"]>("connecting");
 
-  // Stable setter refs — React guarantees setState functions never change,
+  // Stable setter refs: React guarantees setState functions never change,
   // so we can safely close over these inside the effect without listing them
   // as dependencies (which would defeat the isolation goal).
   const setAsksRef = useRef(setAsks);
@@ -254,7 +254,7 @@ export const useOrderBook = (pairLabel: string): OrderBookState => {
 
     connect();
 
-    // ── Cleanup — runs synchronously before the next effect instance ────────
+    // ── Cleanup: runs synchronously before the next effect instance ────────
     return () => {
       dead = true;
 

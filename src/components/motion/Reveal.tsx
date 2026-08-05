@@ -1,5 +1,5 @@
 /**
- * Reveal.tsx — scroll-triggered staggered reveal.
+ * Reveal.tsx: scroll-triggered staggered reveal.
  *
  * Wrap anything: it fades + rises + unblurs when it enters the viewport.
  * `delay` staggers siblings. Respects prefers-reduced-motion (instant).
@@ -9,7 +9,7 @@
  * Reveal only ever controlled opacity and transform, which is fine for static
  * content and quietly wrong for anything that *animates itself*. Contact's
  * headline was `<ScrambleText text="…" active />` inside a Reveal: the wrapper
- * faded in on scroll, but the scramble started the moment Contact mounted —
+ * faded in on scroll, but the scramble started the moment Contact mounted , 
  * at page load, five sections above the fold, behind the boot overlay. It had
  * always finished long before anyone scrolled far enough to look at it.
  *
@@ -79,7 +79,7 @@ export const Reveal = ({
 
   return (
     <Tag
-      // Tag union is div/section/span — all share HTMLElement refs.
+      // Tag union is div/section/span: all share HTMLElement refs.
       ref={ref as never}
       className={className}
       style={{
@@ -97,7 +97,7 @@ export const Reveal = ({
 };
 
 /**
- * A scramble that waits for its Reveal — and for the boot screen.
+ * A scramble that waits for its Reveal: and for the boot screen.
  *
  * Both gates matter. The Reveal covers the normal case (the element is far down
  * the page). The entrance gate covers the one the observer cannot: a short page

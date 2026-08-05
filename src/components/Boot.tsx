@@ -1,5 +1,5 @@
 /**
- * Boot.tsx — terminal-inspired loading sequence.
+ * Boot.tsx: terminal-inspired loading sequence.
  *
  * > Initializing neural network...        ✓ OK
  * > Connecting validator nodes...         ✓ OK
@@ -7,7 +7,7 @@
  *
  * · Runs once per session (sessionStorage), ~2.4s total.
  * · Click / key / prefers-reduced-motion skips it instantly.
- * · One faint scanline + grain — CRT by suggestion, never cheesy.
+ * · One faint scanline + grain: CRT by suggestion, never cheesy.
  * · Fades out with a blur dissolve, then unmounts completely.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -116,7 +116,7 @@ export const Boot = ({ onDone }: BootProps) => {
         pointerEvents: leaving ? "none" : "auto",
       }}
     >
-      {/* One drifting scanline — CRT by suggestion */}
+      {/* One drifting scanline: CRT by suggestion */}
       <div
         style={{
           position: "absolute",

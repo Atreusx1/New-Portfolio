@@ -1,5 +1,5 @@
 /**
- * sections.ts — the section order, owned in one place.
+ * sections.ts: the section order, owned in one place.
  *
  * Both the DOM app (nav scroll-spy) and the 3D app (flight waypoints) need
  * this list, and they must never disagree: if the nav thinks Projects is

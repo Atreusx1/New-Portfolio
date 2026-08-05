@@ -1,12 +1,12 @@
 /**
- * UniverseBackground.tsx — the boundary between the DOM app and the 3D app.
+ * UniverseBackground.tsx: the boundary between the DOM app and the 3D app.
  *
  * Everything three.js-shaped lives behind this React.lazy() call, so the
  * initial bundle contains none of it. This component itself is tiny and safe
  * to import eagerly from App.
  *
  * The fallback is a real static globe (CSS radial gradients), not a spinner or
- * a blank div — so on a cold load, a failed WebGL context, or a reduced-motion
+ * a blank div: so on a cold load, a failed WebGL context, or a reduced-motion
  * preference, the page still looks composed rather than broken.
  */
 import { Suspense, lazy, useState } from "react";

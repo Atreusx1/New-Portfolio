@@ -1,5 +1,5 @@
 /**
- * App.tsx — reference wiring for the redesign.
+ * App.tsx: reference wiring for the redesign.
  *
  * Boot plays once per session, then the portfolio fades in over the
  * living blockchain-universe canvas. Section order is compressed:
@@ -8,7 +8,7 @@
  *
  * ── Why the tree stays mounted behind Boot ──
  * Hero opens a WebSocket and fetches four kline series on mount, and the boot
- * screen is the ideal cover for that work — the ticker rail should be full of
+ * screen is the ideal cover for that work: the ticker rail should be full of
  * real prices the first time anyone sees it, not four em-dashes filling in
  * afterwards. So the subtree mounts immediately and only the *choreography*
  * waits, via EntranceProvider. Every staged reveal below reads that gate rather
@@ -64,48 +64,52 @@ const App = () => {
       {!booted && <Boot onDone={() => setBooted(true)} />}
 
       <UniverseBackground />
+
+      {/* Flat band for iOS Safari's toolbar to sample. See index.css. */}
+      <div className="top-scrim" aria-hidden="true" />
       <FloatingParticles />
 
       <EntranceProvider ready={booted}>
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          opacity: booted ? 1 : 0,
-          // Shortened from 0.8s: the hero's first stage now lands at 140ms
-          // after this starts, and a slower wrapper fade would have the
-          // eyebrow arriving while the page is still at a third opacity.
-          transition: "opacity 0.55s ease",
-        }}
-      >
-        <Navigation onNavigate={navigate} activeSection={active} />
-        <main>
-          <HeroRedesign />
-          <About />
-          <Projects />
-          <Skills />
-          <Experience />
-          <Contact />
-        </main>
-        <footer
+        <div
           style={{
-            borderTop: "1px solid var(--border-subtle)",
-            padding: "2rem",
-            textAlign: "center",
+            position: "relative",
+            zIndex: 1,
+            opacity: booted ? 1 : 0,
+            // Shortened from 0.8s: the hero's first stage now lands at 140ms
+            // after this starts, and a slower wrapper fade would have the
+            // eyebrow arriving while the page is still at a third opacity.
+            transition: "opacity 0.55s ease",
           }}
         >
-          <span
-            className="data-text"
+          <Navigation onNavigate={navigate} activeSection={active} />
+          <main>
+            <HeroRedesign />
+            <About />
+            <Projects />
+            <Skills />
+            <Experience />
+            <Contact />
+          </main>
+          <footer
             style={{
-              fontSize: "0.6rem",
-              letterSpacing: "0.14em",
-              color: "var(--fg-muted)",
+              borderTop: "1px solid var(--border-subtle)",
+              padding: "2rem",
+              textAlign: "center",
             }}
           >
-            © {new Date().getFullYear()} ANISH KADAM · BUILT ON-CHAIN-ISH
-          </span>
-        </footer>
-      </div>
+            <span
+              className="data-text"
+              style={{
+                fontSize: "0.6rem",
+                letterSpacing: "0.14em",
+                color: "var(--fg-muted)",
+              }}
+            >
+              © {new Date().getFullYear()} ANISH KADAM · BUILT WITH ❤️ USING
+              REACT, THREE.JS, AND CREATIVITY
+            </span>
+          </footer>
+        </div>
       </EntranceProvider>
       <Analytics />
       <SpeedInsights />

@@ -1,11 +1,11 @@
 /**
- * useQuality.ts — decides what this device gets before any GPU work starts.
+ * useQuality.ts: decides what this device gets before any GPU work starts.
  *
  * Three independent axes, deliberately not collapsed into one "isLowEnd":
- *  · reducedMotion — a stated user preference. Non-negotiable, wins over
+ *  · reducedMotion: a stated user preference. Non-negotiable, wins over
  *    everything, and is live (people toggle it mid-session).
- *  · webgl — a capability. No WebGL means the static fallback, not a blank div.
- *  · tier — a performance guess. Only this one is allowed to be wrong.
+ *  · webgl: a capability. No WebGL means the static fallback, not a blank div.
+ *  · tier: a performance guess. Only this one is allowed to be wrong.
  */
 import { useEffect, useState } from "react";
 
@@ -59,14 +59,14 @@ export const detectTier = (): QualityTier => {
 };
 
 /**
- * Particle budget per tier — the single place counts are decided.
+ * Particle budget per tier: the single place counts are decided.
  *
  * This is the hero globe's budget (the starfield takes a fraction of it on
  * top). Raising it is the cheapest density win in the whole scene: the globe's
  * only per-frame CPU work is a handful of uniform writes, because dispersal,
  * twinkle, rim and tighten all happen in the vertex shader. What it does cost
- * is fill rate — every point is a translucent quad, and under additive blending
- * they overdraw each other — so these numbers are bounded by the weakest GPU in
+ * is fill rate: every point is a translucent quad, and under additive blending
+ * they overdraw each other: so these numbers are bounded by the weakest GPU in
  * each tier rather than by frame-time arithmetic.
  */
 export const PARTICLE_BUDGET: Record<QualityTier, number> = {
@@ -98,7 +98,7 @@ export const stepTier = (tier: QualityTier, delta: number): QualityTier => {
 
 /**
  * Per-motif budgets. Separate from PARTICLE_BUDGET because the hero globe is
- * always present while motifs are mutually exclusive in practice — at most two
+ * always present while motifs are mutually exclusive in practice: at most two
  * are ever awake, so their budgets overlap rather than add.
  *
  * Measured on this machine (node, 3000-frame average, JIT warmed):
@@ -108,7 +108,7 @@ export const stepTier = (tier: QualityTier, delta: number): QualityTier => {
  *   FlowDrift    1400 points            → 0.373 ms/frame
  *   FlowDrift     850 points            → 0.231 ms/frame
  *
- * FlowDrift is the expensive one, not the graph — it samples three octaves of
+ * FlowDrift is the expensive one, not the graph: it samples three octaves of
  * simplex per point with no early exit, while the graph only samples per *node*
  * and its edges are pure arithmetic. Budget accordingly: the intuition that the
  * network is the heavy motif is wrong. Assume 3–5x these numbers on a
@@ -129,7 +129,7 @@ export const stepTier = (tier: QualityTier, delta: number): QualityTier => {
  *   NetworkGraph  200 nodes / 339 edges            → 0.039 ms/frame
  *
  * Two things worth reading off that table. The per-particle settle work is
- * nearly free — 2,300 points now cost what ~2,200 would have cost without it —
+ * nearly free, 2,300 points now cost what ~2,200 would have cost without it ,
  * so the density raise, not the new behaviour, is where the time went. And the
  * hex rhyme only bills inside its seam, which is why it is gated on a threshold
  * rather than multiplied by a bias that is usually zero.

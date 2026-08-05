@@ -1,41 +1,146 @@
 /**
- * Projects.tsx — redesigned.
+ * Projects.tsx
  *
- * The one-visible-at-a-time carousel becomes a responsive grid of tilt
- * cards — every project visible at once (less scrolling, more scanning),
- * each with a pointer-following glow, and links/full tech stack that
- * rise into view on hover. Keyboard/touch users see the links always
- * (hover reveal is progressive enhancement, not gatekeeping).
+ * ── Stage 8: detail arrives where you are looking ──
+ * The previous version opened detail in a drawer below the deck. On a short
+ * viewport that put the answer off-screen, so clicking appeared to do nothing,
+ * and the drawer's translucent surface over a live 3D scene was close to
+ * unreadable once you found it. Both problems come from treating detail as more
+ * page rather than as a change of state in the card you touched.
  *
- * The DEX / Order Book tab — the portfolio's centerpiece demo — is
- * preserved exactly, wired to the untouched <DEXOrderBook />.
+ * Now the deck sits on a *stage*: a positioned box the cards fill. Opening a
+ * project expands a view over that stage, scaling out of the clicked card's own
+ * centre, while the deck dims and blurs underneath. Nothing reflows, nothing
+ * moves down the page, and the panel is bounded by the space you were already
+ * looking at.
+ *
+ * ── Every card opens ──
+ * Detail used to be a privilege of the two projects with boards, which made the
+ * affordance inconsistent and meant a card had to carry its full description in
+ * case it was one of the ones that could not expand. Now every card opens, so
+ * card copy can be trimmed to three lines and the full text lives in the view.
+ * That shortens the deck as a side effect of making it consistent.
+ *
+ * The view also carries prev/next, so a reader can go through the work without
+ * closing and reopening. Cheap to add and it turns a lookup into browsing.
+ *
+ * ── One interaction language for the whole section ──
+ * The order book's explainer had the identical disease: a toggle below the
+ * terminal that opened off-screen on a short viewport. It now opens the same
+ * way, over its own stage, from its own trigger, using the same shell. After
+ * seeing one panel open, a reader knows what every other one here will do.
+ *
+ * Scoped to the two stages rather than the whole section, so headings and body
+ * and much worse idea than a terminal that does.
+ *
+ * DEXOrderBook itself remains untouched.
  */
-import { useState } from "react";
-import { Github, ArrowUpRight } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import {
+  Github,
+  ArrowUpRight,
+  Maximize2,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { projectsData, type Project } from "../data/projects";
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
 import { DEXOrderBook } from "./Dexorderbook";
 import { Reveal } from "./motion/Reveal";
 import { TiltCard } from "./motion/TiltCard";
+import { Takeaway } from "./patterns/Takeaway";
+import { OrderBookBrief } from "./patterns/OrderBookBrief";
+import { ProjectDeck, type ProjectDeckHandle } from "./patterns/ProjectDeck";
+import { ProjectView } from "./patterns/ProjectView";
+import { useExpandable } from "./patterns/useExpandable";
 
-const CATEGORIES = ["all", "web", "blockchain", "fullstack", "build-tools"] as const;
+const CATEGORIES = [
+  "all",
+  "web",
+  "blockchain",
+  "fullstack",
+  "build-tools",
+] as const;
 const ALL_TABS = [...CATEGORIES, "dex"] as const;
 type Tab = (typeof ALL_TABS)[number];
 
 const tabLabel = (tab: Tab): string =>
-  tab === "dex" ? "DEX / Order Book" : tab === "build-tools" ? "Build tools" : tab;
+  tab === "dex"
+    ? "DEX / Order Book"
+    : tab === "build-tools"
+      ? "Build tools"
+      : tab;
+
+const countFor = (tab: Tab): number =>
+  tab === "dex"
+    ? 0
+    : tab === "all"
+      ? projectsData.length
+      : projectsData.filter((p) => p.category === tab).length;
 
 export const Projects = () => {
   const t = useTheme();
   const [filter, setFilter] = useState<Tab>("dex");
-  const isDexTab = filter === "dex";
 
+  const stageRef = useRef<HTMLDivElement>(null);
+  const deckRef = useRef<ProjectDeckHandle>(null);
+
+  /**
+   * Page state for the top-right controls. Owned here rather than inside
+   * ProjectDeck, because the controls now render beside the tab bar instead of
+   * under the rail, and a sibling cannot read another sibling's internal state
+   * without it being lifted somewhere both can reach.
+   */
+  const [deckPage, setDeckPage] = useState({ page: 0, pages: 1 });
+  const onDeckPage = useCallback(
+    (s: { page: number; pages: number }) => setDeckPage(s),
+    [],
+  );
+  const dexStageRef = useRef<HTMLDivElement>(null);
+
+  // Same mechanics for both panels: expand origin, exit phase, focus return.
+  const detail = useExpandable<number>(stageRef);
+  const brief = useExpandable<true>(dexStageRef);
+  /** Stops the trigger's attention pulse once it has done its job. */
+  const [briefSeen, setBriefSeen] = useState(false);
+
+  const isDexTab = filter === "dex";
   const filtered = isDexTab
     ? []
     : filter === "all"
       ? projectsData
       : projectsData.filter((p) => p.category === filter);
+
+  const openIdx = detail.item;
+  const active = openIdx !== null ? (filtered[openIdx] ?? null) : null;
+
+  const step = useCallback(
+    (delta: number) => {
+      if (openIdx === null || filtered.length === 0) return;
+      detail.replace((openIdx + delta + filtered.length) % filtered.length);
+    },
+    [openIdx, filtered.length, detail],
+  );
+
+  /**
+   * Jumping to a related project. It may not be in the current filter, in which
+   * case widening to "all" is the only way to show it, and the deck behind is
+   * dimmed anyway so the change costs the reader nothing they can see.
+   */
+  const selectProject = useCallback(
+    (target: Project) => {
+      const here = filtered.findIndex((p) => p.id === target.id);
+      if (here >= 0) {
+        detail.replace(here);
+        return;
+      }
+      setFilter("all");
+      detail.replace(projectsData.findIndex((p) => p.id === target.id));
+    },
+    [filtered, detail],
+  );
 
   return (
     <section id="projects" className="section">
@@ -47,88 +152,230 @@ export const Projects = () => {
           </h2>
         </Reveal>
 
-        {/* Tabs */}
+        {/* Filters. Counts sit in the pill so the size of each set is legible
+            before you commit to switching to it. */}
         <Reveal delay={0.06}>
-          <div
-            role="tablist"
-            aria-label="Project categories"
-            style={{
-              display: "flex",
-              gap: "0.35rem",
-              flexWrap: "wrap",
-              marginBottom: "2rem",
-            }}
-          >
-            {ALL_TABS.map((tab) => {
-              const active = filter === tab;
-              const isDex = tab === "dex";
-              return (
+          <div className="proj-tabs-row">
+            <div
+              role="tablist"
+              aria-label="Project categories"
+              className="proj-tabs"
+            >
+              {ALL_TABS.map((tab) => {
+                const isActive = filter === tab;
+                const isDex = tab === "dex";
+                const count = countFor(tab);
+                return (
+                  <button
+                    key={tab}
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => {
+                      setFilter(tab);
+                      detail.close();
+                    }}
+                    className="proj-tab"
+                    style={{
+                      border: `1px solid ${isActive ? "transparent" : "var(--border)"}`,
+                      background: isActive ? t.accent : "transparent",
+                      color: isActive ? t.bg : isDex ? t.ac_(0.8) : t.fg_(0.5),
+                    }}
+                  >
+                    {isDex && !isActive && (
+                      <span className="proj-tab-dot" aria-hidden="true" />
+                    )}
+                    {tabLabel(tab)}
+                    {!isDex && <span className="proj-tab-count">{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/*
+              Top right, beside the tabs rather than under the rail. The old
+              position put the only way to change page at the bottom of a
+              section that can run several viewport-widths of cards tall on a
+              narrow desktop window, below content a reader had to scroll past
+              to reach it. Up here it sits next to the control that already
+              changes what the deck shows, so both live in the same place.
+
+              Rendered only once there is a second page to go to, same as
+              before: a control for a one-page deck was dead chrome.
+            */}
+            {!isDexTab && deckPage.pages > 1 && (
+              <div className="deck-controls">
                 <button
-                  key={tab}
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setFilter(tab)}
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.75rem",
-                    fontWeight: 550,
-                    textTransform: "capitalize",
-                    padding: "0.5rem 1rem",
-                    borderRadius: 999,
-                    border: `1px solid ${active ? "transparent" : "var(--border)"}`,
-                    background: active ? t.accent : "transparent",
-                    color: active ? t.bg : isDex ? t.ac_(0.8) : t.fg_(0.5),
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.45rem",
-                    transition: "all 0.25s cubic-bezier(0.16,1,0.3,1)",
-                  }}
+                  className="deck-arrow"
+                  onClick={() => deckRef.current?.prev()}
+                  disabled={deckPage.page <= 0}
+                  aria-label="Previous projects"
                 >
-                  {isDex && !active && (
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        width: 5,
-                        height: 5,
-                        borderRadius: "50%",
-                        background: t.accent,
-                        animation: "blink 2s ease-in-out infinite",
-                      }}
-                    />
-                  )}
-                  {tabLabel(tab)}
+                  <ChevronLeft size={14} />
                 </button>
-              );
-            })}
+                <span className="deck-controls-pos">
+                  {deckPage.page + 1} / {deckPage.pages}
+                </span>
+                <button
+                  className="deck-arrow"
+                  onClick={() => deckRef.current?.next()}
+                  disabled={deckPage.page >= deckPage.pages - 1}
+                  aria-label="More projects"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
           </div>
+
+          {/*
+            The progress line. A thin track the width of the tab row, filled to
+            the current page's share of the whole. Mounted only once paging is
+            active, so a single-page filter shows nothing rather than a line
+            permanently sitting at 100%, which would just be a border with an
+            opinion.
+          */}
+          {!isDexTab && deckPage.pages > 1 && (
+            <div
+              className="deck-progress"
+              role="progressbar"
+              aria-label="Project page"
+              aria-valuenow={deckPage.page + 1}
+              aria-valuemin={1}
+              aria-valuemax={deckPage.pages}
+            >
+              <span
+                className="deck-progress-fill"
+                style={{
+                  width: `${((deckPage.page + 1) / deckPage.pages) * 100}%`,
+                }}
+              />
+            </div>
+          )}
         </Reveal>
 
-        {/* DEX centerpiece */}
+        {/* DEX centrepiece */}
         {isDexTab && (
           <Reveal delay={0.1}>
-            <div className="mono-label" style={{ marginBottom: "0.9rem" }}>
-              Decentralized order book · live price feed · simulated CLOB depth
+            {/* Trigger above the terminal, so the panel grows downward over the
+                thing it describes rather than out of empty space below it. */}
+            <div className="dex-head">
+              <Takeaway>
+                The gap between an exchange price and the oracle price a
+                contract actually reads is the number that matters. This shows
+                both.
+              </Takeaway>
+              {/*
+                Was a ghost pill borrowed from the project cards, which made the
+                one control on this tab read as the quietest thing on it. It now
+                carries the accent as a border and a tint, and a soft halo that
+                pulses until it has been opened once. Discoverability first,
+                restraint second: it is the only affordance here, so it can
+                afford to be the loudest thing that is not the terminal.
+              */}
+              <button
+                className="dex-explain"
+                data-seen={briefSeen ? "true" : "false"}
+                onClick={(e) => {
+                  setBriefSeen(true);
+                  brief.openWith(true, e.currentTarget);
+                }}
+              >
+                <Info size={13} />
+                <span>How this works</span>
+              </button>
             </div>
-            <DEXOrderBook />
+
+            <div className="pstage dex-stage" ref={dexStageRef}>
+              <div
+                className="dex-wrap"
+                data-dimmed={brief.item ? "true" : "false"}
+              >
+                <DEXOrderBook />
+              </div>
+
+              {brief.item && (
+                <button
+                  className="pstage-scrim"
+                  onClick={brief.close}
+                  aria-label="Close"
+                  tabIndex={-1}
+                />
+              )}
+              {brief.item && (
+                <OrderBookBrief
+                  closing={brief.closing}
+                  origin={brief.origin}
+                  onClose={brief.close}
+                />
+              )}
+            </div>
           </Reveal>
         )}
 
-        {/* Grid */}
+        {/* Deck and the view that opens over it */}
         {!isDexTab && (
-          <div className="grid-projects">
-            {filtered.map((project, i) => (
-              <Reveal key={project.title} delay={0.05 * (i % 4)}>
-                <ProjectCard project={project} index={i} />
-              </Reveal>
-            ))}
-          </div>
+          <Reveal delay={0.1}>
+            <div className="pstage" ref={stageRef}>
+              {/* Keyed on the filter so a new set of cards animates in rather
+                  than being swapped underneath the reader. */}
+              <ProjectDeck
+                ref={deckRef}
+                key={filter}
+                resetKey={filter}
+                label={`${tabLabel(filter)} projects`}
+                dimmed={active !== null}
+                onPageChange={onDeckPage}
+              >
+                {filtered.map((project, i) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    index={i}
+                    onOpen={(el) => detail.openWith(i, el)}
+                  />
+                ))}
+              </ProjectDeck>
+
+              {/* Click-off. Sits under the panel, over the dimmed deck. */}
+              {active && (
+                <button
+                  className="pstage-scrim"
+                  onClick={detail.close}
+                  aria-label="Close detail"
+                  tabIndex={-1}
+                />
+              )}
+
+              {active && openIdx !== null && (
+                <ProjectView
+                  project={active}
+                  index={openIdx}
+                  total={filtered.length}
+                  closing={detail.closing}
+                  origin={detail.origin}
+                  onPrev={() => step(-1)}
+                  onNext={() => step(1)}
+                  onClose={detail.close}
+                  onSelect={selectProject}
+                />
+              )}
+            </div>
+          </Reveal>
         )}
       </div>
     </section>
   );
 };
 
-const ProjectCard = ({ project, index }: { project: Project; index: number }) => {
+const ProjectCard = ({
+  project,
+  index,
+  onOpen,
+}: {
+  project: Project;
+  index: number;
+  onOpen: (el: HTMLElement) => void;
+}) => {
   const t = useTheme();
   const [hovered, setHovered] = useState(false);
 
@@ -136,140 +383,85 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
   const hasLive = project.live && project.live !== "Not Live Yet";
 
   return (
-    <TiltCard
-      style={{ padding: "1.75rem", minHeight: "250px", display: "flex", flexDirection: "column" }}
-    >
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{ display: "flex", flexDirection: "column", flex: 1 }}
-      >
-        {/* Meta row */}
+    <div className="deck-card">
+      <TiltCard className="pcard-shell" style={{ height: "100%" }}>
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "1rem",
-          }}
+          className="pcard"
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
         >
-          <span
-            className="data-text"
-            style={{ fontSize: "0.6rem", letterSpacing: "0.18em", color: t.fg_(0.28) }}
-          >
+          {/* The index as a watermark rather than a label: it gives each card a
+              distinct silhouette at a glance without adding another line of
+              type competing with the title. */}
+          <span className="pcard-num" aria-hidden="true">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span className="chip">{project.category}</span>
-        </div>
 
-        {/* Title + description */}
-        <h3
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "1.125rem",
-            fontWeight: 600,
-            letterSpacing: "-0.015em",
-            lineHeight: 1.25,
-            color: hovered ? t.accent : t.fg,
-            transition: "color 0.25s ease",
-            marginBottom: "0.6rem",
-          }}
-        >
-          {project.title}
-        </h3>
-        <p
-          className="body-text"
-          style={{ fontSize: "0.84rem", flex: 1, marginBottom: "1.25rem" }}
-        >
-          {project.description}
-        </p>
+          <div className="pcard-meta">
+            <span className="chip">{project.category}</span>
+          </div>
 
-        {/* Tech chips — full stack unfolds on hover */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0.35rem",
-            flexWrap: "wrap",
-            marginBottom: "1.1rem",
-          }}
-        >
-          {(hovered ? project.technologies : project.technologies.slice(0, 4)).map(
-            (tech) => (
-              <span
-                key={tech}
-                className="chip"
-                style={{ animation: hovered ? "fadeIn 0.3s ease" : undefined }}
-              >
+          <h3
+            className="pcard-title"
+            style={{ color: hovered ? t.accent : t.fg }}
+          >
+            {project.title}
+          </h3>
+
+          <Takeaway>{project.takeaway}</Takeaway>
+
+          {/* Clamped: the full text is one click away in the view, and uniform
+              card height is what keeps the deck a predictable size. */}
+          <p className="body-text pcard-desc">{project.description}</p>
+
+          <div className="pcard-chips">
+            {project.technologies.slice(0, 3).map((tech) => (
+              <span key={tech} className="chip">
                 {tech}
               </span>
-            ),
-          )}
-          {!hovered && project.technologies.length > 4 && (
-            <span className="chip" style={{ borderStyle: "dashed" }}>
-              +{project.technologies.length - 4}
-            </span>
-          )}
-        </div>
+            ))}
+            {project.technologies.length > 3 && (
+              <span className="chip" style={{ borderStyle: "dashed" }}>
+                +{project.technologies.length - 3}
+              </span>
+            )}
+          </div>
 
-        {/* Links */}
-        <div
-          style={{
-            display: "flex",
-            gap: "1.2rem",
-            paddingTop: "0.9rem",
-            borderTop: "1px solid var(--border-subtle)",
-          }}
-        >
-          {hasGithub && (
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                fontFamily: "var(--font-body)",
-                fontSize: "0.75rem",
-                fontWeight: 550,
-                color: hovered ? t.accent : t.fg_(0.45),
-                textDecoration: "none",
-                transition: "color 0.2s ease",
-              }}
+          <div className="pcard-foot">
+            {hasGithub && (
+              <a
+                href={project.github ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pcard-link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Github size={13} /> Code
+              </a>
+            )}
+            {hasLive && (
+              <a
+                href={project.live ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pcard-link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ArrowUpRight size={13} /> Live
+              </a>
+            )}
+
+            <button
+              className="pcard-open"
+              onClick={(e) => onOpen(e.currentTarget)}
+              aria-label={`Open ${project.title} detail`}
             >
-              <Github size={13} /> Code
-            </a>
-          )}
-          {hasLive && (
-            <a
-              href={project.live}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                fontFamily: "var(--font-body)",
-                fontSize: "0.75rem",
-                fontWeight: 550,
-                color: hovered ? t.accent : t.fg_(0.45),
-                textDecoration: "none",
-                transition: "color 0.2s ease",
-              }}
-            >
-              <ArrowUpRight size={13} /> Live
-            </a>
-          )}
-          {!hasGithub && !hasLive && (
-            <span
-              className="data-text"
-              style={{ fontSize: "0.62rem", color: t.fg_(0.28), letterSpacing: "0.1em" }}
-            >
-              PRIVATE
-            </span>
-          )}
+              <span>Detail</span>
+              <Maximize2 size={12} />
+            </button>
+          </div>
         </div>
-      </div>
-    </TiltCard>
+      </TiltCard>
+    </div>
   );
 };

@@ -1,9 +1,9 @@
 /**
- * packets.ts — in-flight transactions, ported from `universe/PacketManager.ts`.
+ * packets.ts: in-flight transactions, ported from `universe/PacketManager.ts`.
  *
  * The routing is unchanged: BFS from a random client to the nearest validator,
  * capped at `maxRouteHops`, walking `cameFrom` back and reversing in place.
- * Packets are pooled and `alive`-toggled — nothing allocates after construction,
+ * Packets are pooled and `alive`-toggled: nothing allocates after construction,
  * which is the property that let the original run 10 concurrent packets on a
  * phone without GC sawtooth.
  *
@@ -12,7 +12,7 @@
  *  · the trail ring buffer stores 3 components per sample instead of 2
  *
  * The edge-lighting scan at the end of `update` was O(edges) per packet per
- * frame in the original — with ~500 edges and 10 packets that is 5,000
+ * frame in the original: with ~500 edges and 10 packets that is 5,000
  * comparisons a frame for a cosmetic effect. Replaced with a precomputed
  * edge-index map; behaviour identical, cost constant.
  */
@@ -22,7 +22,7 @@ import type { NetworkTopology } from "./graph";
 /**
  * Stage 4 raised the traffic: more concurrent packets, spawning sooner, with
  * longer trails. The cost is entirely in the shared packet buffer, which is
- * `poolSize * (1 + trailLength)` points — 630 here, against 360 before — and
+ * `poolSize * (1 + trailLength)` points, 630 here, against 360 before, and
  * every one of them is a point the vertex shader may skip via aScale 0. Routing
  * cost is unchanged, because it is per *spawn* rather than per frame, and the
  * pool still allocates nothing after construction.
@@ -104,7 +104,7 @@ export class PacketRouter {
   private readonly rand: () => number;
   private readonly onConsensus: (validatorId: number, time: number) => void;
 
-  /** BFS scratch — reused, never reallocated per route. */
+  /** BFS scratch: reused, never reallocated per route. */
   private readonly visited: Int32Array;
   private readonly cameFrom: Int32Array;
   private readonly queue: Int32Array;
@@ -228,7 +228,7 @@ export class PacketRouter {
 
   /**
    * @param intensity 0..1 presence of the motif. At 0 the router idles
-   *        completely — no spawns, no integration — so an off-screen section
+   *        completely, no spawns, no integration, so an off-screen section
    *        costs nothing. This is the main reason the flight can carry five
    *        motifs at once.
    */
