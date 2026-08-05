@@ -53,8 +53,8 @@ export const detectTier = (): QualityTier => {
   const narrow = window.innerWidth < 720;
   const mem = (navigator as { deviceMemory?: number }).deviceMemory ?? 4;
 
-  if (coarse && (narrow || cores <= 4 || mem <= 3)) return "medium";
-  if (cores <= 4 || mem <= 4) return "high";
+  if (coarse && (narrow || cores <= 4 || mem <= 3)) return "low";
+  if (cores <= 4 || mem <= 4) return "medium";
   return "high";
 };
 

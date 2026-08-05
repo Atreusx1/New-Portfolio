@@ -33,16 +33,16 @@ import { projectsData } from "../data/projects";
 import { EXPERIENCE } from "../data/constants";
 
 const PARAGRAPHS = [
-  "I came up through the MERN stack and moved to contracts because that was where the expensive mistakes were. Since 2023 I have shipped ICO platforms with fiat checkout, NFT provenance systems, staking contracts, and the React front ends sitting on top of them, across Ethereum, Polygon, Avalanche and Solana.",
-  "The part I actually care about is the unglamorous half. The invariant suite that proves no sensitive role can be granted without sitting out the full timelock delay. The test that proves a reentrancy guard is load-bearing rather than decorative. Kestrel Protocol is where that discipline lives right now. Off the clock, it is the 3D scene behind this page.",
+  "Started in MERN, moved to smart contracts once I realized that's where a typo costs six figures instead of a Slack apology. Since 2023 I have shipped ICO platforms, NFT provenance systems, staking contracts, backends to support them, and the React front ends sitting on top of them, across Ethereum, Polygon, Avalanche.",
+  "Outside of that I trade on Hyperliquid with a discipline that comes and goes. Most projects eventually drag me across the entire stack anyway, from Solidity and APIs to databases and frontend code. The goal is always the same: build it properly, break it deliberately, and fix the thing that made it break in the first place.",
 ] as const;
 
 const TRAITS = [
   "Solidity",
   "Foundry and Hardhat",
   "React and Three.js",
-  "Circom and zkSNARKs",
-  "Substrate",
+  "Node.Js and Express",
+  "Ether.js",
 ] as const;
 
 /** Month index by three-letter name, for parsing "Jan 2023" style periods. */
@@ -118,8 +118,8 @@ export const About = () => {
 
         <Reveal delay={0.04}>
           <Takeaway size="lead">
-            I write the contracts and the interfaces that make them legible.
-            Most of the work below is both.
+            I build the contract, the backend, and the frontend mostly so I only
+            have one person to blame when something breaks.
           </Takeaway>
         </Reveal>
 

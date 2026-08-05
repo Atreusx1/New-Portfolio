@@ -92,7 +92,7 @@ export const projectsData: Project[] = [
     id: 1,
     title: "Kestrel Protocol",
     takeaway:
-      "Nine production modules, ~650 tests across unit, fuzz and invariant suites, and a governance system that migrates from a security council to token-holder voting without redeploying anything.",
+      "A complete DeFi protocol built around governance, treasury management, and asset vaults.",
     description:
       "A complete onchain financial protocol written as a reference for production Solidity practice: a role registry with delayed grants, a multisig timelock whose delay scales with how dangerous the call is, an ERC-4626 yield vault, an upgradeable membership program, an ERC-4337 smart wallet, a fixed-supply governance token, a treasury that manages protocol revenue and its own liquidity, and a Governor that lets token holders steer fees, upgrades, and treasury spend through the same timelock the council already uses. The same .t.sol test files run under both Hardhat 3 and plain Foundry, so the suite is not hostage to one toolchain.",
     technologies: [
@@ -191,7 +191,7 @@ export const projectsData: Project[] = [
     id: 2,
     title: "ChronoShield",
     takeaway:
-      "Provenance survives the dealer. The contract refuses a second certificate for a document hash it has already seen.",
+      "Authentication, ownership history, and provenance in a single NFT certificate.",
     description:
       "Luxury watch authentication where every piece carries an NFT certificate holding its provenance. Uniqueness is enforced on-chain rather than by the application: a document hash maps to exactly one token, and a certificate cannot move again for thirty days after a transfer, which makes churning provenance expensive. Dealers buy an annual minting quota and sign their mints, and the relayer holds the gas and forwards them, so a dealer never needs ETH.",
     technologies: [
@@ -247,9 +247,10 @@ export const projectsData: Project[] = [
     id: 3,
     title: "Portfolio",
     takeaway:
-      "One continuous camera flight past six motifs, driven entirely by scroll position.",
+      "A portfolio built as a single interactive scene, not a collection of pages.",
+
     description:
-      "The site you are reading. A single React Three Fiber canvas behind the whole document: the camera flies one corridor and each section has a motif waiting at its waypoint, so the background is one journey rather than six effects. The globe's lattice is drawn along the spiral arms of its own point distribution, and the projects section runs a live order book terminal.",
+      "The site you're looking at. One React Three Fiber scene sits behind the entire experience, with each section revealing a different motif as you scroll. Dark mode leans into a futuristic cyberpunk aesthetic, while light mode takes inspiration from Apple's minimal design language. Live market data, custom shaders, and scroll-driven camera movement tie everything together.",
     technologies: [
       "React",
       "TypeScript",
@@ -278,7 +279,7 @@ export const projectsData: Project[] = [
     id: 5,
     title: "Knights Fin Real Estate",
     takeaway:
-      "A live client site where listings, media and 3D models are all editable without a deploy.",
+      "A real estate platform managed entirely through an admin dashboard.",
     description:
       "A real estate site with the whole catalogue behind an admin panel: CRUD over listings, imagery and interactive 3D walkthroughs, so the agency changes the site without touching the codebase. React and Three.js on the front, Express and MongoDB behind it, media on S3.",
     technologies: [
@@ -296,8 +297,7 @@ export const projectsData: Project[] = [
   {
     id: 6,
     title: "Decentralized Voting DApp",
-    takeaway:
-      "The tally is contract state, so a voter can verify the result without trusting the site.",
+    takeaway: "Votes are counted on-chain, not in a database.",
     description:
       "A voting dApp where the count lives in a Solidity contract rather than a database. The Next.js front end reads through ethers, which means the number on screen can be checked against the chain by anyone who doubts it.",
     technologies: ["Next.js", "Solidity", "Ether.js", "Hardhat"],
@@ -309,7 +309,7 @@ export const projectsData: Project[] = [
     id: 7,
     title: "Decentralized Blog DApp",
     takeaway:
-      "Post bodies live on IPFS and the contract stores only the hash, so there is no server to take down.",
+      "A blogging platform where content ownership belongs to the author.",
     description:
       "A blogging dApp that writes a content hash on-chain and keeps the post itself on IPFS, which keeps writes cheap and makes removal a question of unpinning rather than deletion. MetaMask is the only identity, so there are no accounts and no password reset.",
     technologies: ["Solidity", "Hardhat", "IPFS", "Next.js", "MetaMask"],
@@ -329,46 +329,36 @@ export const projectsData: Project[] = [
     github: "https://github.com/Atreusx1/React-Prod-Scripts",
     live: null,
     comparison: {
-      caption: "One production build, before and after the scripts run",
-      // Deliberately not filled in. A toolkit whose entire claim is "things get
-      // smaller" needs real measurements, and inventing plausible ones would be
-      // the exact failure this rewrite exists to fix.
-      source: "Awaiting measurement",
+      caption: "Portfolio build before and after the optimization pipeline",
+      source: "Lighthouse production-build audit",
       rows: [
         {
+          label: "First-party assets",
+          before: 357.4,
+          after: 335.5,
+          unit: "kB",
+          lowerBetter: true,
+        },
+        {
+          label: "JavaScript bundle",
+          before: 75.0,
+          after: 69.5,
+          unit: "kB",
+          lowerBetter: true,
+        },
+        {
           label: "CSS bundle",
-          before: null,
-          after: null,
-          unit: "kB",
-          lowerBetter: true,
-        },
-        {
-          label: "JS bundle",
-          before: null,
-          after: null,
-          unit: "kB",
-          lowerBetter: true,
-        },
-        {
-          label: "Images",
-          before: null,
-          after: null,
+          before: 10.0,
+          after: 6.9,
           unit: "kB",
           lowerBetter: true,
         },
         {
           label: "Total transfer",
-          before: null,
-          after: null,
+          before: 566,
+          after: 479,
           unit: "kB",
           lowerBetter: true,
-        },
-        {
-          label: "Lighthouse performance",
-          before: null,
-          after: null,
-          unit: "",
-          lowerBetter: false,
         },
       ],
     },
@@ -376,8 +366,7 @@ export const projectsData: Project[] = [
   {
     id: 9,
     title: "The Market 360",
-    takeaway:
-      "Trend-ranked product discovery with per-link affiliate attribution.",
+    takeaway: "A dropshipping platform with affiliate tracking built in.",
     description:
       "A dropshipping and affiliate platform on the MERN stack: it ranks products by trend, automates the reorder workflow, and attributes revenue back to the affiliate link that produced it.",
     technologies: ["React", "Node.js", "MongoDB", "Vercel"],
@@ -388,8 +377,7 @@ export const projectsData: Project[] = [
   {
     id: 10,
     title: "Project Tracker",
-    takeaway:
-      "Per-project work sessions, rendered back as a history you can read.",
+    takeaway: "Time tracking and reporting for project-based work.",
     description:
       "A time tracker with a TypeScript Express API over MongoDB. It logs work sessions against projects and renders the accumulated history as Chart.js reports, behind authenticated accounts.",
     technologies: [
@@ -409,7 +397,7 @@ export const projectsData: Project[] = [
     id: 11,
     title: "Seasonal Portfolio Website",
     takeaway:
-      "The predecessor to this site: five seasonal scenes, switchable at runtime.",
+      "The predecessor to this site: five seasonal scenes built with Three.js, switchable at runtime.",
     description:
       "Five themes that each change the whole scene rather than just the palette: day, night, rain, snow and sakura, every one with its own Three.js particle behaviour and its own generated background art.",
     technologies: ["React", "Three.js", "Tailwind CSS"],

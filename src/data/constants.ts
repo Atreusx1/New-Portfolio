@@ -9,7 +9,7 @@ export const RESUME = {
    * it is the string that would end up in a meta description or a resume
    * export, so it should not be the one place the site is wrong about itself.
    */
-  bio: "Full-stack blockchain developer. Solidity and MERN, shipping to Ethereum, Polygon, Avalanche and Solana since 2023. Currently building Kestrel Protocol: an ERC-4626 vault and tiered-timelock governance, covered by fuzz and invariant tests.",
+  bio: "Full-stack blockchain developer. Solidity and MERN, shipping to Ethereum, Polygon, Avalanche and Solana since 2023.",
   email: "anishkadam92@gmail.com",
   github: "https://github.com/Atreusx1",
   linkedin: "https://www.linkedin.com/in/anish-defi/",
@@ -67,16 +67,18 @@ export const EXPERIENCE = [
     role: "Freelance Full-Stack Blockchain Developer",
     company: "Self-Employed",
     period: "Jun 2025 - Present",
-    impact: "Buyers pay by card and never have to source ETH to complete a purchase.",
+    impact:
+      "Designed and delivered complete products from smart contract to user experience.",
     description:
-      "ICO platforms and NFT systems on MERN and Hardhat. Stripe covers the fiat leg, and meta-transactions cover gas, so the wallet requirement disappears from the buying flow. Cross-chain messaging where a product spans more than one network.",
+      "Built ICO platforms, a luxury watch provenance platform, and DeFi systems involving vaults, governance, staking, and treasury management. Owned the stack from smart contracts and testing to APIs, dashboards, and payment flows.",
   },
   {
     id: 2,
     role: "Full-Stack Blockchain Developer",
     company: "TecMetaverse",
     period: "Nov 2024 - Jun 2025",
-    impact: "Took dApps live on four chains, and led the blockchain track that got them there.",
+    impact:
+      "Took dApps live on four chains, and led the blockchain track that got them there.",
     description:
       "Shipped dApps to Ethereum, Polygon, Avalanche and Solana, including DeFi and staking contracts, with Node.js services on AWS behind them.",
   },
@@ -85,7 +87,8 @@ export const EXPERIENCE = [
     role: "Software Developer Intern",
     company: "Portalwiz Technologies",
     period: "Feb 2024 - Aug 2024",
-    impact: "First production Python: Django APIs behind React, with chatbot flows on top.",
+    impact:
+      "First production Python: Django APIs behind React, with chatbot flows on top.",
     description:
       "Django APIs over MongoDB with React interfaces in front, plus chatbot flows for client-facing workflows.",
   },

@@ -105,7 +105,8 @@ const App = () => {
                 color: "var(--fg-muted)",
               }}
             >
-              © {new Date().getFullYear()} ANISH KADAM · BUILT ON-CHAIN-ISH
+              © {new Date().getFullYear()} ANISH KADAM · BUILT WITH ❤️ USING
+              REACT, THREE.JS, AND CREATIVITY
             </span>
           </footer>
         </div>
