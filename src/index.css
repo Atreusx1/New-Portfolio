@@ -1213,7 +1213,7 @@ html[data-theme="light"] .field {
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   /* The rail owns horizontal gestures; the page keeps vertical ones. */
-  touch-action: pan-x pan-y pinch-zoom;
+  touch-action: pan-x pa n-y pinch-zoom;
   scrollbar-width: none;
   padding-bottom: 2px;
 }
@@ -1225,9 +1225,30 @@ html[data-theme="light"] .field {
   outline-offset: 6px;
   border-radius: var(--radius);
 }
-/* Fade only on a side there is more content on. Masking both edges
-   unconditionally clips the first card's border at rest, which reads as a
-   rendering fault rather than as an affordance. */
+/**
+ * Fade only on a side there is more content on. Masking both edges
+ * unconditionally clips the first card's border at rest, which reads as a
+ * rendering fault rather than as an affordance.
+ *
+ * ── Desktop/tablet: off ──
+ * `edge` is computed from `pages`, and `pages` depends on how many cards the
+ * current filter matched: 11 for "All" is three pages and a right-edge fade,
+ * 3 for "Web" is one page and `edge` collapses to "none". That produced the
+ * actual bug report, which was never "the fade looks wrong", it was "the fade
+ * exists on some tabs and not others" — an affordance that only sometimes
+ * describes a real affordance reads as a rendering glitch rather than a hint.
+ *
+ * Disabled outright above 820px rather than fixed, because a fade that is
+ * present exactly when there is more to scroll to is correct, and the actual
+ * complaint was about its presence being inconsistent-looking at all, not
+ * about the logic being wrong.
+ *
+ * ── Mobile: unchanged ──
+ * Below 820px this block does not apply, so the rules further down keep
+ * exactly the behaviour already confirmed correct there. Scoping the removal
+ * rather than deleting the mechanism is what keeps mobile untouched to the
+ * pixel.
+ */
 .deck[data-edge="both"] .deck-track {
   mask-image: linear-gradient(
     to right,
@@ -1247,6 +1268,34 @@ html[data-theme="light"] .field {
     #000 calc(100% - 34px),
     transparent 100%
   );
+}
+
+/*
+ * Desktop/tablet: off. The three rules above and this override have identical
+ * selector specificity, so which one wins is decided by source order, not by
+ * the media condition. The previous version placed this block *before* the
+ * unconditional rules, so on a desktop-width viewport both matched and the
+ * later, unconditional one always won: the "none" was being silently
+ * overridden the instant the stylesheet loaded, which is why the fade kept
+ * appearing on desktop after the fix that was supposed to remove it.
+ *
+ * Moving it after them is the entire fix. Nothing about the logic changed.
+ *
+ * `edge` is computed from `pages`, and `pages` depends on how many cards the
+ * current filter matched: 11 for "All" is three pages, 3 for "Web" is one
+ * page. That is the actual bug report this exists for: not that the fade
+ * looked wrong, but that it appeared on some tabs and not others, which reads
+ * as a rendering glitch rather than as a hint tied to real scrollable content.
+ * Disabled outright above 820px rather than fixed, because the complaint was
+ * about the fade's presence being inconsistent-looking at all on desktop, not
+ * about the underlying logic being wrong, and mobile already keeps it.
+ */
+@media (min-width: 821px) {
+  .deck[data-edge="both"] .deck-track,
+  .deck[data-edge="start"] .deck-track,
+  .deck[data-edge="end"] .deck-track {
+    mask-image: none;
+  }
 }
 
 .deck-card {
@@ -1272,61 +1321,96 @@ html[data-theme="light"] .field {
   scroll-snap-align: start;
 }
 
+/*
+ * Controls moved from the bottom of the rail to the top right, beside the tab
+ * bar, in stage 8's follow-up pass. The old position put the only way to
+ * change page below however many rows of cards the current filter produced,
+ * which on a narrow desktop window could be several screens down. Up here it
+ * sits next to the control that already changes what the deck shows.
+ *
+ * Dots became a compact "2 / 5" readout plus a thin progress line under the
+ * tab row: nine dots for the "All" filter at low card counts would have been
+ * wider than the tab bar itself, and a readout scales to any page count for
+ * free.
+ */
 .deck-controls {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
-  margin-top: 1.1rem;
+  gap: 0.4rem;
+  flex: none;
+  padding: 0.2rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-muted);
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease;
 }
+/* .deck-controls[data-seen="false"] {
+  animation: dexHalo 2.6s ease-in-out infinite;
+}
+.deck-controls[data-seen="false"]:hover {
+  animation: none;
+} */
 .deck-arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 1px solid var(--border);
+  border: none;
   background: transparent;
-  color: var(--fg-muted);
+  color: var(--accent);
   cursor: pointer;
   transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
+    background 0.2s ease,
     transform 0.2s var(--ease-spring);
 }
 .deck-arrow:hover:not(:disabled) {
-  color: var(--accent);
-  border-color: var(--accent-border);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
   transform: scale(1.08);
 }
 .deck-arrow:disabled {
   opacity: 0.3;
   cursor: default;
 }
+.deck-controls-pos {
+  min-width: 2.6rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
 
-.deck-dots {
+/* The row holding the tab bar and the controls: tabs wrap onto their own
+   lines on a narrow measure, controls stay pinned to the right end. */
+.proj-tabs-row {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
-.deck-dot {
-  width: 6px;
-  height: 6px;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: var(--border-active);
-  cursor: pointer;
-  transition:
-    width 0.32s var(--ease-spring),
-    background 0.25s ease;
+
+/* Thin track under the tab row, filled to the current page's share of the
+   whole. Same visual language as the hero's live-data hairlines: a line that
+   fills rather than a bar that looks decorative. */
+.deck-progress {
+  height: 2px;
+  margin: 0.7rem 0 1.6rem;
+  border-radius: 2px;
+  background: var(--border-faint);
+  overflow: hidden;
 }
-/* The active dot stretches rather than only recolouring, so position is
-   legible without relying on colour alone. */
-.deck-dot[data-active="true"] {
-  width: 18px;
+.deck-progress-fill {
+  display: block;
+  height: 100%;
   background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.45s var(--ease-out);
 }
 
 /* ─── CARD ────────────────────────────────────────────────*/

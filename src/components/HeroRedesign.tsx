@@ -240,7 +240,7 @@ export const HeroRedesign = () => {
               style={{ background: t.accent }}
               aria-hidden="true"
             />
-            Full-stack · Blockchain · Pune, IN
+            Smart Contracts · Backend · Frontend
           </div>
 
           <h1 className="hero-headline">
@@ -252,7 +252,7 @@ export const HeroRedesign = () => {
               )}
             </span>
             <span className="display-sub hero-claim hero-step" style={step(3)}>
-              writes the contract and the client.
+              builds on-chain systems.
             </span>
           </h1>
 
@@ -264,9 +264,8 @@ export const HeroRedesign = () => {
             standard, and the actual test discipline.
           */}
           <p className="body-text hero-blurb hero-step" style={step(4)}>
-            Solidity and full-stack, three years in. Right now that means
-            Kestrel Protocol: an ERC-4626 vault and tiered-timelock governance,
-            covered by fuzz and invariant tests.
+            2+ years across smart contracts, APIs, and frontend with a habit of
+            testing the parts that actually matter.
           </p>
 
           <div className="hero-actions hero-step" style={step(5)}>
@@ -336,10 +335,7 @@ export const HeroRedesign = () => {
                       vectorEffect="non-scaling-stroke"
                     />
                   </svg>
-                  <span
-                    className="tape-change"
-                    data-up={up ? "true" : "false"}
-                  >
+                  <span className="tape-change" data-up={up ? "true" : "false"}>
                     {up ? "+" : ""}
                     {tk.change}%
                   </span>

@@ -36,7 +36,14 @@
  * DEXOrderBook itself remains untouched.
  */
 import { useCallback, useRef, useState } from "react";
-import { Github, ArrowUpRight, Maximize2, Info } from "lucide-react";
+import {
+  Github,
+  ArrowUpRight,
+  Maximize2,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { projectsData, type Project } from "../data/projects";
 import { ScrambleText } from "./Scrambletext";
 import { useTheme } from "../context/ThemeContext";
@@ -45,7 +52,7 @@ import { Reveal } from "./motion/Reveal";
 import { TiltCard } from "./motion/TiltCard";
 import { Takeaway } from "./patterns/Takeaway";
 import { OrderBookBrief } from "./patterns/OrderBookBrief";
-import { ProjectDeck } from "./patterns/ProjectDeck";
+import { ProjectDeck, type ProjectDeckHandle } from "./patterns/ProjectDeck";
 import { ProjectView } from "./patterns/ProjectView";
 import { useExpandable } from "./patterns/useExpandable";
 
@@ -78,6 +85,19 @@ export const Projects = () => {
   const [filter, setFilter] = useState<Tab>("dex");
 
   const stageRef = useRef<HTMLDivElement>(null);
+  const deckRef = useRef<ProjectDeckHandle>(null);
+
+  /**
+   * Page state for the top-right controls. Owned here rather than inside
+   * ProjectDeck, because the controls now render beside the tab bar instead of
+   * under the rail, and a sibling cannot read another sibling's internal state
+   * without it being lifted somewhere both can reach.
+   */
+  const [deckPage, setDeckPage] = useState({ page: 0, pages: 1 });
+  const onDeckPage = useCallback(
+    (s: { page: number; pages: number }) => setDeckPage(s),
+    [],
+  );
   const dexStageRef = useRef<HTMLDivElement>(null);
 
   // Same mechanics for both panels: expand origin, exit phase, focus return.
@@ -135,40 +155,102 @@ export const Projects = () => {
         {/* Filters. Counts sit in the pill so the size of each set is legible
             before you commit to switching to it. */}
         <Reveal delay={0.06}>
-          <div
-            role="tablist"
-            aria-label="Project categories"
-            className="proj-tabs"
-          >
-            {ALL_TABS.map((tab) => {
-              const isActive = filter === tab;
-              const isDex = tab === "dex";
-              const count = countFor(tab);
-              return (
+          <div className="proj-tabs-row">
+            <div
+              role="tablist"
+              aria-label="Project categories"
+              className="proj-tabs"
+            >
+              {ALL_TABS.map((tab) => {
+                const isActive = filter === tab;
+                const isDex = tab === "dex";
+                const count = countFor(tab);
+                return (
+                  <button
+                    key={tab}
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => {
+                      setFilter(tab);
+                      detail.close();
+                    }}
+                    className="proj-tab"
+                    style={{
+                      border: `1px solid ${isActive ? "transparent" : "var(--border)"}`,
+                      background: isActive ? t.accent : "transparent",
+                      color: isActive ? t.bg : isDex ? t.ac_(0.8) : t.fg_(0.5),
+                    }}
+                  >
+                    {isDex && !isActive && (
+                      <span className="proj-tab-dot" aria-hidden="true" />
+                    )}
+                    {tabLabel(tab)}
+                    {!isDex && <span className="proj-tab-count">{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/*
+              Top right, beside the tabs rather than under the rail. The old
+              position put the only way to change page at the bottom of a
+              section that can run several viewport-widths of cards tall on a
+              narrow desktop window, below content a reader had to scroll past
+              to reach it. Up here it sits next to the control that already
+              changes what the deck shows, so both live in the same place.
+
+              Rendered only once there is a second page to go to, same as
+              before: a control for a one-page deck was dead chrome.
+            */}
+            {!isDexTab && deckPage.pages > 1 && (
+              <div className="deck-controls">
                 <button
-                  key={tab}
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => {
-                    setFilter(tab);
-                    detail.close();
-                  }}
-                  className="proj-tab"
-                  style={{
-                    border: `1px solid ${isActive ? "transparent" : "var(--border)"}`,
-                    background: isActive ? t.accent : "transparent",
-                    color: isActive ? t.bg : isDex ? t.ac_(0.8) : t.fg_(0.5),
-                  }}
+                  className="deck-arrow"
+                  onClick={() => deckRef.current?.prev()}
+                  disabled={deckPage.page <= 0}
+                  aria-label="Previous projects"
                 >
-                  {isDex && !isActive && (
-                    <span className="proj-tab-dot" aria-hidden="true" />
-                  )}
-                  {tabLabel(tab)}
-                  {!isDex && <span className="proj-tab-count">{count}</span>}
+                  <ChevronLeft size={14} />
                 </button>
-              );
-            })}
+                <span className="deck-controls-pos">
+                  {deckPage.page + 1} / {deckPage.pages}
+                </span>
+                <button
+                  className="deck-arrow"
+                  onClick={() => deckRef.current?.next()}
+                  disabled={deckPage.page >= deckPage.pages - 1}
+                  aria-label="More projects"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
           </div>
+
+          {/*
+            The progress line. A thin track the width of the tab row, filled to
+            the current page's share of the whole. Mounted only once paging is
+            active, so a single-page filter shows nothing rather than a line
+            permanently sitting at 100%, which would just be a border with an
+            opinion.
+          */}
+          {!isDexTab && deckPage.pages > 1 && (
+            <div
+              className="deck-progress"
+              role="progressbar"
+              aria-label="Project page"
+              aria-valuenow={deckPage.page + 1}
+              aria-valuemin={1}
+              aria-valuemax={deckPage.pages}
+            >
+              <span
+                className="deck-progress-fill"
+                style={{
+                  width: `${((deckPage.page + 1) / deckPage.pages) * 100}%`,
+                }}
+              />
+            </div>
+          )}
         </Reveal>
 
         {/* DEX centrepiece */}
@@ -237,10 +319,12 @@ export const Projects = () => {
               {/* Keyed on the filter so a new set of cards animates in rather
                   than being swapped underneath the reader. */}
               <ProjectDeck
+                ref={deckRef}
                 key={filter}
                 resetKey={filter}
                 label={`${tabLabel(filter)} projects`}
                 dimmed={active !== null}
+                onPageChange={onDeckPage}
               >
                 {filtered.map((project, i) => (
                   <ProjectCard

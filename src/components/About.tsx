@@ -112,11 +112,7 @@ export const About = () => {
         <Reveal className="section-head">
           <span className="mono-label">About</span>
           <h2 className="section-title">
-            <ScrambleText
-              text="Builder of decentralized things"
-              active
-              speed={16}
-            />
+            <ScrambleText text="What I build" active speed={16} />
           </h2>
         </Reveal>
 

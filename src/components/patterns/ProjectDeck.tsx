@@ -34,11 +34,13 @@
 import {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
+  type ForwardedRef,
   type ReactNode,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { forwardRef } from "react";
 import { prefersReducedMotion } from "./../motion/Reveal";
 
 export interface ProjectDeckProps {
@@ -52,14 +54,31 @@ export interface ProjectDeckProps {
    * card, opened* rather than as an unrelated thing that appeared.
    */
   dimmed?: boolean;
+  /**
+   * Reported on every page change, so a caller can render its own controls
+   * without re-deriving page count and position from the scroll container a
+   * second time.
+   */
+  onPageChange?: (state: { page: number; pages: number }) => void;
 }
 
-export const ProjectDeck = ({
-  children,
-  resetKey,
-  label,
-  dimmed = false,
-}: ProjectDeckProps) => {
+/** Imperative handle for controls that live outside this component. */
+export interface ProjectDeckHandle {
+  goTo: (page: number) => void;
+  next: () => void;
+  prev: () => void;
+}
+
+/**
+ * Wrapped in forwardRef so the top-right cluster in Projects.tsx can drive
+ * paging without the deck rendering its own controls. `pages` and `page` are
+ * still measured here, since they come from the scroll container's own
+ * geometry and this is the component holding the ref to it.
+ */
+export const ProjectDeck = forwardRef(function ProjectDeck(
+  { children, resetKey, label, dimmed = false, onPageChange }: ProjectDeckProps,
+  ref: ForwardedRef<ProjectDeckHandle>,
+) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState(1);
   const [page, setPage] = useState(0);
@@ -67,8 +86,16 @@ export const ProjectDeck = ({
   const measure = useCallback(() => {
     const el = trackRef.current;
     if (!el || el.clientWidth === 0) return;
-    setPages(Math.max(1, Math.round(el.scrollWidth / el.clientWidth)));
-    setPage(Math.round(el.scrollLeft / el.clientWidth));
+    const nextPages = Math.max(1, Math.round(el.scrollWidth / el.clientWidth));
+    const nextPage = Math.round(el.scrollLeft / el.clientWidth);
+    setPages(nextPages);
+    setPage(nextPage);
+    onPageChange?.({ page: nextPage, pages: nextPages });
+    // onPageChange is expected to be a stable callback (useCallback at the call
+    // site); including it would re-run measure, and therefore the scroll and
+    // resize listeners below, on every render of the parent instead of only
+    // when the geometry actually changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -104,14 +131,86 @@ export const ProjectDeck = ({
     measure();
   }, [resetKey, measure]);
 
-  const go = (to: number): void => {
-    const el = trackRef.current;
-    if (!el) return;
-    el.scrollTo({
-      left: Math.max(0, Math.min(pages - 1, to)) * el.clientWidth,
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
-    });
-  };
+  const go = useCallback(
+    (to: number): void => {
+      const el = trackRef.current;
+      if (!el) return;
+      el.scrollTo({
+        left: Math.max(0, Math.min(pages - 1, to)) * el.clientWidth,
+        behavior: prefersReducedMotion() ? "auto" : "smooth",
+      });
+    },
+    [pages],
+  );
+  const dragRef = useRef({
+    down: false,
+    dragging: false,
+    startX: 0,
+    startScroll: 0,
+  });
+
+  const onTrackPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      const el = trackRef.current;
+      if (!el) return;
+      dragRef.current = {
+        down: true,
+        dragging: false,
+        startX: e.clientX,
+        startScroll: el.scrollLeft,
+      };
+    },
+    [],
+  );
+
+  const onTrackPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const d = dragRef.current;
+      const el = trackRef.current;
+      if (!d.down || !el) return;
+      const delta = e.clientX - d.startX;
+      if (!d.dragging && Math.abs(delta) > 5) {
+        d.dragging = true;
+        el.setPointerCapture(e.pointerId);
+        el.style.scrollSnapType = "none"; // free-scroll for the whole gesture
+        document.body.dataset.deckDragging = "true";
+      }
+      if (d.dragging) el.scrollLeft = d.startScroll - delta;
+    },
+    [],
+  );
+
+  const onTrackPointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const d = dragRef.current;
+      const el = trackRef.current;
+      d.down = false;
+      delete document.body.dataset.deckDragging;
+      if (!d.dragging || !el) return;
+      d.dragging = false;
+      el.releasePointerCapture(e.pointerId);
+      el.style.scrollSnapType = ""; // restored for keyboard/wheel use, but nothing moves now
+
+      const swallow = (ce: MouseEvent) => {
+        ce.stopPropagation();
+        ce.preventDefault();
+      };
+      el.addEventListener("click", swallow, { capture: true, once: true });
+      setTimeout(() => el.removeEventListener("click", swallow, true), 0);
+    },
+    [],
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      goTo: go,
+      next: () => go(page + 1),
+      prev: () => go(page - 1),
+    }),
+    [go, page],
+  );
 
   const atStart = page <= 0;
   const atEnd = page >= pages - 1;
@@ -135,48 +234,14 @@ export const ProjectDeck = ({
         role="group"
         aria-label={label}
         aria-hidden={dimmed || undefined}
-        /* Focusable so the rail is keyboard-scrollable, which is the browser's
-           own behaviour for an overflow container and better than reimplementing
-           arrow-key handling on top of it. */
         tabIndex={dimmed ? -1 : 0}
+        onPointerDown={onTrackPointerDown}
+        onPointerMove={onTrackPointerMove}
+        onPointerUp={onTrackPointerUp}
+        onPointerCancel={onTrackPointerUp}
       >
         {children}
       </div>
-
-      {pages > 1 && (
-        <div className="deck-controls">
-          <button
-            className="deck-arrow"
-            onClick={() => go(page - 1)}
-            disabled={atStart}
-            aria-label="Previous projects"
-          >
-            <ChevronLeft size={15} />
-          </button>
-
-          <div className="deck-dots">
-            {Array.from({ length: pages }, (_, i) => (
-              <button
-                key={i}
-                className="deck-dot"
-                data-active={i === page ? "true" : "false"}
-                onClick={() => go(i)}
-                aria-label={`Page ${i + 1} of ${pages}`}
-                aria-current={i === page ? "true" : undefined}
-              />
-            ))}
-          </div>
-
-          <button
-            className="deck-arrow"
-            onClick={() => go(page + 1)}
-            disabled={atEnd}
-            aria-label="More projects"
-          >
-            <ChevronRight size={15} />
-          </button>
-        </div>
-      )}
     </div>
   );
-};
+});
