@@ -1088,10 +1088,9 @@ html[data-theme="light"] .field {
 }
 .cmp-row {
   display: grid;
-  grid-template-columns: minmax(90px, 1.1fr) minmax(0, 1.3fr) minmax(
-      0,
-      1fr
-    ) 44px;
+  grid-template-columns:
+    minmax(90px, 1.1fr) minmax(0, 1.3fr) minmax(0, 1fr)
+    44px;
   align-items: center;
   gap: 0.75rem;
   padding: 0.55rem 0.85rem;
@@ -2471,38 +2470,50 @@ html[data-theme="light"] .sk-scan {
   flex: none;
 }
 
-/* The sentence a non-technical reader is actually here for. Body face, reading
-   size, real contrast: not a caption. */
+/* The sentence a non-technical reader is actually here for. Dropped one notch
+   quieter than the shipped version so it frames the skill list rather than
+   competing with it — this is the section's preamble, not its payoff. */
 .sk-group-plain {
   font-family: var(--font-body);
-  font-size: 0.83rem;
+  font-size: 0.78rem;
   line-height: 1.6;
-  color: var(--fg-dim);
+  color: var(--fg-muted);
   max-width: 56ch;
 }
 
 .sk-skills {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-top: 0.1rem;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
 }
 .sk-skill {
   font-family: var(--font-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  /* --fg-dim, not --fg-muted. At 0.58rem uppercase these are small text and
-     need the full 4.5:1; muted measured 4.49:1 on paper, which is close enough
-     to passing to be worth not shipping. Dim clears it in both themes and
-     suits the higher-contrast direction anyway. */
-  color: var(--fg-dim);
-  padding: 0.22rem 0.5rem;
-  border: 1px solid var(--border-active);
+  /* Full --fg, not --fg-dim. This is the section's payoff — the actual tech
+     names — and the previous pass had it as the dimmest, smallest-type tier
+     in the whole slab, which is backwards for a section called "Skills". */
+  color: var(--fg);
+  padding: 0.4rem 0.8rem;
+  /* Full-strength border, matching every other rule in this slab (--fg, not
+     the faint --border-active token). The chips were the one place still
+     using a muted border while everything around them went full-contrast. */
+  border: 1.5px solid var(--fg);
   /* Square. A pill is the friendly shape and this is not the friendly section. */
   border-radius: 0;
   background: transparent;
   white-space: nowrap;
+  transition:
+    background 0.15s linear,
+    color 0.15s linear;
+}
+/* Hover inverts, same register as the group rows: instant, no easing. */
+.sk-skill:hover {
+  background: var(--fg);
+  color: var(--bg);
 }
 /* The legend above the slab explains this emphasis in words. An unexplained
    highlight is decoration; a stated one is information. */
