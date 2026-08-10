@@ -16,6 +16,7 @@
  * invisibly behind the overlay. See components/motion/Entrance.tsx.
  */
 import { useEffect, useState } from "react";
+import { ReactLenis, useLenis } from "lenis/react";
 import { ThemeProvider } from "./context/ThemeContext";
 import { Boot } from "./components/Boot";
 import { UniverseBackground } from "./components/UniverseBackground";
@@ -38,6 +39,11 @@ const App = () => {
   const [booted, setBooted] = useState(false);
   const [active, setActive] = useState("home");
 
+  // `root: true` below makes this instance reachable from anywhere via
+  // useLenis, not just from inside <ReactLenis>'s own subtree — so it's safe
+  // to read it here even though the two sit as siblings.
+  const lenis = useLenis();
+
   // Scroll-spy for the nav indicator.
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -56,11 +62,35 @@ const App = () => {
   }, [booted]);
 
   const navigate = (id: string): void => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Lenis is mounted a beat after first paint, so the very first click of a
+    // session could land before it's ready — native scroll is the fallback,
+    // not the common path.
+    if (lenis) lenis.scrollTo(el);
+    else el.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <ThemeProvider>
+      {/**
+       * `root` scrolls <html> itself (native scrollTop under the hood, not a
+       * transformed wrapper), which is exactly why nothing else in this file
+       * or in useFlightProgress/Navigation's own `window.scrollY` listeners
+       * has to change: Lenis is animating the same scroll position they were
+       * already reading, just settling it more smoothly between input events.
+       * `autoRaf` defaults to on for this component, and Lenis already backs
+       * off to a 1:1, non-smoothed scroll on its own when the visitor prefers
+       * reduced motion, so there's no separate gate to wire up here.
+       */}
+      <ReactLenis
+        root
+        options={{
+          duration: 1.6,
+          easing: (t) => 1 - Math.pow(1 - t, 4), // easeOutQuart, more "reach" than Lenis's default expo
+        }}
+      />
+
       {!booted && <Boot onDone={() => setBooted(true)} />}
 
       <UniverseBackground />

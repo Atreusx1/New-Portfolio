@@ -235,6 +235,7 @@ export const ProjectDeck = forwardRef(function ProjectDeck(
         aria-label={label}
         aria-hidden={dimmed || undefined}
         tabIndex={dimmed ? -1 : 0}
+        data-lenis-prevent
         onPointerDown={onTrackPointerDown}
         onPointerMove={onTrackPointerMove}
         onPointerUp={onTrackPointerUp}

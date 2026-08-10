@@ -853,7 +853,10 @@ export const DEXOrderBook = () => {
                 </span>
               ))}
             </div>
-            <div style={{ maxHeight: "320px", overflowY: "auto" }}>
+            <div
+              style={{ maxHeight: "320px", overflowY: "auto" }}
+              data-lenis-prevent
+            >
               {trades.length === 0 ? (
                 <div
                   style={{

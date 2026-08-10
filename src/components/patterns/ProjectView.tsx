@@ -177,7 +177,7 @@ export const ProjectView = ({
         stagger. Without the key the panel swaps text in place, which reads as a
         glitch rather than as navigation.
       */}
-      <div className="pv-body" key={project.id}>
+      <div className="pv-body" data-lenis-prevent key={project.id}>
         <div className="pv-meta">
           <span className="chip">{project.category}</span>
         </div>

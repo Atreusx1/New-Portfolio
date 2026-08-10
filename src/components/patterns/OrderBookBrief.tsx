@@ -137,7 +137,7 @@ export const OrderBookBrief = ({ closing, origin, onClose }: OrderBookBriefProps
         </div>
       </header>
 
-      <div className="pv-body">
+      <div className="pv-body" data-lenis-prevent>
         <div className="obb-grid">
           <Column title="What is live" facts={LIVE} />
           <Column title="How it is built" facts={BUILT} />

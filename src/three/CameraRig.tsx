@@ -80,7 +80,7 @@ export const CameraRig = ({ flight, still = false }: CameraRigProps) => {
       e,
     );
     const settle = MathUtils.clamp((t - 1) / 0.5, 0, 1);
-    const targetFov = MathUtils.lerp(
+    const cruiseFov = MathUtils.lerp(
       diveFov,
       CORRIDOR.fovCruise,
       MOTION.easeOutCubic(settle),
@@ -88,7 +88,8 @@ export const CameraRig = ({ flight, still = false }: CameraRigProps) => {
 
     // Sway ramps in only after the breakthrough: swaying during the dive
     // would read as the camera losing its aim at the exact moment it needs to
-    // look purposeful.
+    // look purposeful. The same gate doubles as the fov punch's corridor-only
+    // switch just below, since both describe "we're past the dive now".
     const swayAmount = MathUtils.clamp(t - 1, 0, 1);
     const targetX =
       Math.sin((t / CORRIDOR.swayPeriodX) * Math.PI * 2) *
@@ -98,6 +99,16 @@ export const CameraRig = ({ flight, still = false }: CameraRigProps) => {
       Math.cos((t / CORRIDOR.swayPeriodY) * Math.PI * 2) *
       CORRIDOR.swayY *
       swayAmount;
+
+    // Speed cue: nudges fov wider while the wheel is actively moving fast,
+    // corridor-only. The dive already tells its own speed story via diveFov
+    // above; layering the same trick on both would blur the one moment
+    // (breaking through the globe) that's supposed to read as the spike.
+    // 50px of scroll delta between consecutive samples is a brisk flick, not
+    // an extreme one — most of a fast scroll's range should register here.
+    const speed = Math.min(1, Math.abs(flight.current.velocity) / 50);
+    const velocityPunch = swayAmount * speed * CORRIDOR.fovPunch;
+    const targetFov = cruiseFov + velocityPunch;
 
     current.current.z = damp(current.current.z, targetZ, MOTION.lambda.camera, dt);
     current.current.x = damp(current.current.x, targetX, MOTION.lambda.camera, dt);

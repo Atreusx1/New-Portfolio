@@ -112,6 +112,14 @@ export const CORRIDOR = {
   /** Cruising fov once the dive is over: the dive's 76° is a spike, not a home. */
   fovCruise: 60,
   /**
+   * How much fov widens on top of cruise when the wheel is moving fast, in
+   * degrees at full speed. The dive already sells "speed" with an explicit
+   * 24° swing (fovRest → fovBreak); this is the corridor's much quieter
+   * version of the same idea, keyed to input rather than position so a fast
+   * flick reads as fast and a slow crawl reads as slow.
+   */
+  fovPunch: 6,
+  /**
    * Lateral drift amplitude. Without this a five-section flight down a straight
    * −z line reads as a tube, and the eye stops registering forward motion.
    */
