@@ -107,7 +107,7 @@ export const projectsData: Project[] = [
       "Governor",
     ],
     category: "blockchain",
-    github: "https://github.com/Atreusx1/production-solidity-patterns",
+    github: "https://github.com/Atreusx1/Kestrel-Protocol",
     live: null,
     board: {
       built: "Shipped",
